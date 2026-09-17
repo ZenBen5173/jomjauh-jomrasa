@@ -1,0 +1,51 @@
+# JomJauh + JomRasa
+
+DOSM Datathon 2026 · *ML & AI for sustainable tourism in Malaysia*
+
+A decision tool that shows which under-visited Malaysian states to steer tourists toward, why those
+states are skipped, what shifting visitors would do (capped by real hotel capacity), and how travellers
+feel about going there.
+
+```
+data/raw/        untouched downloads + _manifest.json (URL, access date, sha256)
+data/clean/      parquet tables (see docs/data_dictionary.md)
+pipeline/        extract -> transform -> panel -> export; pipeline/text = JomRasa
+core/metrics.py  reference implementation of every metric (Python)
+web/             Next.js dashboard; src/lib/metrics.ts is tested against the Python results
+tests/           data checks + metric tests (pytest)
+docs/            prior work review, data dictionary, validation files
+```
+
+## Run the pipeline
+
+```bash
+uv venv --python 3.12 .venv && uv pip install --python .venv/Scripts/python.exe -r requirements-dev.txt
+python -m pipeline.extract                # DOSM, data.gov.my, geoBoundaries
+python -m pipeline.extract_powerbi        # Tourism Malaysia Paid Accommodation Survey
+python -m pipeline.extract_osm            # OpenStreetMap layers
+python -m pipeline.transform_structured   # clean tables
+python -m pipeline.build_panel            # one row per state per year
+python -m pytest tests -q                 # data checks + metric tests
+python -m pipeline.export_web             # JSON for the dashboard + Python reference results
+python -m pipeline.data_dictionary
+```
+
+JomRasa (needs `.env`, see `.env.example`; everything is cached, nothing is fetched or labelled twice):
+
+```bash
+python -m pipeline.text.collect exa --state TRG     # trial run: check quality and cost first
+python -m pipeline.text.collect exa --all
+python -m pipeline.text.collect youtube --all
+python -m pipeline.text.prepare                     # clean, de-identify, deduplicate
+python -m pipeline.text.tag --limit 200             # trial batch, then without --limit
+python -m pipeline.text.score build
+python -m pipeline.text.score sample                # 200 items to hand-label -> then `validate`
+python -m pipeline.build_panel && python -m pipeline.export_web
+```
+
+## Run the dashboard
+
+```bash
+cd web && npm install && npm run dev      # http://localhost:3000
+npm test                                  # TypeScript metrics must reproduce the Python reference
+```

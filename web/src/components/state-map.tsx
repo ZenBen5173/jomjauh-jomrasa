@@ -107,7 +107,7 @@ export function StateMap({
           const active = hover === p.code || selected === p.code;
           return (
             <motion.circle
-              key={`m-${p.code}`} cx={x} cy={y}
+              key={`m-${p.code}`} cx={x} cy={y} r={5.5} initial={false}
               animate={{ r: active ? 8 : 5.5, fill: colorFor(values[p.code], scale) }}
               transition={SPRING.snappy}
               stroke={active ? "#edeef0" : "#111113"} strokeWidth={1.5}

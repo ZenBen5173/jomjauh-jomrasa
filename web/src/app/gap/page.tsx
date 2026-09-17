@@ -60,7 +60,7 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
           <motion.g key={p.code} initial={{ opacity: 0 }} animate={{ opacity: 1, x: px(p.x), y: py(p.y) }} transition={{ delay: 0.03 * i, type: "spring", stiffness: 160, damping: 26 }}
             onPointerEnter={() => setHover(p.code)} onPointerLeave={() => setHover(null)} onClick={() => onSelect(p.code)} style={{ cursor: "pointer" }}>
             <circle r={12} fill="transparent" />
-            <motion.circle animate={{ r: on ? 7 : 5 }} fill={p.y >= p.x ? "#3987e5" : "#e66767"} stroke="var(--card)" strokeWidth={2} />
+            <motion.circle r={5} initial={false} animate={{ r: on ? 7 : 5 }} fill={p.y >= p.x ? "#3987e5" : "#e66767"} stroke="var(--card)" strokeWidth={2} />
             <text x={9} y={3} className={cn("text-[9px]", on ? "fill-[var(--slate-12)] font-semibold" : "fill-[var(--slate-11)]")}>{STATE_LABEL[p.code]}</text>
           </motion.g>
         );

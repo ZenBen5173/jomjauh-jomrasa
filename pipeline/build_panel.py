@@ -133,6 +133,12 @@ def build(year: int, osm: pd.DataFrame) -> pd.DataFrame:
 
     p = p.join(osm)
 
+    # JomRasa columns join in once the text pipeline has run; the metrics skip them until then
+    jr = CLEAN / "jomrasa_state.parquet"
+    if jr.exists():
+        cols = ["experience_score", "access_sentiment", "amenity_sentiment", "mentions_n"]
+        p = p.join(pd.read_parquet(jr).set_index("code")[cols])
+
     # derived intensity measures
     p["visitor_share_pct"] = p["visitors_k"] / p["visitors_k"].sum() * 100
     p["visitors_per_resident"] = p["visitors_k"] / p["population_k"]
