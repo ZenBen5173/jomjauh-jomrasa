@@ -6,3 +6,6 @@ __pycache__/
 reference/
 data/raw/text/
 .pytest_cache/
+web/node_modules/
+web/.next/
+.claude/

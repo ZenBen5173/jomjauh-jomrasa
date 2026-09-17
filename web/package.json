@@ -1,0 +1,39 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "d3-geo": "^3.1.1",
+    "d3-interpolate": "^3.0.1",
+    "framer-motion": "^13.4.0",
+    "lucide-react": "^1.46.0",
+    "motion": "^13.4.0",
+    "next": "15.5.25",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/d3-geo": "^3.1.1",
+    "@types/d3-interpolate": "^3.0.4",
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^22.20.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.25",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.1"
+  }
+}
