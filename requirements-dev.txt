@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest
+duckdb
+playwright
+python-dotenv
+tqdm

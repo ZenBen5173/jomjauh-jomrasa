@@ -1,0 +1,172 @@
+{
+  "datagovmy/arrivals_soe.parquet": {
+    "accessed": "2026-09-17",
+    "bytes": 190816,
+    "sha256": "b939733cb9b8d9f6de76ab48fd2350920167f43d64ff45e224216b39d661937c",
+    "url": "https://storage.data.gov.my/demography/arrivals_soe.parquet"
+  },
+  "datagovmy/gdp_state_real_supply.parquet": {
+    "accessed": "2026-09-17",
+    "bytes": 13514,
+    "sha256": "eb422ca7b041a029c2452dbf0b3d0cbfb53b4270c31706d05ce02a0c8686d656",
+    "url": "https://storage.dosm.gov.my/gdp/gdp_state_real_supply.parquet"
+  },
+  "datagovmy/hh_access_amenities.parquet": {
+    "accessed": "2026-09-17",
+    "bytes": 9976,
+    "sha256": "1720d4be9d2a11f549a9076d159b845ba14af9b0d9d4cef5435b580f7ed41609",
+    "url": "https://storage.dosm.gov.my/hies/hh_access_amenities.parquet"
+  },
+  "datagovmy/hh_income_state.parquet": {
+    "accessed": "2026-09-17",
+    "bytes": 5274,
+    "sha256": "606ad545aa8d0f4b4e590bffa28a84a9fc79091b1bbb0f66e1779ec9c1dc7e8f",
+    "url": "https://storage.dosm.gov.my/hies/hh_income_state.parquet"
+  },
+  "datagovmy/hh_poverty_state.parquet": {
+    "accessed": "2026-09-17",
+    "bytes": 5666,
+    "sha256": "af3fd822ba0fcecce1a74c990e061ffcff35555605125f3b1e33338fe4e2d9c7",
+    "url": "https://storage.dosm.gov.my/hies/hh_poverty_state.parquet"
+  },
+  "datagovmy/population_state.parquet": {
+    "accessed": "2026-09-17",
+    "bytes": 389489,
+    "sha256": "3ae425f5cf5a053ae799adfd59480ea46455f8ed6eb34a47dcece76f7fae63da",
+    "url": "https://storage.dosm.gov.my/population/population_state.parquet"
+  },
+  "datagovmy/ridership_headline.parquet": {
+    "accessed": "2026-09-17",
+    "bytes": 110033,
+    "sha256": "1602e91d534c7f7571c60b42694f160a368a7aaef51cdc040ff48b8fb589937d",
+    "url": "https://storage.data.gov.my/transportation/ridership_headline.parquet"
+  },
+  "dosm/state/tourism_domestic_2023_johor.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380928,
+    "sha256": "81631136111471db23fea8ba5ec869da708398aca888c0d00e1f656a22596307",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_johor.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_kedah.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380906,
+    "sha256": "c7a89b0a314e73f5c370aca1297a9f1b2d29f87e9f775ee9d47440c28e93656b",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_kedah.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_kelantan.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380842,
+    "sha256": "9827f7014aa01092990f59c6134b2d2e98de583a30884194b4e3c8a2ef0b3402",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_kelantan.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_melaka.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380818,
+    "sha256": "1df9b2af25724ba5194557dec67e718adff0c52d6aee562e97a2a1e685749f4d",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_melaka.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_negerisembilan.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380795,
+    "sha256": "052d91c8303248f69367e1fa51c67597066fc957738b5f4d5fa28be7985aa1b3",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_negerisembilan.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_pahang.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380768,
+    "sha256": "feb28bc41cb0cfafcd18bcd0c48746e187022fd86261c17e2fdd0615abc46181",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_pahang.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_perak.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 382213,
+    "sha256": "e526e377077943eabbf930663da28f474e08fe584521e562e442800b8f3b33e0",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_perak.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_perlis.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 381065,
+    "sha256": "cf972dbe3bb5f793888825b1c2f3e996499a93b70192f455ea60bd0c8e159a04",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_perlis.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_pulaupinang.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380921,
+    "sha256": "fdcbdb484d4e342708236e2df5c5f7312772741c408c6812e50a38f5d7351ae4",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_pulaupinang.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_sabah.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380888,
+    "sha256": "6ed793ceaf56def33c5434cf85ea781324dfbb203399e7b52c3775a1fef5af9b",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_sabah.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_sarawak.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380870,
+    "sha256": "5f4fb809cc51408e3169aa1f6d5b7a3106e0282e7eb60470177ba999ec3419f9",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_sarawak.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_selangor.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380890,
+    "sha256": "61fe9d133e354b8ec2ec8916e5f786d0bb3215840b2d5a93e45711dfee4f4f0f",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_selangor.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_terengganu.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380909,
+    "sha256": "a44e11285f0a34deeafbe414cebd2cca2ef545ceb2a878b22325a254d586afae",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_terengganu.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_wpkualalumpur.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380794,
+    "sha256": "d6e5e86d63088ee43a077c1dc960b9aa656436b757f6cf395a23bed8964e76c5",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wpkualalumpur.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_wplabuan.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380962,
+    "sha256": "40021d44a9607cd7e68816b2f3077981ed14717671c0ac6ea7b054272bf62005",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wplabuan.xlsx"
+  },
+  "dosm/state/tourism_domestic_2023_wpputrajaya.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 380766,
+    "sha256": "671708bdf7aa5bfd8e86e00a104baa98d244c07dea6f8678f8dea55abab4a711",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wpputrajaya.xlsx"
+  },
+  "dosm/tourism_2025.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 715191,
+    "sha256": "d33836e9e6ebc8e4d520313af376ec7016d82e68d6af217ba971fb854a4a7b63",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_2025.xlsx"
+  },
+  "dosm/tourism_domestic_2023.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 53441,
+    "sha256": "c24245c79011f50c00008c59a277ffa8f8b7a2b19fc665aebff96873d56d22b2",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023.xlsx"
+  },
+  "dosm/tourism_domestic_2024.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 83272,
+    "sha256": "67e2aac05c5dc06dc045969e1608cc76ac6b526a3f789b5bb9db4e53e415026c",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2024.xlsx"
+  },
+  "dosm/tourism_domestic_2025.xlsx": {
+    "accessed": "2026-09-17",
+    "bytes": 57094,
+    "sha256": "c9fe28d1c516e58e6a79bfefa2ff53ddcfef109511c8c8dbe117a7bf87d04c96",
+    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2025.xlsx"
+  },
+  "geo/geoBoundaries-MYS-ADM1_simplified.geojson": {
+    "accessed": "2026-09-17",
+    "boundary_source": "OpenStreetMap, Wambacher",
+    "bytes": 583194,
+    "license": "Open Data Commons Open Database License 1.0",
+    "sha256": "fb0f76f0f987c748b732ef02049113946db2dd5fc604130d4a0fbab4e74d4012",
+    "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MYS/ADM1/geoBoundaries-MYS-ADM1_simplified.geojson"
+  }
+}
