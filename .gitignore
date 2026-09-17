@@ -10,3 +10,4 @@ web/node_modules/
 web/.next/
 .claude/
 data/cache/
+web/.vercel/
