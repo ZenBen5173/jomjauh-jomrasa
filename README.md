@@ -58,3 +58,5 @@ npm test                                  # TypeScript metrics must reproduce th
 - JomRasa validation figures are agreement with blind reference labels from a stronger model, not human-labelled accuracy (see `docs/validation_*.`).
 
 Live dashboard: https://jomjauh.vercel.app · Team ANAK SUNWAY · DOSM Datathon 2026
+
+Deployment: every push to `main` is built and published automatically by Vercel (project root `web/`).
