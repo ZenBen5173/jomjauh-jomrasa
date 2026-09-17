@@ -108,11 +108,28 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="min-w-0 flex-1">
-        <nav className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar px-3 py-2 md:hidden">
-          {NAV.flatMap((g) => g.items).map((it) => (
-            <Link key={it.href} href={it.href} className="shrink-0 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground">{it.label}</Link>
-          ))}
-        </nav>
+        <div className="sticky top-0 z-30 border-b border-border bg-sidebar md:hidden">
+          <div className="flex items-center justify-between px-3 pt-2">
+            <Link href="/" className="text-sm font-semibold">JomJauh + JomRasa</Link>
+            <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              Base year
+              <select value={year} onChange={(e) => setYear(+e.target.value)} className="rounded-md border border-input bg-background px-1.5 py-1 text-xs text-foreground">
+                {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </label>
+          </div>
+          <nav className="flex gap-1 overflow-x-auto px-2 py-2 [scrollbar-width:none]">
+            {NAV.flatMap((g) => g.items).map((it) => {
+              const active = it.match ? path.startsWith(it.match) : path === it.href;
+              return (
+                <Link key={it.href} href={it.href}
+                  className={cn("shrink-0 rounded-md px-2.5 py-1.5 text-xs", active ? "bg-sidebar-accent font-medium text-foreground" : "text-muted-foreground")}>
+                  {it.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
         <main className="mx-auto max-w-[1320px] px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
@@ -134,7 +151,7 @@ export function Stagger({ children, className }: { children: React.ReactNode[]; 
   return (
     <div className={className}>
       {children.map((c, i) => (
-        <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 * i, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div key={i} className="min-w-0" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 * i, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
           {c}
         </motion.div>
       ))}

@@ -114,3 +114,21 @@ def test_simulator_multi_destination_and_multiplier(panel):
     r = M.simulate(panel, M.Scenario("KUL", {"KTN": 0.5, "SBH": 0.5}, share_pct=4, assumptions=a))
     assert len(r["destinations"]) == 2
     assert r["economic_impact_gained_rm_m"] == pytest.approx(r["receipts_gained_rm_m"] * 1.42)
+
+
+def test_overflow_from_a_full_destination_goes_to_the_others(panel):
+    cap = M.capacity(panel)
+    small, big = "PLS", "SWK"
+    want = cap.at[small, "max_extra_visitors_k"] * 4            # far more than Perlis can take on a 50/50 split
+    share = want / panel.at["SGR", "visitors_k"] * 100
+    r = M.simulate(panel, M.Scenario("SGR", {small: 0.5, big: 0.5}, share_pct=share))
+    d = r["destinations"]
+    assert d.at[small, "moved_k"] == pytest.approx(cap.at[small, "max_extra_visitors_k"]) and d.at[small, "capped"]
+    assert d.at[big, "moved_k"] == pytest.approx(want - cap.at[small, "max_extra_visitors_k"])   # took the overflow
+    assert r["moved_k"] == pytest.approx(want) and not r["capacity_binds"]
+
+
+def test_allocate_leaves_visitors_unmoved_only_when_everything_is_full():
+    assert M.allocate(10, {"a": 1, "b": 1}, {"a": 2, "b": 3}) == {"a": 2, "b": 3}
+    assert M.allocate(10, {"a": 1, "b": 3}, {"a": 100, "b": 100}) == {"a": 2.5, "b": 7.5}
+    assert M.allocate(10, {"a": 1, "b": 1}, {"a": 0, "b": 100}) == {"a": 0.0, "b": 10}

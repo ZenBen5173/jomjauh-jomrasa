@@ -20,7 +20,7 @@ export function Kpi({
   return (
     <SpotlightCard className="h-full p-5">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight">
+      <p className="mt-2 whitespace-nowrap text-[clamp(1.35rem,2.1vw,1.875rem)] font-semibold leading-tight tracking-tight">
         <StatsCounter value={value} decimals={decimals} prefix={prefix} suffix={suffix} duration={0.9} />
       </p>
       <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
@@ -37,8 +37,8 @@ export function Kpi({
 
 // ------------------------------------------------------------ Lorenz curve
 export function LorenzChart({ before, after }: { before: { x: number[]; y: number[] }; after?: { x: number[]; y: number[] } }) {
-  const S = 260, P = 30;
-  const px = (v: number) => P + v * (S - P - 8), py = (v: number) => S - P - v * (S - P - 8);
+  const S = 260, P = 30, R = 16;
+  const px = (v: number) => P + v * (S - P - R), py = (v: number) => S - P - v * (S - P - R);
   const line = (c: { x: number[]; y: number[] }) => c.x.map((x, i) => `${i ? "L" : "M"}${px(x)},${py(c.y[i])}`).join(" ");
   const [hi, setHi] = useState<number | null>(null);
   const cur = after ?? before;
@@ -112,19 +112,27 @@ export function RankBars({
 
 // ------------------------------------------------------------ line chart (single y axis)
 export function LineChart({
-  series, years, format, height = 180, highlight,
+  series, years, format, height = 230, highlight, zeroBase = true,
 }: {
   series: { id: string; label: string; color: string; values: (number | null)[] }[];
   years: (number | string)[]; format: (v: number) => string; height?: number; highlight?: string;
+  /** false = zoom the y axis to the data (fine for a line chart; position, not length, carries the value) */
+  zeroBase?: boolean;
 }) {
-  const W = 520, P = { l: 44, r: 12, t: 12, b: 22 };
+  const W = 520, P = { l: 50, r: 14, t: 12, b: 24 };
   const all = series.flatMap((s) => s.values.filter((v): v is number => v != null));
-  const lo = Math.min(0, ...all), hi = Math.max(...all) * 1.05;
+  const dmin = Math.min(...all), dmax = Math.max(...all);
+  const lo = zeroBase ? Math.min(0, dmin) : dmin - (dmax - dmin) * 0.25, hi = zeroBase ? dmax * 1.05 : dmax + (dmax - dmin) * 0.25;
   const px = (i: number) => P.l + (i / Math.max(years.length - 1, 1)) * (W - P.l - P.r);
   const py = (v: number) => height - P.b - ((v - lo) / (hi - lo || 1)) * (height - P.t - P.b);
   const [hi_i, setHi] = useState<number | null>(null);
   return (
     <div className="relative">
+      {series.length > 1 && (
+        <div className="mb-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+          {series.map((s) => <span key={s.id} className="flex items-center gap-1.5"><span className="h-0.5 w-4 rounded" style={{ background: s.color }} />{s.label}</span>)}
+        </div>
+      )}
       <svg viewBox={`0 0 ${W} ${height}`} className="w-full" onPointerLeave={() => setHi(null)}
         onPointerMove={(e) => {
           const r = e.currentTarget.getBoundingClientRect();
@@ -136,12 +144,12 @@ export function LineChart({
           return (
             <g key={t}>
               <line x1={P.l} x2={W - P.r} y1={py(v)} y2={py(v)} stroke="var(--slate-4)" />
-              <text x={P.l - 6} y={py(v) + 3} textAnchor="end" className="fill-[var(--slate-10)] text-[9px]">{format(v)}</text>
+              <text x={P.l - 6} y={py(v) + 3} textAnchor="end" className="fill-[var(--slate-10)] text-[11px]">{format(v)}</text>
             </g>
           );
         })}
         {years.map((y, i) => (i % Math.ceil(years.length / 9) === 0 || i === years.length - 1) && (
-          <text key={i} x={px(i)} y={height - 6} textAnchor="middle" className="fill-[var(--slate-10)] text-[9px]">{y}</text>
+          <text key={i} x={px(i)} y={height - 6} textAnchor="middle" className="fill-[var(--slate-10)] text-[11px]">{y}</text>
         ))}
         {hi_i != null && <line x1={px(hi_i)} x2={px(hi_i)} y1={P.t} y2={height - P.b} stroke="var(--slate-8)" strokeDasharray="2 3" />}
         {series.map((s) => {
@@ -180,7 +188,9 @@ export function PillarBars({ scores, colors, bottleneck }: { scores: Record<stri
           <div className="mb-1 flex items-center justify-between text-xs">
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-sm" style={{ background: colors[k] }} />{k}
-              {k === bottleneck && <span className="rounded bg-[var(--amber-4)] px-1.5 py-px text-[10px] font-medium text-[var(--amber-11)]">⚠ main bottleneck</span>}
+              {k === bottleneck && (v < 50
+                ? <span className="rounded bg-[var(--amber-4)] px-1.5 py-px text-[10px] font-medium text-[var(--amber-11)]">⚠ main bottleneck</span>
+                : <span className="rounded bg-muted px-1.5 py-px text-[10px] text-muted-foreground">weakest, but above median</span>)}
             </span>
             <span className="font-medium tabular-nums">{v.toFixed(0)}</span>
           </div>
@@ -198,7 +208,7 @@ export function PillarBars({ scores, colors, bottleneck }: { scores: Record<stri
 
 export function Card({ title, right, children, className }: { title?: string; right?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-2xl border border-border bg-card p-5", className)}>
+    <section className={cn("min-w-0 rounded-2xl border border-border bg-card p-5", className)}>
       {(title || right) && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           {title && <h2 className="text-sm font-semibold">{title}</h2>}
@@ -213,9 +223,9 @@ export function Card({ title, right, children, className }: { title?: string; ri
 /** Segmented control with a sliding pill (same shared-layout trick as the library's tabs). */
 export function Segmented<T extends string>({ id, value, onChange, options }: { id: string; value: T; onChange: (v: T) => void; options: { value: T; label: string }[] }) {
   return (
-    <div className="relative flex rounded-lg bg-muted p-0.5">
+    <div className="relative flex max-w-full overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none]">
       {options.map((o) => (
-        <button key={o.value} onClick={() => onChange(o.value)} className="relative z-10 rounded-md px-2.5 py-1 text-xs font-medium">
+        <button key={o.value} onClick={() => onChange(o.value)} className="relative z-10 shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium">
           {value === o.value && <motion.span layoutId={`seg-${id}`} className="absolute inset-0 -z-10 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 300, damping: 24 }} />}
           <span className={value === o.value ? "text-foreground" : "text-muted-foreground"}>{o.label}</span>
         </button>

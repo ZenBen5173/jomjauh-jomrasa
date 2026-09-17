@@ -16,9 +16,9 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 function WeightSliders({ inds, weights, onChange }: { inds: Indicator[]; weights: Weights; onChange: (w: Weights) => void }) {
   const total = inds.reduce((s, i) => s + (weights[i.col] ?? 0), 0) || 1;
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {inds.map((i) => (
-        <label key={i.col} className="block">
+        <label key={i.col} className="block" title={`Source: ${i.source}`}>
           <span className="mb-1 flex items-baseline justify-between gap-2 text-xs">
             <span className="text-muted-foreground">{i.label}</span>
             <span className="shrink-0 font-medium tabular-nums">{(((weights[i.col] ?? 0) / total) * 100).toFixed(0)}%</span>
@@ -26,7 +26,6 @@ function WeightSliders({ inds, weights, onChange }: { inds: Indicator[]; weights
           <input type="range" min={0} max={3} step={0.25} value={weights[i.col] ?? 0}
             onChange={(e) => onChange({ ...weights, [i.col]: +e.target.value })}
             className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-[var(--primary)]" />
-          <span className="text-[10px] text-muted-foreground">Source: {i.source}</span>
         </label>
       ))}
     </div>
@@ -38,7 +37,7 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
   const px = (v: number) => P + (v / 100) * (S - P - 10), py = (v: number) => S - P - (v / 100) * (S - P - 10);
   const [hover, setHover] = useState<string | null>(null);
   return (
-    <svg viewBox={`0 0 ${S} ${S}`} className="mx-auto w-full max-w-[460px]">
+    <svg viewBox={`0 0 ${S} ${S}`} className="mx-auto w-full max-w-[600px]">
       <polygon points={`${px(0)},${py(0)} ${px(100)},${py(100)} ${px(0)},${py(100)}`} fill="#3987e5" opacity={0.07} />
       <polygon points={`${px(0)},${py(0)} ${px(100)},${py(100)} ${px(100)},${py(0)}`} fill="#e66767" opacity={0.06} />
       {[0, 25, 50, 75, 100].map((t) => (
@@ -61,7 +60,9 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
             onPointerEnter={() => setHover(p.code)} onPointerLeave={() => setHover(null)} onClick={() => onSelect(p.code)} style={{ cursor: "pointer" }}>
             <circle r={12} fill="transparent" />
             <motion.circle r={5} initial={false} animate={{ r: on ? 7 : 5 }} fill={p.y >= p.x ? "#3987e5" : "#e66767"} stroke="var(--card)" strokeWidth={2} />
-            <text x={9} y={3} className={cn("text-[9px]", on ? "fill-[var(--slate-12)] font-semibold" : "fill-[var(--slate-11)]")}>{STATE_LABEL[p.code]}</text>
+            {/* short codes keep the cluster readable; the full name appears on hover / selection and in the ranking beside it */}
+            <text x={p.x > 80 ? -9 : 9} y={3} textAnchor={p.x > 80 ? "end" : "start"} stroke="var(--card)" strokeWidth={on ? 3 : 0} paintOrder="stroke"
+              className={cn(on ? "fill-[var(--slate-12)] text-[10px] font-semibold" : "fill-[var(--slate-11)] text-[8px]")}>{on ? STATE_LABEL[p.code] : p.code}</text>
           </motion.g>
         );
       })}
@@ -140,7 +141,11 @@ export default function GapPage() {
                           </div>
                         </td>
                       ))}
-                      <td className="py-1.5"><span className="rounded px-1.5 py-0.5 text-[11px] font-medium text-white" style={{ background: PILLAR_COLOR[p.bottleneck] }}>{p.bottleneck}</span></td>
+                      <td className="py-1.5">
+                        {p.bottleneck_score < 50
+                          ? <span className="rounded px-1.5 py-0.5 text-[11px] font-medium text-white" style={{ background: PILLAR_COLOR[p.bottleneck] }}>{p.bottleneck}</span>
+                          : <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">none below median</span>}
+                      </td>
                     </motion.tr>
                   );
                 })}
@@ -177,9 +182,9 @@ export default function GapPage() {
       </div>
 
       <Card className="mt-4" title="Sensitivity check - how much does the ranking depend on the weights?">
-        <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
+        <div className="gap-x-8 md:columns-2">
           {sens.states.slice().sort((a, b) => a.rank - b.rank).map((s) => (
-            <div key={s.code} className="grid grid-cols-[92px_1fr_70px] items-center gap-2 text-xs">
+            <div key={s.code} className="mb-1 grid break-inside-avoid grid-cols-[92px_1fr_70px] items-center gap-2 text-xs">
               <span className="truncate text-muted-foreground">{STATE_LABEL[s.code]}</span>
               <span className="relative h-3">
                 <span className="absolute inset-x-0 top-1/2 h-px bg-[var(--slate-5)]" />

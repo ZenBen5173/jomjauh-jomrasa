@@ -57,13 +57,16 @@ export default function StateProfile() {
   });
   const quiet = byQuarter.reduce((m, x) => (x.mean < m.mean ? x : m));
   const places = PLACES_DOSM.filter((d) => d.code === code && d.kind === "destination" && d.year === 2025);
+  const malls = places.filter((d) => /mall|shopping|aeon|plaza|parade|sogo|pavilion|outlet|waremart|mart\b|centre point|city square|toppen|lotus|giant|mydin|kompleks|arked|bazaar|bazar/i.test(d.name)).length;
   const districts = PLACES_DOSM.filter((d) => d.code === code && d.kind === "district");
 
   return (
     <>
       <PageHeader eyebrow={`State profile · base year ${year}`} title={STATE_NAME[code]}>
-        Gap Score {fmt.signed(g.gap, 0)} (#{g.gap_rank} of 16) · Potential {g.potential.toFixed(0)} vs Actual {g.actual.toFixed(0)} · main bottleneck:{" "}
-        <span className="font-medium" style={{ color: PILLAR_COLOR[p.bottleneck] }}>{p.bottleneck}</span> - {PILLAR_BLURB[p.bottleneck].toLowerCase()}.
+        Gap Score {fmt.signed(g.gap, 0)} (#{g.gap_rank} of 16) · Potential {g.potential.toFixed(0)} vs Actual {g.actual.toFixed(0)} ·{" "}
+        {p.bottleneck_score < 50
+          ? <>main bottleneck: <span className="font-medium" style={{ color: PILLAR_COLOR[p.bottleneck] }}>{p.bottleneck}</span> - {PILLAR_BLURB[p.bottleneck].toLowerCase()}.</>
+          : <>no pillar below the national median - access, awareness and amenities are not what limits it.</>}
       </PageHeader>
       <StatePicker current={code} />
 
@@ -71,7 +74,7 @@ export default function StateProfile() {
         <Kpi label="Domestic visitors" value={n("visitors_k") / 1000} decimals={1} suffix="M" note={`${fmt.pct(n("visitor_share_pct"))} of Malaysia`} />
         <Kpi label="Visitors per resident" value={n("visitors_per_resident")} decimals={1} note="tourism intensity" />
         <Kpi label="Spend per visitor" value={n("spend_per_visitor_rm")} prefix="RM " note={`DOSM ${n("spend_year")}`} />
-        <Kpi label="Avg length of stay" value={n("avg_length_of_stay")} decimals={2} suffix=" nights" note={`DOSM ${n("spend_year")}`} />
+        <Kpi label="Avg length of stay" value={n("avg_length_of_stay")} decimals={2} note={`nights · DOSM ${n("spend_year")}`} />
         <Kpi label="Hotel occupancy" value={n("occupancy_pct")} decimals={1} suffix="%" note={`${fmt.int(n("rooms"))} rooms`} />
         <Kpi label="Room for more visitors" value={cap.max_extra_visitors_k / 1000} decimals={2} suffix="M" note={`at ${assumptions.target_occupancy_pct}% ceiling (assumption)`} />
       </Stagger>
@@ -126,7 +129,12 @@ export default function StateProfile() {
             ))}
           </ol>
           {districts.length > 0 && <p className="mt-3 text-[11px] text-muted-foreground">Top districts: {districts.map((d) => d.name).join(" · ")}</p>}
-          <SourceNote>Mostly malls and town centres - a sign that nature and heritage sites are under-marketed. Source: DOSM DTS 2025, Tables 8A-8B.</SourceNote>
+          <SourceNote>
+            {malls >= 3
+              ? `${malls} of the top ${places.length} are malls or shops - a sign that nature and heritage sites are under-marketed. `
+              : malls === 0 ? "None of the top five is a mall - visitors already come for places, not shopping. " : ""}
+            Source: DOSM DTS 2025, Tables 8A-8B.
+          </SourceNote>
         </Card>
 
         <Card title="Context">

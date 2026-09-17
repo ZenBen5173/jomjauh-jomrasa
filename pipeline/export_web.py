@@ -77,7 +77,9 @@ def reference(panel_all: pd.DataFrame) -> dict:
     p = panel_all[panel_all.year == DEFAULT_YEAR].set_index("code")
     sims = []
     for origin, dests, share, mult in [("SGR", {"TRG": 1.0}, 5, 1.0), ("SGR", {"PLS": 1.0}, 30, 1.0),
-                                       ("KUL", {"KTN": 0.5, "SBH": 0.5}, 4, 1.42)]:
+                                       ("KUL", {"KTN": 0.5, "SBH": 0.5}, 4, 1.42),
+                                       ("SGR", {"PLS": 0.5, "SWK": 0.5}, 20, 1.0),      # Perlis fills up, overflow goes to Sarawak
+                                       ("KUL", {"PHG": 1.0, "LBN": 1.0}, 25, 1.0)]:     # everything full: capacity binds
         r = M.simulate(p, M.Scenario(origin, dests, share, M.Assumptions(multiplier=mult)))
         sims.append({"origin": origin, "destinations": dests, "share_pct": share, "multiplier": mult,
                      "moved_k": r["moved_k"], "capacity_binds": r["capacity_binds"],

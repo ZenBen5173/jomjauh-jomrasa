@@ -254,20 +254,44 @@ export interface Scenario {
   share_pct: number;
 }
 
+/** Split `requested` by weight; a destination at its Capacity Limit keeps its limit and the overflow
+ *  is re-offered to the others, so visitors stay unmoved only when every destination is full. */
+export function allocate(requested: number, weights: Record<string, number>, limits: Record<string, number>): Record<string, number> {
+  const moved: Record<string, number> = Object.fromEntries(Object.keys(weights).map((d) => [d, 0]));
+  const open = new Set(Object.keys(weights).filter((d) => weights[d] > 0 && limits[d] > 0));
+  let left = requested;
+  while (left > 1e-9 && open.size) {
+    const wsum = sum([...open].map((d) => weights[d]));
+    const share = Object.fromEntries([...open].map((d) => [d, (left * weights[d]) / wsum]));
+    const full = [...open].filter((d) => moved[d] + share[d] >= limits[d] - 1e-12);
+    if (!full.length) {
+      for (const d of open) moved[d] += share[d];
+      break;
+    }
+    for (const d of full) {
+      left -= limits[d] - moved[d];
+      moved[d] = limits[d];
+      open.delete(d);
+    }
+  }
+  return moved;
+}
+
 export function simulate(rows: Row[], sc: Scenario, a: Assumptions) {
   const by = Object.fromEntries(rows.map((r) => [r.code, r]));
   const cap = Object.fromEntries(capacity(rows, a).map((c) => [c.code, c]));
   const o = by[sc.origin];
   const requested = (num(o, "visitors_k") * sc.share_pct) / 100;
   const tot = sum(Object.values(sc.destinations)) || 1;
+  const alloc = allocate(requested, sc.destinations, Object.fromEntries(Object.keys(sc.destinations).map((c) => [c, cap[c].max_extra_visitors_k])));
   const dests = Object.entries(sc.destinations).map(([code, w]) => {
     const d = by[code];
     const want = (requested * w) / tot;
     const limit = cap[code].max_extra_visitors_k;
-    const moved = Math.min(want, limit);
+    const moved = alloc[code];
     const rn = moved * 1e3 * cap[code].room_nights_per_visitor;
     return {
-      code, requested_k: want, moved_k: moved, capped: want > limit + 1e-9, capacity_limit_k: limit,
+      code, requested_k: want, moved_k: moved, capped: want > 0 && moved >= limit - 1e-9, capacity_limit_k: limit,
       receipts_gained_rm_m: (moved * num(d, "spend_per_visitor_rm")) / 1e3,
       room_nights_needed: rn, spare_room_nights: cap[code].spare_room_nights,
       occupancy_before_pct: num(d, "occupancy_pct"),
@@ -292,7 +316,7 @@ export function simulate(rows: Row[], sc: Scenario, a: Assumptions) {
   const oRn = moved * 1e3 * cap[sc.origin].room_nights_per_visitor;
   const oAfter = after.find((r) => r.code === sc.origin)!;
   return {
-    requested_k: requested, moved_k: moved, capacity_binds: dests.some((d) => d.capped), destinations: dests,
+    requested_k: requested, moved_k: moved, capacity_binds: moved < requested - 1e-6, destinations: dests,
     receipts_gained_rm_m: gained, receipts_lost_rm_m: lost, net_national_rm_m: gained - lost,
     economic_impact_gained_rm_m: gained * a.multiplier,
     origin: {

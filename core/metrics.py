@@ -252,22 +252,45 @@ class Scenario:
     assumptions: Assumptions = field(default_factory=Assumptions)
 
 
+def allocate(requested: float, weights: dict[str, float], limits: dict[str, float]) -> dict[str, float]:
+    """Split `requested` across destinations by weight. A destination that hits its Capacity
+    Limit keeps its limit and the overflow is re-offered to the others (water-filling), so
+    visitors are only left unmoved when every destination is full."""
+    moved = {d: 0.0 for d in weights}
+    open_ = {d for d, w in weights.items() if w > 0 and limits[d] > 0}
+    left = requested
+    while left > 1e-9 and open_:
+        wsum = sum(weights[d] for d in open_)
+        share = {d: left * weights[d] / wsum for d in open_}
+        full = {d for d in open_ if moved[d] + share[d] >= limits[d] - 1e-12}
+        if not full:
+            for d in open_:
+                moved[d] += share[d]
+            break
+        for d in full:
+            left -= limits[d] - moved[d]
+            moved[d] = limits[d]
+        open_ -= full
+    return moved
+
+
 def simulate(panel: pd.DataFrame, sc: Scenario) -> dict:
     """What-if rebalancing. Redirected visitors are assumed to behave like the destination's
     current average visitor (spend, overnight share, length of stay)."""
     a = sc.assumptions
     cap = capacity(panel, a)
     requested = panel.at[sc.origin, "visitors_k"] * sc.share_pct / 100
+    alloc = allocate(requested, sc.destinations, {d: float(cap.at[d, "max_extra_visitors_k"]) for d in sc.destinations})
     tot = sum(sc.destinations.values()) or 1.0
     rows, moved_total = [], 0.0
     for dest, w in sc.destinations.items():
         want = requested * w / tot
         limit = float(cap.at[dest, "max_extra_visitors_k"])
-        moved = min(want, limit)
+        moved = alloc[dest]
         moved_total += moved
         rn_needed = moved * 1e3 * cap.at[dest, "room_nights_per_visitor"]
         rows.append({
-            "dest": dest, "requested_k": want, "moved_k": moved, "capped": want > limit + 1e-9,
+            "dest": dest, "requested_k": want, "moved_k": moved, "capped": bool(want > 0 and moved >= limit - 1e-9),
             "capacity_limit_k": limit,
             "receipts_gained_rm_m": moved * panel.at[dest, "spend_per_visitor_rm"] / 1e3,
             "room_nights_needed": rn_needed, "spare_room_nights": float(cap.at[dest, "spare_room_nights"]),
@@ -294,7 +317,7 @@ def simulate(panel: pd.DataFrame, sc: Scenario) -> dict:
 
     o_rn = moved_total * 1e3 * cap.at[sc.origin, "room_nights_per_visitor"]
     return {
-        "requested_k": requested, "moved_k": moved_total, "capacity_binds": bool(dests["capped"].any()),
+        "requested_k": requested, "moved_k": moved_total, "capacity_binds": bool(moved_total < requested - 1e-6),
         "destinations": dests,
         "receipts_gained_rm_m": gained, "receipts_lost_rm_m": lost, "net_national_rm_m": gained - lost,
         "multiplier": a.multiplier,

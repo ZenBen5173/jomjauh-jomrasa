@@ -81,7 +81,7 @@ export default function Overview() {
                 <dt>Visitors</dt><dd>{fmt.visitorsK(by[c].visitors_k as number)}</dd>
                 <dt>Hotel occupancy</dt><dd>{fmt.pct(by[c].occupancy_pct as number)}</dd>
                 <dt>Spend / visitor</dt><dd>RM {fmt.int(by[c].spend_per_visitor_rm as number)}</dd>
-                <dt>Main bottleneck</dt><dd>{pilBy[c].bottleneck}</dd>
+                <dt>Main bottleneck</dt><dd>{pilBy[c].bottleneck_score < 50 ? pilBy[c].bottleneck : "none below median"}</dd>
               </dl>
             )}
           />
@@ -102,7 +102,9 @@ export default function Overview() {
           </div>
           <PillarBars scores={pilBy[sel].scores} colors={PILLAR_COLOR} bottleneck={pilBy[sel].bottleneck} />
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            <span className="font-medium text-foreground">{PILLAR_BLURB[pilBy[sel].bottleneck]}.</span>{" "}
+            <span className="font-medium text-foreground">
+              {pilBy[sel].bottleneck_score < 50 ? `${PILLAR_BLURB[pilBy[sel].bottleneck]}.` : "No pillar is below the national median - access, awareness and amenities are not what limits this state."}
+            </span>{" "}
             Hotels ran at {fmt.pct(by[sel].occupancy_pct as number)}; at a {assumptions.target_occupancy_pct}% ceiling there is room for about{" "}
             <span className="font-medium text-foreground">{fmt.visitorsK(capBy[sel].max_extra_visitors_k)}</span> more visitors a year.
           </p>
@@ -125,7 +127,7 @@ export default function Overview() {
           </SourceNote>
         </Card>
         <Card title="Concentration over time (Gini of state visitors)">
-          <LineChart years={years} format={(v) => v.toFixed(2)}
+          <LineChart years={years} format={(v) => v.toFixed(2)} zeroBase={false} height={300}
             series={[{ id: "gini", label: "Gini", color: "#3987e5", values: years.map((y) => TREND.gini_by_year[y]) }]} />
           <SourceNote>Source: DOSM Domestic Tourism Survey, Table 9 (2017-2025).</SourceNote>
         </Card>

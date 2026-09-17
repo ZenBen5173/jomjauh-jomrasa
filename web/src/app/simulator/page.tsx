@@ -27,6 +27,9 @@ function Slider({ label, value, min, max, step, onChange, format, hint }: {
   );
 }
 
+/** RM millions as a KPI: switch to billions from RM 1,000M so the figure never wraps. */
+const rm = (m: number) => (m >= 1000 ? { value: m / 1000, decimals: 2, prefix: "RM ", suffix: "bn" } : { value: m, decimals: 0, prefix: "RM ", suffix: "M" });
+
 export default function Simulator() {
   const { rows, gap, assumptions, setAssumptions, year } = useStore();
   const ranked = useMemo(() => [...gap].sort((a, b) => b.gap - a.gap).map((g) => g.code), [gap]);
@@ -62,7 +65,7 @@ export default function Simulator() {
       </PageHeader>
 
       <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
-        <Card title="Scenario">
+        <Card title="Scenario" className="self-start xl:sticky xl:top-6">
           <div className="space-y-5">
             <label className="block text-xs">
               <span className="mb-1.5 block text-muted-foreground">Take visitors from</span>
@@ -133,9 +136,9 @@ export default function Simulator() {
 
           <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Kpi label="Visitors moved" value={sim.moved_k / 1000} decimals={2} suffix="M" note={`of ${fmt.visitorsK(sim.requested_k)} requested`} />
-            <Kpi label={multOn ? "Economic impact at destinations" : "Receipts gained by destinations"} value={(multOn ? sim.economic_impact_gained_rm_m : sim.receipts_gained_rm_m)} decimals={0} prefix="RM " suffix="M"
+            <Kpi label={multOn ? "Economic impact at destinations" : "Receipts gained by destinations"} {...rm(multOn ? sim.economic_impact_gained_rm_m : sim.receipts_gained_rm_m)}
               note={multOn ? `incl. ×${a.multiplier.toFixed(2)} multiplier (assumption)` : "at destination spend / visitor"} />
-            <Kpi label={`Receipts lost by ${STATE_LABEL[origin]}`} value={sim.receipts_lost_rm_m} decimals={0} prefix="RM " suffix="M" note="at origin spend / visitor" />
+            <Kpi label={`Receipts lost by ${STATE_LABEL[origin]}`} {...rm(sim.receipts_lost_rm_m)} note="at origin spend / visitor" />
             <Kpi label="Gini of visitors, after" value={sim.concentration_after.gini} decimals={3}
               delta={sim.concentration_after.gini - sim.concentration_before.gini} deltaGoodWhenNegative note={`from ${sim.concentration_before.gini.toFixed(3)}`} />
           </Stagger>
@@ -169,7 +172,7 @@ export default function Simulator() {
                   return (
                     <div key={d.code}>
                       <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-xs">
-                        <span className="font-medium">{STATE_NAME[d.code]} {d.capped && <span className="ml-1 rounded bg-[var(--amber-4)] px-1.5 py-px text-[10px] text-[var(--amber-11)]">capped</span>}</span>
+                        <span className="font-medium">{STATE_NAME[d.code]} {d.capped && <span className="ml-1 rounded bg-[var(--amber-4)] px-1.5 py-px text-[10px] text-[var(--amber-11)]">{sim.capacity_binds ? "at capacity" : "at capacity · overflow sent to the others"}</span>}</span>
                         <span className="tabular-nums text-muted-foreground">
                           {fmt.int(d.room_nights_needed)} needed of {fmt.int(d.spare_room_nights)} spare · occupancy {fmt.pct(d.occupancy_before_pct)} → <span className="font-medium text-foreground">{fmt.pct(d.occupancy_after_pct)}</span>
                         </span>

@@ -22,7 +22,8 @@ export default function StatsCounter({
   className,
 }: StatsCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  // no negative margin: on a phone a tile at the screen edge never gets 100px inside the viewport and would stay at 0
+  const isInView = useInView(ref, { once: true });
   const motionValue = useMotionValue(0);
   const springValue = useSpring(motionValue, { duration: duration * 1000, bounce: 0 });
   const [displayValue, setDisplayValue] = useState(0);
@@ -43,7 +44,7 @@ export default function StatsCounter({
   return (
     <span ref={ref} className={cn("tabular-nums", className)}>
       {prefix}
-      {displayValue.toFixed(decimals)}
+      {displayValue.toLocaleString("en-MY", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
       {suffix}
     </span>
   );

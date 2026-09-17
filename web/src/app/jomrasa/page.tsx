@@ -72,6 +72,25 @@ export default function JomRasa() {
               );
             }} />
           <Legend scale={scale} left="lower" right="higher Experience Score" />
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {[
+              { h: "Best experienced", v: states.slice(0, 3) },
+              { h: "Most friction", v: states.slice(-3).reverse() },
+            ].map((b) => (
+              <div key={b.h} className="rounded-xl bg-muted/50 p-3">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{b.h}</p>
+                {b.v.map((x) => (
+                  <button key={x.code} onClick={() => setSelected(x.code)} className="mt-1 flex w-full justify-between text-xs transition-colors hover:text-primary">
+                    <span>{STATE_LABEL[x.code]}</span><span className="tabular-nums text-muted-foreground">{x.experience_score.toFixed(1)}</span>
+                  </button>
+                ))}
+              </div>
+            ))}
+            <div className="rounded-xl border border-dashed border-[var(--indigo-7)] p-3 text-xs leading-relaxed text-muted-foreground">
+              <span className="font-medium text-foreground">What it means.</span> The spread is only {(states[0].experience_score - states[states.length - 1].experience_score).toFixed(1)} points and
+              most uncertainty bands overlap: quiet states are experienced about as well as busy ones. People who go, like it - the challenge is getting people to go.
+            </div>
+          </div>
         </Card>
 
         <Card title="Ranking with uncertainty">
@@ -99,7 +118,7 @@ export default function JomRasa() {
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-3">
+      <div className="mt-4 grid items-start gap-4 xl:grid-cols-3">
         <Card title={`${STATE_NAME[sel]} · what people talk about`} right={gapRank ? <span className="rounded-md bg-muted px-2 py-0.5 text-xs">Gap #{gapRank}</span> : undefined}>
           <div className="space-y-2">
             {topics.map((t) => (
@@ -161,7 +180,7 @@ export default function JomRasa() {
           <p><span className="font-medium text-foreground">1 · Collect.</span> Per-state searches in Malay, English and Mandarin (Exa) plus comments on travel videos (YouTube Data API). Only text, state, link, date and language are stored - never usernames.</p>
           <p><span className="font-medium text-foreground">2 · Filter.</span> Each text is checked: is it about a travel experience? Two passes must both agree that it is a first-hand account; politics, news, spam and &quot;nice video&quot; comments are dropped.</p>
           <p><span className="font-medium text-foreground">3 · Tag.</span> A small language model ({JR.meta.model}) assigns topics with per-topic sentiment, overall sentiment and one emotion from fixed lists. Results are cached.</p>
-          <p><span className="font-medium text-foreground">4 · Score.</span> Overall sentiment is averaged per state and shrunk toward the national mean according to sample size. The score also feeds the Gap Score and the bottleneck pillars.</p>
+          <p><span className="font-medium text-foreground">4 · Score.</span> The 11 aspect sentiments are each shrunk toward the national mean according to sample size, then averaged with equal weight. The score also feeds the Gap Score and the bottleneck pillars.</p>
         </div>
         {v && (
           <SourceNote>
