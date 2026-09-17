@@ -4,3 +4,4 @@ duckdb
 playwright
 python-dotenv
 tqdm
+shapely

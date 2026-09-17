@@ -28,6 +28,23 @@ _STATES = [
 STATES = pd.DataFrame(_STATES, columns=["code", "state", "label", "dosm_slug", "region"])
 CODES = list(STATES["code"])
 
+# Land area (km2, DOSM / JUPEM published state areas) and state capital coordinates
+# (used only for the distance-based market-access proxy).
+_GEO = {
+    "JHR": (19166, "Johor Bahru", 1.4927, 103.7414), "KDH": (9492, "Alor Setar", 6.1248, 100.3678),
+    "KTN": (15040, "Kota Bharu", 6.1254, 102.2381), "MLK": (1712, "Melaka", 2.1896, 102.2501),
+    "NSN": (6658, "Seremban", 2.7297, 101.9381), "PHG": (35965, "Kuantan", 3.8077, 103.3260),
+    "PRK": (21146, "Ipoh", 4.5975, 101.0901), "PLS": (819, "Kangar", 6.4414, 100.1986),
+    "PNG": (1049, "George Town", 5.4141, 100.3288), "SBH": (73904, "Kota Kinabalu", 5.9804, 116.0735),
+    "SWK": (124450, "Kuching", 1.5533, 110.3592), "SGR": (7951, "Shah Alam", 3.0733, 101.5185),
+    "TRG": (12958, "Kuala Terengganu", 5.3296, 103.1370), "KUL": (243, "Kuala Lumpur", 3.1390, 101.6869),
+    "LBN": (92, "Victoria", 5.2831, 115.2308), "PJY": (49, "Putrajaya", 2.9264, 101.6964),
+}
+STATES["area_km2"] = STATES["code"].map(lambda c: _GEO[c][0])
+STATES["capital"] = STATES["code"].map(lambda c: _GEO[c][1])
+STATES["lat"] = STATES["code"].map(lambda c: _GEO[c][2])
+STATES["lon"] = STATES["code"].map(lambda c: _GEO[c][3])
+
 _ALIASES = {
     "johor": "JHR", "johore": "JHR",
     "kedah": "KDH",

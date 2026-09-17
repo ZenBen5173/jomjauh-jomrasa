@@ -347,6 +347,43 @@ def boundaries() -> dict:
     return gj
 
 
+# ---------------------------------------------------------------- Tourism Malaysia (Power BI)
+def _tm(name: str) -> pd.DataFrame:
+    tm = RAW / "tourism_malaysia"
+    df = pd.read_csv(tm / f"{name}.csv")
+    ref = pd.read_csv(tm / "ref_states.csv").set_index("id")["name"]
+    df["area"] = df["state_id"].map(ref)
+    df["code"] = df["area"].map(to_code)
+    df.loc[df["area"] == "Langkawi", "code"] = "LGK"   # reported separately from Kedah
+    df.loc[df["area"] == "All States", "code"] = "MYS"
+    return df[df["code"].notna()].drop(columns=["state_id", "date"])
+
+
+def accommodation_year() -> pd.DataFrame:
+    """Full-year paid-accommodation figures. quarter_cumulative == 5 is Jan-Dec."""
+    aor = _tm("dashboard_aor_cumulative_public").query("quarter_cumulative == 5")
+    hg = _tm("dashboard_hg_cumulative_public").query("quarter_cumulative == 5")
+    rooms = _tm("dashboard_room_cumulative_public").dropna(subset=["total_room"])
+    df = aor[["code", "year", "aor_cumulative"]].rename(columns={"aor_cumulative": "occupancy_pct"})
+    df = df.merge(hg[["code", "year", "domestic_hotel_guest", "foreigner_hotel_guest", "overall_hotel_guest"]],
+                  on=["code", "year"], how="outer")
+    df = df.merge(rooms[["code", "year", "total_hotel", "total_room"]], on=["code", "year"], how="outer")
+    df = df.rename(columns={"domestic_hotel_guest": "hotel_guests_domestic", "foreigner_hotel_guest": "hotel_guests_foreign",
+                            "overall_hotel_guest": "hotel_guests_total", "total_hotel": "hotels", "total_room": "rooms"})
+    return df.sort_values(["code", "year"]).reset_index(drop=True)
+
+
+def accommodation_quarter() -> pd.DataFrame:
+    aor = _tm("dashboard_aor_quarter_public").rename(columns={"quarter_quarterly": "quarter", "aor_quarter": "occupancy_pct"})
+    hg = _tm("dashboard_hg_quarter_public").rename(columns={
+        "quarter_quarterly": "quarter", "domestic_hotel_guest": "hotel_guests_domestic",
+        "foreigner_hotel_guest": "hotel_guests_foreign", "overall_hotel_guest": "hotel_guests_total"})
+    df = aor[["code", "year", "quarter", "occupancy_pct"]].merge(
+        hg[["code", "year", "quarter", "hotel_guests_domestic", "hotel_guests_foreign", "hotel_guests_total"]],
+        on=["code", "year", "quarter"], how="outer")
+    return df.sort_values(["code", "year", "quarter"]).reset_index(drop=True)
+
+
 # ---------------------------------------------------------------- main
 def main() -> None:
     CLEAN.mkdir(parents=True, exist_ok=True)
@@ -361,6 +398,8 @@ def main() -> None:
         "population_state": population(),
         "socioeconomic_state": socioeconomic(),
         "foreign_arrivals_soe": foreign_arrivals_soe(),
+        "accommodation_year": accommodation_year(),
+        "accommodation_quarter": accommodation_quarter(),
     }
     for name, df in tables.items():
         df.to_parquet(CLEAN / f"{name}.parquet", index=False)
