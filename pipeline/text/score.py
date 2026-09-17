@@ -52,6 +52,12 @@ def tagged() -> pd.DataFrame:
     items = pd.read_parquet(CLEAN / "text_items.parquet")
     tags = pd.DataFrame(load_cache().values()).rename(columns={"id": "item_id"})
     df = items.merge(tags.drop(columns=["model", "prompt_version"]), on="item_id", how="inner")
+    # second-pass filter: an item counts as travel experience only if both passes agree
+    from pipeline.text.verify import load as load_verify
+    ver = load_verify()
+    if ver:
+        df["tagger_travel"] = df["is_travel_experience"]
+        df["is_travel_experience"] = df["is_travel_experience"] & df["item_id"].map(ver).fillna(False).astype(bool)
     return df
 
 
@@ -82,7 +88,7 @@ def build() -> None:
             rec[f"lang_{lang}"] = int((g.language == lang).sum())
         rows.append(rec)
     exp = pd.DataFrame(rows)
-    exp.attrs["k"] = k
+    exp["prior_k"], exp["national_mean"] = k, mu
 
     # --- topic sentiment per state (shrunk per topic)
     t = df[["item_id", "code", "topics"]].explode("topics").dropna(subset=["topics"])
@@ -108,6 +114,21 @@ def build() -> None:
         return sub.groupby("code").apply(lambda g: np.average(g.sentiment, weights=g.n + 1), include_groups=False)
 
     exp = exp.set_index("code")
+    # Experience Score = equal-weight mean of the aspect sentiments (each already shrunk for sample size).
+    # Why not the plain mean of overall sentiment: online travel writing is ~88% positive and scenery / food /
+    # culture are praised almost identically everywhere, so that mean cannot separate states (range ~3 points).
+    # Averaging aspects equally lets the frictions that do differ - access, crowding, price, cleanliness, safety -
+    # count as much as the praise. The overall-sentiment mean is kept as `overall_sentiment_*` for reference.
+    exp = exp.rename(columns={"experience_raw": "overall_sentiment_raw", "experience_score": "overall_sentiment",
+                              "experience_lo": "overall_lo", "experience_hi": "overall_hi"})
+    sd_t = t.groupby("topic").s100.std(ddof=1)
+    k_t = {tp: prior_strength([g.s100.to_numpy() for _, g in t[t.topic == tp].groupby("code")]) for tp in topics.topic.unique()}
+    piv, piv_raw, piv_n = (topics.pivot(index="code", columns="topic", values=v) for v in ("sentiment", "sentiment_raw", "n"))
+    exp["experience_score"] = piv.mean(axis=1)
+    exp["experience_raw"] = piv_raw.mean(axis=1)
+    exp["national_mean"] = exp["experience_score"].mean()
+    se = np.sqrt(sum((sd_t[c] ** 2) / (piv_n[c] + k_t[c]) for c in piv.columns)) / len(piv.columns)
+    exp["experience_lo"], exp["experience_hi"] = exp["experience_score"] - 1.96 * se, exp["experience_score"] + 1.96 * se
     exp["access_sentiment"] = pillar(ACCESS_TOPICS)
     exp["amenity_sentiment"] = pillar(AMENITY_TOPICS)
     exp = exp.reset_index()
@@ -124,6 +145,10 @@ def build() -> None:
     p = df.dropna(subset=["place"]).copy()
     p["place_key"] = p.place.str.lower().str.replace(r"[^a-z0-9一-鿿 ]", "", regex=True).str.strip()
     p = p[p.place_key.str.len() >= 4]
+    # a state or country name is not a "spot"
+    not_spots = {"malaysia", "penang", "pulau pinang", "malacca", "kl", "east malaysia", "borneo", "peninsular malaysia",
+                 *STATES.state.str.lower(), *STATES.label.str.lower(), *STATES.state.str.replace("W.P. ", "", regex=False).str.lower()}
+    p = p[~p.place_key.isin(not_spots)]
     cat = []
     for (code, key), g in p.groupby(["code", "place_key"]):
         if len(g) < 2:
@@ -139,13 +164,15 @@ def build() -> None:
                     "quote": best.text[:260], "quote_url": best.url})
     places = pd.DataFrame(cat)
     if not places.empty:
+        # the 40 most-mentioned places per state are plenty for the planner and keep geocoding to a few minutes
+        places = places.sort_values("mentions", ascending=False).groupby("code").head(40).reset_index(drop=True)
         places = geocode(places)
 
     exp.to_parquet(CLEAN / "jomrasa_state.parquet", index=False)
     topics.to_parquet(CLEAN / "jomrasa_topics.parquet", index=False)
     quotes.to_parquet(CLEAN / "jomrasa_quotes.parquet", index=False)
     places.to_parquet(CLEAN / "jomrasa_places.parquet", index=False)
-    print(exp[["code", "mentions_n", "experience_raw", "experience_score"]].round(1).to_string(index=False))
+    print(exp[["code", "mentions_n", "overall_sentiment", "experience_raw", "experience_score", "experience_lo", "experience_hi"]].round(1).to_string(index=False))
     print(f"prior strength k = {k:.1f}; places {len(places)}; quotes {len(quotes)}")
 
 
@@ -177,6 +204,11 @@ def geocode(places: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------- validation
 def sample(n: int = 200, seed: int = 11) -> None:
     df = tagged()
+    r1 = DOCS / "validation_round1_sample.csv"
+    if r1.exists():   # round 2: fresh items only, different seed - round 1 was used to tune the second-pass filter
+        df = df[~df.item_id.isin(pd.read_csv(r1, encoding="utf-8-sig").item_id)]
+        df = df[df.language.isin(["ms", "en", "zh", "mixed"])]
+        n, seed = 120, 23
     df["stratum"] = df.language + "|" + df.source_type
     per = max(n // df.stratum.nunique(), 1)
     s = df.groupby("stratum", group_keys=False).apply(lambda g: g.sample(min(len(g), per), random_state=seed), include_groups=False)

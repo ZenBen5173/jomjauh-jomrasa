@@ -49,3 +49,12 @@ python -m pipeline.build_panel && python -m pipeline.export_web
 cd web && npm install && npm run dev      # http://localhost:3000
 npm test                                  # TypeScript metrics must reproduce the Python reference
 ```
+
+## Data notes
+
+- `data/raw/` holds the untouched official downloads (DOSM, data.gov.my, Tourism Malaysia, geoBoundaries, OpenStreetMap) with access dates in `_manifest.json`.
+- The collected travel text corpus (`data/clean/text_items.parquet`, `data/raw/text/`) is **not** in this repository: it is third-party writing.
+  Only derived, aggregated tables and short attributed quotes are published. Re-create it with the JomRasa commands above.
+- JomRasa validation figures are agreement with blind reference labels from a stronger model, not human-labelled accuracy (see `docs/validation_*.`).
+
+Live dashboard: https://jomjauh.vercel.app · Team ANAK SUNWAY · DOSM Datathon 2026

@@ -19,6 +19,8 @@ const SOURCES = [
   { name: "data.gov.my - arrivals_soe", what: "Foreign arrivals by state of entry (context only - entry point, not destination; ends Oct 2024)", years: "2020-2024", level: "State", url: "https://data.gov.my/data-catalogue/arrivals_soe", date: accessed("datagovmy/arrivals") },
   { name: "geoBoundaries MYS ADM1 (simplified)", what: "State boundaries", years: "current", level: "Polygon", url: "https://www.geoboundaries.org", date: accessed("geo/") },
   { name: "OpenStreetMap via Overpass API", what: "Attractions, nature & heritage sites, airports with IATA codes, rail stations - assigned to states by point-in-polygon", years: "current", level: "Point", url: "https://www.openstreetmap.org/copyright", date: META.osm_accessed as string },
+  { name: "Exa search API", what: "Public travel blogs, forums and articles per state in Malay, English and Mandarin (TripAdvisor and Google Maps excluded); text passages only, no author data", years: "recent", level: "Text", url: "https://exa.ai", date: "2026-09-17" },
+  { name: "YouTube Data API v3", what: "Public comments on per-state travel videos; comment text only, no usernames or channel ids stored", years: "recent", level: "Text", url: "https://developers.google.com/youtube/v3", date: "2026-09-17" },
 ];
 
 const METHODS = [
@@ -28,6 +30,9 @@ const METHODS = [
   { h: "Bottleneck Finder", p: "Three pillars follow Buhalis's (2000) destination 'As': Access, Awareness, Amenities. Each indicator becomes a robust z-score against the national median (median / 1.4826·MAD, clipped at ±3); a pillar is the mean of its z-scores rescaled so 50 = the median state. The weakest pillar is reported as the main bottleneck, but all three are always shown. The method is rule-based; any generated text only restates these numbers." },
   { h: "Capacity Limit", p: "Spare room-nights = rooms × 365 × (target occupancy − current occupancy), using Tourism Malaysia's state room counts and average occupancy rate for the same year. Only overnight visitors in paid accommodation need rooms: room-nights per extra visitor = overnight share (DOSM tourists ÷ visitors) × paid-accommodation share (1 − share staying with friends & relatives, DOSM Table 12) × average length of stay ÷ guests per room. Target occupancy (default 75%) and guests per room (default 2.0) are user-set assumptions. Legal site-level limits exist in places (e.g. Sipadan's daily dive permits) but are outside this state-level model." },
   { h: "Visitor Simulator", p: "A what-if calculator, not a forecast. Moved visitors = share × origin visitors, capped by each destination's Capacity Limit. Receipts gained use the destination's spend per visitor and receipts lost use the origin's, so the national net is near zero by construction - this is rebalancing, not new money. Redirected visitors are assumed to behave like the destination's current average visitor. The optional economic multiplier (off by default) uses the Malaysian input-output range of 1.20-1.82, mean 1.42 (Mazumder et al. 2009). Results are an upper bound that presumes the destination's main bottleneck is addressed." },
+  { h: "JomRasa Experience Score", p: "Public travel text is collected per state in Malay, English and Mandarin (Exa search; YouTube Data API comments). Only text, state, URL, date and language are stored - no usernames. A small language model assigns closed-set labels: travel-experience yes/no, up to 11 topics with per-topic sentiment, overall sentiment and one of 8 emotions; a second, stricter pass must also agree the text is a first-hand account. Online travel writing is about 88% positive and praise for scenery, food and culture is near-identical everywhere, so a plain average of overall sentiment cannot separate states (range about 3 points). The Experience Score is therefore the equal-weight mean of the 11 aspect sentiments, each shrunk toward the national mean by sample size (empirical Bayes; Efron & Morris 1975), which lets the frictions that do differ - access, price, crowding, cleanliness, safety - count. It enters the Potential index; access and amenity sentiment enter the bottleneck pillars; text volume enters Awareness." },
+  { h: "JomRasa validation", p: "A stronger reference model labelled samples blind to the tagger's output. Round 1 (200 texts) found the travel filter too permissive - it kept 'great video' and 'I want to go there' comments - so a second filtering pass was added. Round 2 (120 fresh texts, not used for that fix) gives the reported agreement: travel filter 82%, sentiment polarity 87% (Cohen's kappa 0.57), main topic 93%, emotion 63%. These are model-to-model agreement figures, not human-labelled accuracy; both labelled samples are in the repository (docs/). Emotion is the weakest label and is shown as indicative only." },
+  { h: "Trip Planner", p: "A language model only converts the traveller's sentence into structured preferences (topics, feelings, budget, crowd tolerance, region). The ranking is a fixed formula shown on the page: 40% how travellers rate the requested aspects, 25% quietness (DOSM visitor intensity and crowding sentiment), 15% budget fit (DOSM spend per visitor), 20% Experience Score; a requested region is a hard requirement. If the model is unreachable the page falls back to multilingual keyword rules, and the example requests are pre-computed, so the planner always answers." },
   { h: "Year alignment", p: "DOSM has published state-level spending only up to 2023. For base years 2024 and 2025, visitors, the origin-destination matrix, occupancy, rooms and hotel guests are from that year, while spend per visitor, length of stay and accommodation-type shares are carried forward from 2023 and labelled on screen; receipts for those years are therefore estimates. Base year 2023 is fully aligned." },
 ];
 
@@ -46,8 +51,8 @@ export default function Methodology() {
   return (
     <>
       <PageHeader eyebrow="Methodology & data" title="Every number, where it comes from, and how it is used">
-        One rerunnable Python pipeline (extract → transform → load → checks) produces every table behind this dashboard. 30 automated data checks and metric
-        tests must pass before export, and the dashboard&apos;s TypeScript calculations are tested against the Python reference results.
+        One rerunnable Python pipeline (extract → transform → load → checks) produces every table behind this dashboard. 37 automated data checks and metric
+        tests must pass before export, and the dashboard&apos;s TypeScript calculations are tested (20 tests) against the Python reference results.
       </PageHeader>
 
       <motion.div {...fade}>
@@ -89,7 +94,7 @@ export default function Methodology() {
                   {inds.map((i) => (
                     <li key={i.col} className="text-xs">
                       {i.label}{i.log && <span className="ml-1 rounded bg-muted px-1 text-[10px] text-muted-foreground">log</span>}
-                      <span className="block text-[11px] text-muted-foreground">{i.source}{i.source === "JomRasa" && " · added when text tagging is complete"}</span>
+                      <span className="block text-[11px] text-muted-foreground">{i.source}</span>
                     </li>
                   ))}
                 </ul>

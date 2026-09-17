@@ -20,11 +20,12 @@ CLEAN = ROOT / "data" / "clean"
 MIN_CHARS, MAX_CHARS = 60, 700
 _URL = re.compile(r"https?://\S+|www\.\S+")
 _EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
-_HANDLE = re.compile(r"(?<!\w)@[\w.\-]{2,}")
+_HANDLE = re.compile(r"@[\w.\-]{2,}")   # also when glued to the previous word ("Follow@someone")
 _PHONE = re.compile(r"(?<!\d)(?:\+?6?0)\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,4}(?!\d)")
 _MS_WORDS = set("yang dan di ke dari ini itu untuk dengan tidak tak ada sangat memang boleh kami saya kita pergi "
                 "makan tempat sini sana best sedap cantik jalan bercuti pantai harga murah mahal".split())
-_BOILER = re.compile(r"(cookie|subscribe|newsletter|all rights reserved|privacy policy|sign up|log in|"
+_BLOCKED = re.compile(r"://[^/]*(tripadvisor\.|google\.|goo\.gl|facebook\.com|instagram\.com|tiktok\.com)", re.I)
+_BOILER =re.compile(r"(cookie|subscribe|newsletter|all rights reserved|privacy policy|sign up|log in|"
                      r"affiliate|click here|read more|share this|leave a comment|table of contents)", re.I)
 
 
@@ -73,6 +74,8 @@ def build(max_passages_per_page: int = 6) -> pd.DataFrame:
         d = json.loads(f.read_text(encoding="utf8"))
         code = d["request"]["code"]
         for res in d["response"].get("results", []):
+            if _BLOCKED.search(res.get("url") or ""):   # plan 4.3: no TripAdvisor / Google Maps review content
+                continue
             for p in passages(res.get("text") or "")[:max_passages_per_page]:
                 rows.append({"text": p, "code": code, "url": res.get("url"), "source_type": "web",
                              "date": (res.get("publishedDate") or "")[:10] or None})

@@ -1,0 +1,10 @@
+{
+  "n": 120,
+  "travel_filter_accuracy": 0.8166666666666667,
+  "polarity_accuracy": 0.8666666666666667,
+  "polarity_macro_f1": 0.5629251700680272,
+  "polarity_kappa": 0.5744680851063829,
+  "emotion_accuracy": 0.6333333333333333,
+  "emotion_macro_f1": 0.4977498691784406,
+  "main_topic_recall": 0.9333333333333333
+}

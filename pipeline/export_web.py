@@ -19,6 +19,7 @@ from core import metrics as M
 ROOT = Path(__file__).resolve().parents[1]
 RAW, CLEAN = ROOT / "data" / "raw", ROOT / "data" / "clean"
 OUT = ROOT / "web" / "public" / "data"
+DOCS = ROOT / "docs"
 YEARS = [2023, 2024, 2025]
 DEFAULT_YEAR = 2025
 
@@ -138,6 +139,35 @@ def main() -> None:
         "files": manifest, "tourism_malaysia": tm, "osm_accessed": osm_date,
     })
     _write("reference.json", reference(_load("state_panel")))
+    export_jomrasa()
+
+
+def export_jomrasa() -> None:
+    """JomRasa tables -> one JSON. Written as an empty shell until the text pipeline has run."""
+    if not (CLEAN / "jomrasa_state.parquet").exists():
+        _write("jomrasa.json", {"ready": False, "states": [], "topics": [], "quotes": [], "places": [], "meta": {}})
+        return
+    from pipeline.text.tag import EMOTIONS, MODEL, TOPICS, load_cache
+
+    def recs(name: str) -> list[dict]:
+        df = _load(name)
+        for c in df.columns:  # parquet list columns come back as numpy arrays
+            if df[c].map(lambda v: isinstance(v, np.ndarray)).any():
+                df[c] = df[c].map(lambda v: list(v) if isinstance(v, np.ndarray) else v)
+        return df.to_dict("records")
+
+    items = _load("text_items")
+    tags = load_cache()
+    val = DOCS / "validation_results.json"
+    places = [p for p in recs("jomrasa_places") if p.get("lat") is not None and np.isfinite(p["lat"])]
+    _write("jomrasa.json", {
+        "ready": True, "states": recs("jomrasa_state"), "topics": recs("jomrasa_topics"),
+        "quotes": recs("jomrasa_quotes"), "places": places,
+        "meta": {"topics": TOPICS, "emotions": EMOTIONS, "model": MODEL, "items_collected": len(items),
+                 "items_tagged": len(tags), "items_travel": int(_load("jomrasa_state").mentions_n.sum()),
+                 "by_source": items.source_type.value_counts().to_dict(),
+                 "validation": json.loads(val.read_text()) if val.exists() else None},
+    })
 
 
 if __name__ == "__main__":

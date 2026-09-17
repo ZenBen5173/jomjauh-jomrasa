@@ -88,7 +88,8 @@ def exa_search(code: str, lang: str, query: str, n: int = 10) -> dict:
         r = requests.post("https://api.exa.ai/search", timeout=60,
                           headers={"x-api-key": os.environ["EXA_API_KEY"], "Content-Type": "application/json"},
                           json={"query": query, "numResults": n, "type": "auto",
-                                "excludeDomains": ["tripadvisor.com", "tripadvisor.com.my", "google.com", "maps.google.com"],
+                                "excludeDomains": ["tripadvisor.com", "tripadvisor.com.my", "tripadvisor.co.uk", "tripadvisor.com.sg",
+                                                   "tripadvisor.com.au", "tripadvisor.in", "google.com", "maps.google.com"],
                                 "contents": {"text": {"maxCharacters": 6000}}})
         r.raise_for_status()
         d = r.json()

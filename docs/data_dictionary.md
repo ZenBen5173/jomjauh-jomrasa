@@ -283,6 +283,10 @@ Analysis panel: one row per state per year with every derived measure used by th
 | `osm_heritage` | int64 | 20 |
 | `rail_stations_n` | int64 | 13 |
 | `airports_100km` | int64 | 1 |
+| `experience_score` | float64 | 82.04 |
+| `access_sentiment` | float64 | 75.78 |
+| `amenity_sentiment` | float64 | 89.92 |
+| `mentions_n` | int64 | 465 |
 | `visitor_share_pct` | float64 | 5.544 |
 | `visitors_per_resident` | float64 | 0.9098 |
 | `visitors_per_km2` | float64 | 190.8 |
@@ -291,3 +295,115 @@ Analysis panel: one row per state per year with every derived measure used by th
 | `rooms_per_1000_residents` | float64 | 8.753 |
 | `attractions_per_1000km2` | float64 | 30.99 |
 | `market_access` | float64 | 71.03 |
+
+## `text_items`
+
+De-identified public travel text: passage / comment, state, URL, source type, date, language hint. No usernames.
+
+- **Source:** Exa API, YouTube Data API
+- **Years:** -  ·  **Rows:** 16,507  ·  **Accessed:** derived
+
+| column | type | example |
+|---|---|---|
+| `item_id` | str | 3d8269c7610a |
+| `text` | str | Malaysian Borneo: Two weeks in Sabah – A bee on the go After |
+| `code` | str | SBH |
+| `url` | str | https://abeeonthego.ca/2025/11/27/malaysian-borneo-two-weeks |
+| `source_type` | str | web |
+| `date` | str | 2025-11-27 |
+| `lang_hint` | str | en |
+
+## `jomrasa_state`
+
+Experience Score (raw, shrunk, interval), sample size, emotion mix, access / amenity sentiment
+
+- **Source:** JomRasa (pipeline/text)
+- **Years:** -  ·  **Rows:** 16  ·  **Accessed:** derived
+
+| column | type | example |
+|---|---|---|
+| `code` | str | JHR |
+| `mentions_n` | int64 | 465 |
+| `overall_sentiment_raw` | float64 | 72.37 |
+| `overall_sentiment` | float64 | 72.65 |
+| `overall_lo` | float64 | 71.44 |
+| `overall_hi` | float64 | 73.86 |
+| `share_positive` | float64 | 0.8538 |
+| `share_negative` | float64 | 0.05376 |
+| `emo_joy` | float64 | 0.5183 |
+| `emo_calm` | float64 | 0.1484 |
+| `emo_surprise` | float64 | 0.04946 |
+| `emo_trust` | float64 | 0.09247 |
+| `emo_disappointment` | float64 | 0.03226 |
+| `emo_frustration` | float64 | 0.02581 |
+| `emo_fear` | float64 | 0.006452 |
+| `emo_neutral` | float64 | 0.1269 |
+| `lang_ms` | int64 | 108 |
+| `lang_en` | int64 | 282 |
+| `lang_zh` | int64 | 42 |
+| `lang_mixed` | int64 | 33 |
+| `prior_k` | float64 | 200 |
+| `national_mean` | float64 | 82.23 |
+| `experience_score` | float64 | 82.04 |
+| `experience_raw` | float64 | 82.37 |
+| `experience_lo` | float64 | 80.22 |
+| `experience_hi` | float64 | 83.85 |
+| `access_sentiment` | float64 | 75.78 |
+| `amenity_sentiment` | float64 | 89.92 |
+
+## `jomrasa_topics`
+
+Topic sentiment per state with sample size (empirical-Bayes shrunk)
+
+- **Source:** JomRasa
+- **Years:** -  ·  **Rows:** 176  ·  **Accessed:** derived
+
+| column | type | example |
+|---|---|---|
+| `code` | str | JHR |
+| `topic` | str | access_transport |
+| `n` | int64 | 86 |
+| `sentiment_raw` | float64 | 77.91 |
+| `sentiment` | float64 | 75.78 |
+| `share_of_mentions` | float64 | 0.1849 |
+
+## `jomrasa_quotes`
+
+Representative short quotes with source links
+
+- **Source:** JomRasa
+- **Years:** -  ·  **Rows:** 128  ·  **Accessed:** derived
+
+| column | type | example |
+|---|---|---|
+| `code` | str | JHR |
+| `text` | str | ak dh pernah pergi..tak ramai org pergi..hidden gem tempat n |
+| `url` | str | https://www.youtube.com/watch?v=uDYKMzooBxE |
+| `source_type` | str | youtube_comment |
+| `language` | str | mixed |
+| `overall` | int64 | 2 |
+| `emotion` | str | joy |
+| `place` | str | pulau |
+| `topics` | object | ['crowding' 'cleanliness' 'scenery_nature' 'culture_heritage |
+
+## `jomrasa_places`
+
+Place catalogue: place, state, coordinates (Nominatim), tags, sentiment, quote
+
+- **Source:** JomRasa + OpenStreetMap Nominatim
+- **Years:** -  ·  **Rows:** 630  ·  **Accessed:** derived
+
+| column | type | example |
+|---|---|---|
+| `code` | str | LBN |
+| `place` | str | Labuan |
+| `place_key` | str | labuan |
+| `mentions` | int64 | 137 |
+| `sentiment` | float64 | 70.72 |
+| `tags` | object | ['food' 'activities' 'scenery_nature' 'culture_heritage'  'a |
+| `praised_for` | object | ['food' 'scenery_nature' 'activities'] |
+| `emotions` | object | ['joy' 'calm'] |
+| `quote` | str | Kalau orang lain mungkin memilih ke Kota Kinabalu Sandakan K |
+| `quote_url` | str | https://jadual-pelancongan.blogspot.com/2022/02/pelancongan- |
+| `lat` | float64 | 5.302 |
+| `lon` | float64 | 115.3 |

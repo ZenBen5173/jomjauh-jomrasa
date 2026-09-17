@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pandas as pd
@@ -28,25 +29,30 @@ CLEAN, CACHE = ROOT / "data" / "clean", ROOT / "data" / "cache"
 load_dotenv(ROOT / ".env")
 
 MODEL = os.environ.get("JOMRASA_MODEL", "google/gemini-2.5-flash-lite")
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 BUDGET_USD = float(os.environ.get("JOMRASA_BUDGET_USD", "3.50"))
 BATCH = 8
+WORKERS = 6
 
 TOPICS = ["access_transport", "accommodation", "food", "price_value", "crowding", "cleanliness",
           "scenery_nature", "culture_heritage", "safety", "activities", "hospitality_service"]
 EMOTIONS = ["joy", "calm", "surprise", "trust", "disappointment", "frustration", "fear", "neutral"]
 LANGS = ["ms", "en", "zh", "mixed", "other"]
+# string enums on the wire (Gemini's structured output rejects nullable types and integer enums);
+# converted to integers before caching
+SENT = {"negative": -1, "mixed": 0, "positive": 1}
+OVERALL = {"very_negative": -2, "negative": -1, "neutral": 0, "positive": 1, "very_positive": 2}
 
 SYSTEM = f"""You label short texts about travel in Malaysia. Texts may be in Malay, English, Mandarin or mixed (Manglish).
 For each text return:
 - is_travel_experience: true only if it describes or evaluates visiting a place (a trip, food, stay, sight, transport).
   false for politics, residents' complaints about government, spam, adverts, song/video praise ("nice video bro"), or pure listings with no opinion.
 - language: one of {LANGS}
-- place: the most specific named place or attraction mentioned (e.g. "Pantai Cenang", "Kek Lok Si"), else null. Never a person.
-- topics: every topic the text clearly evaluates, each with sentiment -1 (negative), 0 (mixed/neutral) or 1 (positive). Only from: {TOPICS}
-- overall: overall sentiment about the travel experience, integer -2 (very negative) to 2 (very positive)
+- place: the most specific named place or attraction mentioned (e.g. "Pantai Cenang", "Kek Lok Si"), else "". Never a person.
+- topics: every topic the text clearly evaluates, each with sentiment negative, mixed or positive. Only from: {TOPICS}
+- overall: overall sentiment about the travel experience, one of {list(OVERALL)}
 - emotion: the dominant emotion of the writer, one of {EMOTIONS}
-If is_travel_experience is false, use topics [], overall 0, emotion "neutral"."""
+If is_travel_experience is false, use topics [], overall "neutral", emotion "neutral"."""
 
 SCHEMA = {
     "name": "labels", "strict": True,
@@ -58,12 +64,12 @@ SCHEMA = {
                 "id": {"type": "string"},
                 "is_travel_experience": {"type": "boolean"},
                 "language": {"type": "string", "enum": LANGS},
-                "place": {"type": ["string", "null"]},
+                "place": {"type": "string"},
                 "topics": {"type": "array", "items": {
                     "type": "object", "additionalProperties": False, "required": ["topic", "sentiment"],
                     "properties": {"topic": {"type": "string", "enum": TOPICS},
-                                   "sentiment": {"type": "integer", "enum": [-1, 0, 1]}}}},
-                "overall": {"type": "integer", "enum": [-2, -1, 0, 1, 2]},
+                                   "sentiment": {"type": "string", "enum": list(SENT)}}}},
+                "overall": {"type": "string", "enum": list(OVERALL)},
                 "emotion": {"type": "string", "enum": EMOTIONS},
             }}}}},
 }
@@ -81,6 +87,16 @@ def load_cache() -> dict[str, dict]:
             if r["model"] == MODEL and r["prompt_version"] == PROMPT_VERSION:
                 out[r["id"]] = r
     return out
+
+
+def normalise(label: dict) -> dict:
+    """Wire format (string enums, "" for no place) -> stored format (integers, None)."""
+    try:
+        return {**label, "place": (label.get("place") or "").strip() or None,
+                "overall": OVERALL.get(label["overall"], label["overall"]),
+                "topics": [{"topic": t["topic"], "sentiment": SENT.get(t["sentiment"], t["sentiment"])} for t in label["topics"]]}
+    except (KeyError, TypeError):
+        return label
 
 
 def valid(label: dict) -> bool:
@@ -122,25 +138,26 @@ def main() -> None:
     todo = items[~items.item_id.isin(done)]
     if a.limit:
         # stratify the trial batch across states
-        todo = todo.groupby("code", group_keys=False).head(max(a.limit // 16, 1)).head(a.limit)
+        todo = todo.groupby("code", group_keys=False).head(max(a.limit // todo.code.nunique(), 1)).head(a.limit)
     CACHE.mkdir(parents=True, exist_ok=True)
     spent, n_ok = 0.0, 0
-    with cache_path().open("a", encoding="utf8") as fh:
-        for i in range(0, len(todo), BATCH):
+    batches = [todo.iloc[i:i + BATCH].to_dict("records") for i in range(0, len(todo), BATCH)]
+    wave = WORKERS * 4   # the budget guard is checked between waves, so overshoot is at most one wave
+    with cache_path().open("a", encoding="utf8") as fh, ThreadPoolExecutor(WORKERS) as pool:
+        for w in range(0, len(batches), wave):
             if spent >= BUDGET_USD:
                 print(f"budget guard: stopped at ${spent:.2f}")
                 break
-            batch = todo.iloc[i:i + BATCH].to_dict("records")
-            ids = {b["item_id"] for b in batch}
-            labels, cost = call(batch)
-            spent += cost
-            for lab in labels:
-                if lab.get("id") in ids and valid(lab):
-                    fh.write(json.dumps({**lab, "model": MODEL, "prompt_version": PROMPT_VERSION}, ensure_ascii=False) + "\n")
-                    n_ok += 1
+            chunk = batches[w:w + wave]
+            for batch, (labels, cost) in zip(chunk, pool.map(call, chunk)):
+                ids = {b["item_id"] for b in batch}
+                spent += cost
+                for lab in map(normalise, labels):
+                    if lab.get("id") in ids and valid(lab):
+                        fh.write(json.dumps({**lab, "model": MODEL, "prompt_version": PROMPT_VERSION}, ensure_ascii=False) + "\n")
+                        n_ok += 1
             fh.flush()
-            if (i // BATCH) % 25 == 0:
-                print(f"  {i + len(batch)}/{len(todo)} items   ${spent:.3f}", flush=True)
+            print(f"  {min((w + wave) * BATCH, len(todo))}/{len(todo)} items   ${spent:.3f}", flush=True)
     print(f"tagged {n_ok} new items with {MODEL}; spent ${spent:.3f}; cache now {len(load_cache())}")
 
 
