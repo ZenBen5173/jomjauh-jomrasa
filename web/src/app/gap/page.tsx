@@ -36,6 +36,24 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
   const S = 360, P = 36;
   const px = (v: number) => P + (v / 100) * (S - P - 10), py = (v: number) => S - P - (v / 100) * (S - P - 10);
   const [hover, setHover] = useState<string | null>(null);
+  // vertical nudge for labels that would sit on top of each other (sorted by y so the push is one-directional)
+  const dy = useMemo(() => {
+    const placed: { x: number; y: number }[] = [];
+    const out: Record<string, number> = {};
+    // a label goes on the left when another dot sits just to its right (or near the right edge)
+    const left: Record<string, boolean> = {};
+    for (const p of points) {
+      left[p.code] = p.x > 80 || points.some((q) => q !== p && px(q.x) - px(p.x) > 0 && px(q.x) - px(p.x) < 26 && Math.abs(py(q.y) - py(p.y)) < 9);
+    }
+    for (const p of [...points].sort((a, b) => py(a.y) - py(b.y))) {
+      const x = px(p.x);
+      let y = py(p.y);
+      for (const q of placed) if (Math.abs(q.x - x) < 24 && y - q.y < 9) y = q.y + 9;
+      placed.push({ x, y });
+      out[p.code] = y - py(p.y);
+    }
+    return { dy: out, left };
+  }, [points]);
   return (
     <svg viewBox={`0 0 ${S} ${S}`} className="mx-auto w-full max-w-[600px]">
       <polygon points={`${px(0)},${py(0)} ${px(100)},${py(100)} ${px(0)},${py(100)}`} fill="#3987e5" opacity={0.07} />
@@ -61,7 +79,7 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
             <circle r={12} fill="transparent" />
             <motion.circle r={5} initial={false} animate={{ r: on ? 7 : 5 }} fill={p.y >= p.x ? "#3987e5" : "#e66767"} stroke="var(--card)" strokeWidth={2} />
             {/* short codes keep the cluster readable; the full name appears on hover / selection and in the ranking beside it */}
-            <text x={p.x > 80 ? -9 : 9} y={3} textAnchor={p.x > 80 ? "end" : "start"} stroke="var(--card)" strokeWidth={on ? 3 : 0} paintOrder="stroke"
+            <text x={dy.left[p.code] ? -9 : 9} y={3 + (on ? 0 : dy.dy[p.code])} textAnchor={dy.left[p.code] ? "end" : "start"} stroke="var(--card)" strokeWidth={on ? 3 : 0} paintOrder="stroke"
               className={cn(on ? "fill-[var(--slate-12)] text-[10px] font-semibold" : "fill-[var(--slate-11)] text-[8px]")}>{on ? STATE_LABEL[p.code] : p.code}</text>
           </motion.g>
         );

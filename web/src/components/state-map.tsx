@@ -79,7 +79,7 @@ export function StateMap({
 
   const flipX = pos.x > (wrap.current?.clientWidth ?? 0) * 0.6;
   return (
-    <div ref={wrap} className="relative w-full" onPointerMove={move}>
+    <div ref={wrap} className="relative w-full" onPointerMove={move} onPointerLeave={() => setHover(null)}>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: height }} role="img" aria-label="Map of Malaysian states">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
@@ -140,7 +140,7 @@ export function StateMap({
             key="tip"
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1, x: pos.x + (flipX ? -236 : 16), y: pos.y + 14 }}
-            exit={{ opacity: 0, scale: 0.96 }}
+            exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.08 } }}
             transition={{ x: SPRING.follow, y: SPRING.follow, opacity: { duration: 0.15 } }}
             className="pointer-events-none absolute left-0 top-0 z-20 w-[220px] rounded-xl border border-border bg-popover/95 p-3 text-xs shadow-xl backdrop-blur"
           >

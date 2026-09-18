@@ -94,7 +94,7 @@ export default function Planner() {
       <div className="mt-4 grid gap-4 xl:grid-cols-3">
         <AnimatePresence mode="popLayout">
           {top.map((r, i) => (
-            <motion.div key={r.code} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ delay: 0.08 * i, duration: 0.5, ease: EASE }}>
+            <motion.div key={r.code} layout className="min-w-0" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ delay: 0.08 * i, duration: 0.5, ease: EASE }}>
               <SpotlightCard className="h-full p-5">
                 <div className="flex items-start justify-between">
                   <div>
