@@ -17,7 +17,7 @@ import { StateSheet } from "@/components/planner/state-sheet";
 import { WeightsSheet } from "@/components/planner/weights-sheet";
 import StatsCounter from "@/components/ui/stats-counter";
 import { Legend, type Scale, StateMap } from "@/components/state-map";
-import { PILLAR_COLOR, STATE_LABEL, TREND, fmt } from "@/lib/data";
+import { PILLAR_COLOR, STAGE, STATE_LABEL, TREND, fmt } from "@/lib/data";
 import { JR } from "@/lib/jomrasa";
 import { lorenz } from "@/lib/metrics";
 import { useStore } from "@/lib/store";
@@ -66,26 +66,26 @@ export default function Dashboard() {
 
   const view = useMemo(() => {
     const col = (c: string) => Object.fromEntries(rows.map((r) => [r.code, r[c] as number]));
-    const seq = (v: Record<string, number>, rank: string, title: string, left: string, right: string, format: (n: number) => string, info: string) => ({
-      rank, title, info, left, right, format, diverging: false, values: v as Record<string, number | string>,
-      scale: { kind: "sequential", min: Math.min(...Object.values(v)), max: Math.max(...Object.values(v)) } as Scale,
+    const seq = (stage: keyof typeof STAGE, v: Record<string, number>, rank: string, title: string, left: string, right: string, format: (n: number) => string, info: string) => ({
+      rank, title, info, left, right, format, diverging: false, color: STAGE[stage].base as string, values: v as Record<string, number | string>,
+      scale: { kind: "sequential", min: Math.min(...Object.values(v)), max: Math.max(...Object.values(v)), from: STAGE[stage].deep, to: STAGE[stage].pale } as Scale,
       list: Object.entries(v).sort((a, b) => b[1] - a[1]).map(([code, value]) => ({ code, value })),
     });
     switch (metric) {
-      case "visitors": return seq(col("visitors_k"), "Busiest first", "Where the crowds are", "fewer", "more visitors", fmt.visitorsK, `Domestic visitors by state, DOSM Domestic Tourism Survey ${year} (Table 9).`);
-      case "occupancy": return seq(col("occupancy_pct"), "Fullest hotels first", "Where hotels still have room", "emptier", "fuller hotels", (v) => fmt.pct(v, 0), `Average hotel occupancy rate, Tourism Malaysia Paid Accommodation Survey ${year}.`);
-      case "spend": return seq(col("spend_per_visitor_rm"), "Biggest spenders first", "Where a visitor is worth the most", "lower", "higher spend per visitor", (v) => `RM ${fmt.int(v)}`, "Average spend per domestic visitor, DOSM Domestic Tourism Survey by State 2023 - the latest state-level release.");
-      case "feel": return seq(Object.fromEntries(JR.states.map((s) => [s.code, s.experience_score])), "Best rated first", "How travellers rate each state", "lower", "higher Experience Score", (v) => v.toFixed(1),
+      case "visitors": return seq("problem", col("visitors_k"), "Busiest first", "Where the crowds are", "fewer", "more visitors", fmt.visitorsK, `Domestic visitors by state, DOSM Domestic Tourism Survey ${year} (Table 9).`);
+      case "occupancy": return seq("opportunity", col("occupancy_pct"), "Fullest hotels first", "Where hotels still have room", "emptier", "fuller hotels", (v) => fmt.pct(v, 0), `Average hotel occupancy rate, Tourism Malaysia Paid Accommodation Survey ${year}.`);
+      case "spend": return seq("opportunity", col("spend_per_visitor_rm"), "Biggest spenders first", "Where a visitor is worth the most", "lower", "higher spend per visitor", (v) => `RM ${fmt.int(v)}`, "Average spend per domestic visitor, DOSM Domestic Tourism Survey by State 2023 - the latest state-level release.");
+      case "feel": return seq("opportunity", Object.fromEntries(JR.states.map((s) => [s.code, s.experience_score])), "Best rated first", "How travellers rate each state", "lower", "higher Experience Score", (v) => v.toFixed(1),
         "JomRasa Experience Score: the average of 11 aspect sentiments from public travel text, adjusted for sample size. An indicator, not an official statistic.");
       case "bottleneck": return {
-        rank: "Bottleneck by state", title: "What holds each state back", left: "", right: "", format: (v: number) => fmt.signed(v, 0), diverging: true,
+        color: STAGE.obstacle.base as string, rank: "Bottleneck by state", title: "What holds each state back", left: "", right: "", format: (v: number) => fmt.signed(v, 0), diverging: true,
         info: "The weakest of three pillars - Access, Awareness, Amenities - when it is below the national median. Grey means nothing is below the median.",
         values: Object.fromEntries(pillars.map((p) => [p.code, p.bottleneck_score < 50 ? p.bottleneck : "None"])) as Record<string, number | string>,
         scale: { kind: "categorical", colors: { ...PILLAR_COLOR, None: "#383835" } } as Scale,
         list: ranked.map((g) => ({ code: g.code, value: g.gap })),
       };
       default: return {
-        rank: "Most untapped first", title: "Where the untapped potential is", left: "over-visited", right: "under-visited", format: (v: number) => fmt.signed(v, 0), diverging: true,
+        color: STAGE.opportunity.base as string, rank: "Most untapped first", title: "Where the untapped potential is", left: "over-visited", right: "under-visited", format: (v: number) => fmt.signed(v, 0), diverging: true,
         info: "Gap Score = what a state can offer (rooms, spare capacity, spend, stay length, attractions, amenities, traveller experience) minus how intensely it is already visited. Each side is scaled 0-100 with equal weights - use Weights to change that.",
         values: Object.fromEntries(gap.map((g) => [g.code, g.gap])) as Record<string, number | string>,
         scale: { kind: "diverging", max: Math.max(...gap.map((g) => Math.abs(g.gap))) } as Scale,
@@ -163,7 +163,7 @@ export default function Dashboard() {
               })}
             </div>
           ) : (
-            <RankBars key={metric} diverging={view.diverging} rows={view.list} format={view.format} selected={sel} onSelect={setSelected} />
+            <RankBars key={metric} color={view.color} diverging={view.diverging} rows={view.list} format={view.format} selected={sel} onSelect={setSelected} />
           )}
         </Card>
 
@@ -205,11 +205,11 @@ export default function Dashboard() {
       <div className="grid gap-3 lg:grid-cols-3">
         <Card title={`The quietest half of the states get ${fmt.pct(lorenz(rows.map((r) => r.visitors_k as number)).y[8] * 100, 0)} of visits`}
           info="Lorenz curve of domestic visitors across the 16 states: the further it sags below the dashed line, the more concentrated tourism is. Hover the dots to read it.">
-          <div className="flex justify-center"><LorenzChart before={lorenz(rows.map((r) => r.visitors_k as number))} /></div>
+          <div className="flex justify-center"><LorenzChart color={STAGE.problem.base} before={lorenz(rows.map((r) => r.visitors_k as number))} /></div>
         </Card>
         <Card title={TREND.gini_by_year[String(year)] > gini2018 ? "Tourism is more concentrated than in 2018" : "Tourism is less concentrated than in 2018"}
           info="Gini coefficient of visitors across states, by year. It spiked when travel collapsed in 2021. Source: DOSM Domestic Tourism Survey, Table 9 (2017-2025).">
-          <LineChart years={years} format={(v) => v.toFixed(2)} zeroBase={false} height={400} series={[{ id: "gini", label: "Gini", color: "#3987e5", values: years.map((y) => TREND.gini_by_year[y]) }]} />
+          <LineChart years={years} format={(v) => v.toFixed(2)} zeroBase={false} height={400} series={[{ id: "gini", label: "Gini", color: STAGE.problem.base, values: years.map((y) => TREND.gini_by_year[y]) }]} />
         </Card>
         <Card title="People who go, like it - almost equally everywhere"
           info={`JomRasa Experience Score per state from ${fmt.int(JR.meta.items_travel)} first-hand travel texts. Dot = score, band = 95% interval, tick = national mean. Most bands overlap, so low visitor numbers are not explained by bad experiences.`}>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, BedDouble, MessageCircleHeart, PanelRightOpen } from "lucide-react";
 import { Info } from "@/components/info";
-import { PILLAR_BLURB, PILLAR_COLOR, STATE_NAME, fmt } from "@/lib/data";
+import { PILLAR_BLURB, PILLAR_COLOR, STAGE, STATE_NAME, fmt } from "@/lib/data";
 import { JR, TOPIC_LABEL } from "@/lib/jomrasa";
 import { useStore } from "@/lib/store";
 
@@ -41,13 +41,13 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
               <h2 className="text-lg font-semibold tracking-tight">{STATE_NAME[code]}</h2>
               <p className="text-xs text-muted-foreground">{fmt.visitorsK(r.visitors_k as number)} visitors · {fmt.pct(r.visitor_share_pct as number)} of Malaysia</p>
             </div>
-            <span className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold tabular-nums" style={{ background: g.gap >= 0 ? "rgba(57,135,229,0.18)" : "rgba(154,157,166,0.18)", color: g.gap >= 0 ? "#86b6ef" : "#c4c7ce" }}>
+            <span className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold tabular-nums" style={{ background: g.gap >= 0 ? "rgba(57,135,229,0.18)" : "rgba(230,103,103,0.18)", color: g.gap >= 0 ? "#86b6ef" : "#f0a3a3" }}>
               Opportunity {fmt.signed(g.gap, 0)} · #{g.gap_rank}
             </span>
           </div>
 
           <div className="mt-4 space-y-2">
-            {([["What it can offer", g.potential, "#3987e5"], ["How visited it is", g.actual, "#9a9da6"]] as const).map(([label, v, c]) => (
+            {([["How visited it is", g.actual, STAGE.problem.base], ["What it can offer", g.potential, STAGE.opportunity.base]] as const).map(([label, v, c]) => (
               <div key={label}>
                 <div className="mb-1 flex justify-between text-xs"><span className="text-muted-foreground">{label}</span><span className="font-medium tabular-nums">{v.toFixed(0)}</span></div>
                 <Bar value={v} color={c} />
@@ -66,7 +66,7 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
                   <div className="mb-1 flex items-center justify-between text-xs">
                     <span className="flex items-center gap-1.5">
                       <span className="size-2 rounded-sm" style={{ background: PILLAR_COLOR[k] }} />{k}
-                      {k === p.bottleneck && binding && <span className="rounded bg-[#3987e5]/20 px-1.5 py-px text-[10px] font-medium text-[#86b6ef]">bottleneck</span>}
+                      {k === p.bottleneck && binding && <span className="rounded bg-[#e0a030]/20 px-1.5 py-px text-[10px] font-medium text-[#ecc477]">bottleneck</span>}
                     </span>
                     <span className="font-medium tabular-nums">{v.toFixed(0)}</span>
                   </div>
@@ -96,7 +96,7 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
             <button onClick={onOpenProfile} className="group inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-transform active:scale-[0.98]">
               <PanelRightOpen className="size-3.5" />Full profile
             </button>
-            <Link href="/simulator" className="group inline-flex flex-1 items-center justify-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium transition-colors hover:border-foreground/30">
+            <Link href="/simulator" className="group inline-flex flex-1 items-center justify-center gap-1 rounded-xl border border-[#199e70]/50 px-3 py-2 text-xs font-medium text-[#5fd0a5] transition-colors hover:border-[#199e70] hover:bg-[#199e70]/10">
               Simulate <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>

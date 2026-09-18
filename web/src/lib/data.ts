@@ -38,10 +38,19 @@ export const STATE_NAME: Record<string, string> = Object.fromEntries(first.map((
 export const STATE_LABEL: Record<string, string> = Object.fromEntries(first.map((r) => [r.code, r.label as string]));
 export const CODES = first.map((r) => r.code);
 
-/** The planner uses one hue. Blue marks what to look at; greys carry the rest (GREY = the saturated / negative side). */
-export const BLUE = "#3987e5", GREY = "#9a9da6", LIGHT = "#c4c7ce";
-/** Three steps of the same blue - fixed per pillar, never cycled. */
-export const PILLAR_COLOR: Record<string, string> = { Access: "#b7d3f6", Awareness: "#3987e5", Amenities: "#24508a" };
+/**
+ * One colour per stage of the argument, and nothing else. Whatever belongs to a stage wears its colour:
+ * problem (how crowded) = red, opportunity (what a state can offer) = blue, obstacle (what holds it back) = amber,
+ * payoff (the simulator) = green. `deep` -> `pale` is the ramp for maps; greys carry everything that has no stage.
+ */
+export const STAGE = {
+  problem: { base: "#e66767", soft: "#f0a3a3", pale: "#f29a9a", deep: "#4a1f1f" },
+  opportunity: { base: "#3987e5", soft: "#86b6ef", pale: "#b7d3f6", deep: "#173a63" },
+  obstacle: { base: "#e0a030", soft: "#ecc477", pale: "#f6dfae", deep: "#80591a" },
+  payoff: { base: "#199e70", soft: "#5fd0a5", pale: "#a9e6cf", deep: "#0f4d38" },
+} as const;
+/** The three pillars are all "obstacle", so they are three steps of its amber - fixed per pillar, never cycled. */
+export const PILLAR_COLOR: Record<string, string> = { Access: STAGE.obstacle.pale, Awareness: STAGE.obstacle.base, Amenities: STAGE.obstacle.deep };
 export const PILLAR_BLURB: Record<string, string> = {
   Access: "Hard to reach from where most travellers live",
   Awareness: "Few out-of-state or foreign travellers know to go",

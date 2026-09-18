@@ -36,7 +36,7 @@ export function Kpi({
 }
 
 // ------------------------------------------------------------ Lorenz curve
-export function LorenzChart({ before, after }: { before: { x: number[]; y: number[] }; after?: { x: number[]; y: number[] } }) {
+export function LorenzChart({ before, after, color = "#3987e5" }: { before: { x: number[]; y: number[] }; after?: { x: number[]; y: number[] }; color?: string }) {
   const S = 260, P = 30, R = 16;
   const px = (v: number) => P + v * (S - P - R), py = (v: number) => S - P - v * (S - P - R);
   const line = (c: { x: number[]; y: number[] }) => c.x.map((x, i) => `${i ? "L" : "M"}${px(x)},${py(c.y[i])}`).join(" ");
@@ -52,14 +52,14 @@ export function LorenzChart({ before, after }: { before: { x: number[]; y: numbe
         </g>
       ))}
       <line x1={px(0)} y1={py(0)} x2={px(1)} y2={py(1)} stroke="var(--slate-8)" strokeDasharray="3 3" strokeWidth={1} />
-      <motion.path d={`${line(before)} L${px(1)},${py(0)} Z`} fill="#3987e5" opacity={0.12} initial={{ opacity: 0 }} animate={{ opacity: 0.12 }} />
-      <motion.path d={line(before)} fill="none" stroke={after ? "var(--slate-9)" : "#3987e5"} strokeWidth={2} strokeLinejoin="round"
+      <motion.path d={`${line(before)} L${px(1)},${py(0)} Z`} fill={color} opacity={0.12} initial={{ opacity: 0 }} animate={{ opacity: 0.12 }} />
+      <motion.path d={line(before)} fill="none" stroke={after ? "var(--slate-9)" : color} strokeWidth={2} strokeLinejoin="round"
         initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, ease: EASE }} />
-      {after && <motion.path initial={{ d: line(after) }} animate={{ d: line(after) }} fill="none" stroke="#3987e5" strokeWidth={2} strokeLinejoin="round" transition={{ duration: 0.4 }} />}
+      {after && <motion.path initial={{ d: line(after) }} animate={{ d: line(after) }} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" transition={{ duration: 0.4 }} />}
       {cur.x.map((x, i) => i > 0 && (
         <g key={i} onPointerEnter={() => setHi(i)}>
           <rect x={px(x) - 7} y={P - 20} width={14} height={S - P} fill="transparent" />
-          <circle cx={px(x)} cy={py(cur.y[i])} r={hi === i ? 4 : 2} fill="#3987e5" stroke="var(--card)" strokeWidth={1.5} />
+          <circle cx={px(x)} cy={py(cur.y[i])} r={hi === i ? 4 : 2} fill={color} stroke="var(--card)" strokeWidth={1.5} />
         </g>
       ))}
       {hi != null && (
@@ -85,7 +85,7 @@ export function RankBars({
     <div className="flex flex-col">
       {rows.map((r, i) => {
         const w = (Math.abs(r.value) / m) * (diverging ? 50 : 100);
-        const fill = r.color ?? (diverging ? (r.value >= 0 ? "#3987e5" : "#9a9da6") : color);
+        const fill = r.color ?? (diverging ? (r.value >= 0 ? "#3987e5" : "#e66767") : color);
         return (
           <motion.button
             key={r.code} layout="position" onClick={() => onSelect?.(r.code)}
@@ -189,7 +189,7 @@ export function PillarBars({ scores, colors, bottleneck }: { scores: Record<stri
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-sm" style={{ background: colors[k] }} />{k}
               {k === bottleneck && (v < 50
-                ? <span className="rounded bg-[#3987e5]/20 px-1.5 py-px text-[10px] font-medium text-[#86b6ef]">⚠ main bottleneck</span>
+                ? <span className="rounded bg-[#e0a030]/20 px-1.5 py-px text-[10px] font-medium text-[#ecc477]">⚠ main bottleneck</span>
                 : <span className="rounded bg-muted px-1.5 py-px text-[10px] text-muted-foreground">weakest, but above median</span>)}
             </span>
             <span className="font-medium tabular-nums">{v.toFixed(0)}</span>

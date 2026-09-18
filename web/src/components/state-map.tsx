@@ -18,12 +18,11 @@ const SMALL = new Set(["KUL", "PJY", "LBN", "PLS", "PNG", "MLK"]);
 const NUDGE: Record<string, [number, number]> = { KUL: [-4, -9], PJY: [6, 8], PNG: [-10, 0], PLS: [-6, -6], MLK: [0, 6], LBN: [-6, -8] };
 
 export type Scale =
-  | { kind: "diverging"; max: number }
-  | { kind: "sequential"; min: number; max: number }
+  | { kind: "diverging"; max: number; pos?: string; neg?: string }
+  | { kind: "sequential"; min: number; max: number; from?: string; to?: string }
   | { kind: "categorical"; colors: Record<string, string> };
 
-const NEUTRAL = "#383835", POS = "#3987e5", NEG = "#c4c7ce";
-const seq = interpolateRgb("#173a63", "#b7d3f6");
+const NEUTRAL = "#383835", POS = "#3987e5", NEG = "#e66767";
 
 export function colorFor(v: number | string | undefined, scale: Scale): string {
   if (v === undefined || v === null) return "#26282b";
@@ -31,9 +30,9 @@ export function colorFor(v: number | string | undefined, scale: Scale): string {
   const x = v as number;
   if (scale.kind === "diverging") {
     const t = Math.max(-1, Math.min(1, x / scale.max));
-    return t >= 0 ? interpolateRgb(NEUTRAL, POS)(Math.sqrt(t)) : interpolateRgb(NEUTRAL, NEG)(Math.sqrt(-t));
+    return t >= 0 ? interpolateRgb(NEUTRAL, scale.pos ?? POS)(Math.sqrt(t)) : interpolateRgb(NEUTRAL, scale.neg ?? NEG)(Math.sqrt(-t));
   }
-  return seq(Math.max(0, Math.min(1, (x - scale.min) / (scale.max - scale.min || 1))));
+  return interpolateRgb(scale.from ?? "#173a63", scale.to ?? "#b7d3f6")(Math.max(0, Math.min(1, (x - scale.min) / (scale.max - scale.min || 1))));
 }
 
 export interface Flow { from: string; to: string; weight: number }

@@ -65,7 +65,7 @@ export function StateSheet({ code, open, onClose }: { code: string; open: boolea
       <Block title="Visitors over time" info="Domestic visitors by state, DOSM Domestic Tourism Survey (Table 9), 2017-2025. The grey line is the average state.">
         <LineChart years={years} format={(v) => fmt.visitorsK(v)} height={200} series={[
           { id: "avg", label: "Average state", color: "var(--slate-9)", values: natAvg },
-          { id: code, label: STATE_LABEL[code], color: "#3987e5", values: years.map((y) => TREND.visitors[code][y]) },
+          { id: code, label: STATE_LABEL[code], color: "#e66767", values: years.map((y) => TREND.visitors[code][y]) },
         ]} />
       </Block>
 
@@ -75,7 +75,7 @@ export function StateSheet({ code, open, onClose }: { code: string; open: boolea
       </Block>
 
       <Block title={`${fmt.pct(n("out_of_state_share_pct"), 0)} of its tourists come from other states`} info={`Overnight tourists by state of origin, DOSM Domestic Tourism Survey Table 10 (${n("od_year")}). The grey bar is the state's own residents.`}>
-        <RankBars rows={origins.map((o) => ({ code: o.origin, value: o.tourists_k, color: o.origin === code ? "var(--slate-8)" : "#3987e5" }))} format={(v) => fmt.visitorsK(v)} />
+        <RankBars rows={origins.map((o) => ({ code: o.origin, value: o.tourists_k, color: o.origin === code ? "var(--slate-8)" : "#e66767" }))} format={(v) => fmt.visitorsK(v)} />
       </Block>
 
       {jr && (

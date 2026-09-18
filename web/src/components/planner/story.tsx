@@ -10,7 +10,7 @@ import { motion } from "motion/react";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { SpotlightCard } from "@/components/spotlight-card";
 import StatsCounter from "@/components/ui/stats-counter";
-import { PILLAR_COLOR, STATE_LABEL, fmt } from "@/lib/data";
+import { PILLAR_COLOR, STAGE, STATE_LABEL, fmt } from "@/lib/data";
 import { simulate } from "@/lib/metrics";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -76,21 +76,21 @@ export function Story({ metric, onMetric }: { metric: string; onMetric: (m: Stor
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <Step n={1} kicker="The problem" color="#3987e5" cue="Show crowds" active={metric === "visitors"} onClick={() => onMetric("visitors")}>
+      <Step n={1} kicker="The problem" color={STAGE.problem.base} cue="Show crowds" active={metric === "visitors"} onClick={() => onMetric("visitors")}>
         <Big><StatsCounter value={concentration.top3_share * 100} suffix="%" duration={0.9} /></Big>
         <Line>of {fmt.visitorsK(s.total)} visits go to just 3 of 16 states</Line>
         <div className="mt-auto pt-3">
           <div className="flex h-2 gap-px overflow-hidden rounded-full">
             {s.shares.map((x, i) => (
-              <motion.span key={x.code} title={`${STATE_LABEL[x.code]} ${fmt.pct(x.share * 100)}`} className="h-full origin-left" style={{ width: `${x.share * 100}%`, background: i < 3 ? "#c4c7ce" : "var(--slate-6)" }}
+              <motion.span key={x.code} title={`${STATE_LABEL[x.code]} ${fmt.pct(x.share * 100)}`} className="h-full origin-left" style={{ width: `${x.share * 100}%`, background: i < 3 ? STAGE.problem.base : "var(--slate-6)" }}
                 initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.2 + 0.02 * i, duration: 0.4, ease: EASE }} />
             ))}
           </div>
-          <p className="mt-1.5 truncate text-[11px] text-foreground/80">{names(s.shares.slice(0, 3).map((x) => x.code))}</p>
+          <p className="mt-1.5 truncate text-[11px]" style={{ color: STAGE.problem.soft }}>{names(s.shares.slice(0, 3).map((x) => x.code))}</p>
         </div>
       </Step>
 
-      <Step n={2} kicker="The opportunity" color="#3987e5" cue="Show potential" active={metric === "gap"} onClick={() => onMetric("gap")}>
+      <Step n={2} kicker="The opportunity" color={STAGE.opportunity.base} cue="Show potential" active={metric === "gap"} onClick={() => onMetric("gap")}>
         <Big><StatsCounter value={s.room / 1000} decimals={1} prefix="+" suffix="M" duration={0.9} /></Big>
         <Line>more visitors fit in the 5 most under-visited states before hotels fill up</Line>
         <div className="mt-auto flex flex-wrap gap-1 pt-3">
@@ -101,7 +101,7 @@ export function Story({ metric, onMetric }: { metric: string; onMetric: (m: Stor
         </div>
       </Step>
 
-      <Step n={3} kicker="The obstacle" color="#3987e5" cue="Show bottlenecks" active={metric === "bottleneck"} onClick={() => onMetric("bottleneck")}>
+      <Step n={3} kicker="The obstacle" color={STAGE.obstacle.base} cue="Show bottlenecks" active={metric === "bottleneck"} onClick={() => onMetric("bottleneck")}>
         <Big><StatsCounter value={s.held.length} duration={0.9} /><span className="text-[0.55em] font-medium text-muted-foreground"> of 16 states</span></Big>
         <Line>are held back by one weak link - and it is a different one in each</Line>
         <div className="mt-auto pt-3">
@@ -116,12 +116,12 @@ export function Story({ metric, onMetric }: { metric: string; onMetric: (m: Stor
         </div>
       </Step>
 
-      <Step n={4} kicker="The payoff" color="#3987e5" cue="Open simulator" last onClick={() => router.push("/simulator")}>
+      <Step n={4} kicker="The payoff" color={STAGE.payoff.base} cue="Open simulator" last onClick={() => router.push("/simulator")}>
         <Big><StatsCounter value={s.sim.moved_k / 1000} decimals={1} suffix="M" duration={0.9} /><span className="text-[0.55em] font-medium text-muted-foreground"> visitors moved</span></Big>
         <Line>if 10% of {STATE_LABEL[s.origin]}&apos;s trips went to {names(s.dests)}</Line>
         <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-3 text-[11px] text-muted-foreground">
-          <span>Concentration <b className="font-semibold text-foreground">{fmt.signed(giniChange, 1)}%</b></span>
-          <span>National spending <b className="font-semibold text-foreground">{s.sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(s.sim.net_national_rm_m))}</b></span>
+          <span>Concentration <b className="font-semibold" style={{ color: STAGE.payoff.soft }}>{fmt.signed(giniChange, 1)}%</b></span>
+          <span>National spending <b className="font-semibold" style={{ color: STAGE.payoff.soft }}>{s.sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(s.sim.net_national_rm_m))}</b></span>
         </div>
       </Step>
     </div>

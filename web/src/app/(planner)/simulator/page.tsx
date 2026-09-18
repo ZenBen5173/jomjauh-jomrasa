@@ -7,7 +7,7 @@ import { Card, Kpi, LorenzChart, Segmented } from "@/components/charts";
 import { Info } from "@/components/info";
 import { PageHeader, Stagger } from "@/components/shell";
 import { Legend, type Scale, StateMap } from "@/components/state-map";
-import { STATE_LABEL, STATE_NAME, fmt } from "@/lib/data";
+import { STAGE, STATE_LABEL, STATE_NAME, fmt } from "@/lib/data";
 import { lorenz, simulate } from "@/lib/metrics";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -54,12 +54,13 @@ export default function Simulator() {
   const maxChange = Math.max(...Object.values(change).map(Math.abs), 1);
   const afterVals = Object.fromEntries(sim.after.map((r) => [r.code, r.visitors_k as number]));
   const scale: Scale = view === "change"
-    ? { kind: "diverging", max: maxChange }
-    : { kind: "sequential", min: Math.min(...Object.values(afterVals)), max: Math.max(...Object.values(afterVals)) };
+    ? { kind: "diverging", max: maxChange, pos: STAGE.payoff.base, neg: STAGE.problem.base }
+    : { kind: "sequential", min: Math.min(...Object.values(afterVals)), max: Math.max(...Object.values(afterVals)), from: STAGE.payoff.deep, to: STAGE.payoff.pale };
   const maxMoved = Math.max(...sim.destinations.map((d) => d.moved_k), 1e-9);
 
   return (
-    <>
+    // the simulator is the payoff stage, so its controls wear the payoff colour
+    <div style={{ "--primary": STAGE.payoff.base, "--ring": STAGE.payoff.base } as React.CSSProperties}>
       <PageHeader title="What if some visitors went somewhere quieter?" />
 
       <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
@@ -177,7 +178,7 @@ export default function Simulator() {
                         </span>
                       </div>
                       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                        <motion.div className="h-full rounded-full" style={{ background: d.capped ? "#c4c7ce" : "#3987e5" }} animate={{ width: `${used * 100}%` }} transition={{ type: "spring", stiffness: 160, damping: 26 }} />
+                        <motion.div className="h-full rounded-full" style={{ background: d.capped ? "#c4c7ce" : STAGE.payoff.base }} animate={{ width: `${used * 100}%` }} transition={{ type: "spring", stiffness: 160, damping: 26 }} />
                       </div>
                       <p className="mt-1 text-[11px] text-muted-foreground">+{fmt.visitorsK(d.moved_k)} visitors · +{fmt.rmM(d.receipts_gained_rm_m)} receipts</p>
                     </div>
@@ -191,11 +192,11 @@ export default function Simulator() {
               </div>
             </Card>
             <Card title="Tourism gets more even" info={`Lorenz curve of visitors: grey is today, yellow is this scenario. Spending Gini ${sim.receipts_gini_before.toFixed(3)} to ${sim.receipts_gini_after.toFixed(3)}.`}>
-              <LorenzChart before={lorenz(rows.map((r) => r.visitors_k as number))} after={lorenz(sim.after.map((r) => r.visitors_k as number))} />
+              <LorenzChart color={STAGE.payoff.base} before={lorenz(rows.map((r) => r.visitors_k as number))} after={lorenz(sim.after.map((r) => r.visitors_k as number))} />
             </Card>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
