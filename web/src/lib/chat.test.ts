@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { EMPTY_PREFS, findState, langOf, respond, understandLocally } from "./chat";
+import { EMPTY_PREFS, findState, langOf, namedPlace, respond, understandLocally } from "./chat";
 import { JR } from "./jomrasa";
 import { gapTable, type Row } from "./metrics";
 
@@ -58,6 +58,12 @@ describe.skipIf(!JR.ready)("replies are built from the data", () => {
     expect([1, 2, 3, 4]).toContain(r.brief.quietQuarter);
     expect(r.brief.loved.length).toBeGreaterThan(0);
     expect(r.text).toMatch(/Terengganu/);
+  });
+  it("acknowledges the place the traveller named when it is not the state itself", () => {
+    const u = { intent: "about_state" as const, state: "KDH", topic: null, prefs: EMPTY_PREFS };
+    expect(respond(u, rows, gap, "en", "is Langkawi worth it for families?").text).toMatch(/^Langkawi is in Kedah/);
+    expect(respond(u, rows, gap, "en", "tell me about Kedah").text).toMatch(/^Kedah:/);
+    expect(namedPlace("what about KL", "KUL")).toBeNull();
   });
   it("anything else gets a helpful nudge, never an error", () => {
     const r = respond(understandLocally("hello", EMPTY_PREFS), rows, gap);

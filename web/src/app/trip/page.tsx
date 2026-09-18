@@ -57,7 +57,7 @@ export default function Trip() {
       }
     }
     if (u.intent === "recommend") setPrefs(u.prefs);
-    const reply = respond(u, rows, gap, langOf(t));
+    const reply = respond(u, rows, gap, langOf(t), t);
     setMsgs((m) => [...m, { id: Date.now() + 1, role: "assistant", reply, via }]);
     setBusy(false);
     input.current?.focus();

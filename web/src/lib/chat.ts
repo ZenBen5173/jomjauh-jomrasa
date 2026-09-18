@@ -57,6 +57,15 @@ export function findState(text: string): string | null {
   return null;
 }
 
+/** The place name the traveller actually typed (e.g. "Langkawi"), so the reply can acknowledge it. */
+export function namedPlace(text: string, code: string): string | null {
+  const hit = PLACE_TO_STATE.find(([, c]) => c === code)?.[0].exec(text)?.[0];
+  if (!hit || !/^[a-z0-9 ]+$/i.test(hit)) return null;                       // only Latin-script names
+  const name = STATE_NAME[code].replace("W.P. ", "").toLowerCase();
+  if (hit.toLowerCase() === name || hit.length <= 3) return null;               // the state itself, or an abbreviation like KL
+  return hit.split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+}
+
 /** Keyword fallback: same output shape as the model, no network. */
 export function understandLocally(text: string, prev: Prefs): Understanding {
   if (GREETING.test(text)) return { intent: "other", state: null, topic: null, prefs: prev };
@@ -113,15 +122,16 @@ export function brief(code: string, rows: Row[], topic: string | null, lang: str
 }
 
 /** Turn an understanding into a reply. Every number comes from the data passed in. */
-export function respond(u: Understanding, rows: Row[], gap: GapRow[], lang: string = "en"): Reply {
+export function respond(u: Understanding, rows: Row[], gap: GapRow[], lang: string = "en", asked: string = ""): Reply {
   if (u.intent === "about_state" && u.state) {
     const b = brief(u.state, rows, u.topic, lang);
     const name = STATE_NAME[u.state].replace("W.P. ", "");
-    const text = b.focus
-      ? `On ${TOPIC_LABEL[b.focus.topic].toLowerCase()} in ${name}: travellers rate it ${b.focus.sentiment.toFixed(0)}/100 across ${b.focus.n} mentions.`
-      : `${name}: travellers love its ${list(b.loved.slice(0, 2).map((t) => TOPIC_LABEL[t.topic].toLowerCase()))}` +
+    const place = namedPlace(asked, u.state);
+    const overview = `${name}: travellers love its ${list(b.loved.slice(0, 2).map((t) => TOPIC_LABEL[t.topic].toLowerCase()))}` +
         (b.gripes.length ? `; the most common gripe is ${TOPIC_LABEL[b.gripes[0].topic].toLowerCase()}.` : ".") +
         ` A typical visitor spends about RM ${Math.round(b.spend)}, and it is quietest in Q${b.quietQuarter}.`;
+    const text = (place ? `${place} is in ${name}, so this covers the whole state. ` : "")
+      + (b.focus ? `On ${TOPIC_LABEL[b.focus.topic].toLowerCase()}, travellers rate it ${b.focus.sentiment.toFixed(0)}/100 across ${b.focus.n} mentions. ` : "") + overview;
     return { kind: "state", text, brief: b, followUps: [`What about food in ${name}?`, `Somewhere like ${name} but quieter`, "Plan something cheaper"] };
   }
   if (u.intent === "recommend") {

@@ -52,7 +52,7 @@ export default function Methodology() {
     <>
       <PageHeader eyebrow="Methodology & data" title="Every number, where it comes from, and how it is used">
         One rerunnable Python pipeline (extract → transform → load → checks) produces every table behind this dashboard. 39 automated data checks and metric
-        tests must pass before export, and the dashboard&apos;s TypeScript calculations are tested (27 tests) against the Python reference results.
+        tests must pass before export, and the dashboard&apos;s TypeScript calculations are tested (28 tests) against the Python reference results.
       </PageHeader>
 
       <motion.div {...fade}>
