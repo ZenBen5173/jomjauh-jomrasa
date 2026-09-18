@@ -38,8 +38,10 @@ export const STATE_NAME: Record<string, string> = Object.fromEntries(first.map((
 export const STATE_LABEL: Record<string, string> = Object.fromEntries(first.map((r) => [r.code, r.label as string]));
 export const CODES = first.map((r) => r.code);
 
-/** Validated categorical slots (dataviz palette, dark steps) - fixed per pillar, never cycled. */
-export const PILLAR_COLOR: Record<string, string> = { Access: "#3987e5", Awareness: "#d95926", Amenities: "#199e70" };
+/** The planner uses one hue. Blue marks what to look at; greys carry the rest (GREY = the saturated / negative side). */
+export const BLUE = "#3987e5", GREY = "#9a9da6", LIGHT = "#c4c7ce";
+/** Three steps of the same blue - fixed per pillar, never cycled. */
+export const PILLAR_COLOR: Record<string, string> = { Access: "#b7d3f6", Awareness: "#3987e5", Amenities: "#24508a" };
 export const PILLAR_BLURB: Record<string, string> = {
   Access: "Hard to reach from where most travellers live",
   Awareness: "Few out-of-state or foreign travellers know to go",

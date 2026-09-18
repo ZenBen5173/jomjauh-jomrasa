@@ -22,7 +22,7 @@ export type Scale =
   | { kind: "sequential"; min: number; max: number }
   | { kind: "categorical"; colors: Record<string, string> };
 
-const NEUTRAL = "#383835", POS = "#3987e5", NEG = "#e66767";
+const NEUTRAL = "#383835", POS = "#3987e5", NEG = "#c4c7ce";
 const seq = interpolateRgb("#173a63", "#b7d3f6");
 
 export function colorFor(v: number | string | undefined, scale: Scale): string {
@@ -83,7 +83,7 @@ export function StateMap({
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: height }} role="img" aria-label="Map of Malaysian states">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="#ffc53d" />
+            <path d="M0,0 L10,5 L0,10 z" fill="#edeef0" />
           </marker>
         </defs>
         {paths.map((p, i) => {
@@ -123,7 +123,7 @@ export function StateMap({
               <motion.path
                 key={`${f.from}-${f.to}`}
                 d={`M${x1},${y1} Q${mx},${my} ${x2},${y2}`}
-                fill="none" stroke="#ffc53d" strokeLinecap="round" markerEnd="url(#arrow)" pointerEvents="none"
+                fill="none" stroke="#edeef0" strokeLinecap="round" markerEnd="url(#arrow)" pointerEvents="none"
                 initial={{ pathLength: 0, opacity: 0, strokeWidth: 1.5 }}
                 animate={{ pathLength: 1, opacity: 0.95, strokeWidth: 1.5 + 3 * f.weight }}
                 exit={{ opacity: 0 }}

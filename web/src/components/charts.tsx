@@ -12,12 +12,11 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 // ------------------------------------------------------------ KPI tile
 export function Kpi({
-  label, value, decimals = 0, prefix, suffix, note, delta, deltaGoodWhenNegative, info,
+  label, value, decimals = 0, prefix, suffix, note, delta, info,
 }: {
   label: string; value: number; decimals?: number; prefix?: string; suffix?: string; note?: string;
-  delta?: number | null; deltaGoodWhenNegative?: boolean; info?: React.ReactNode;
+  delta?: number | null; info?: React.ReactNode;
 }) {
-  const good = delta != null && (deltaGoodWhenNegative ? delta < 0 : delta > 0);
   return (
     <SpotlightCard className="h-full overflow-visible p-5">
       <p className="flex items-center gap-1 text-xs font-medium text-muted-foreground">{label}{info && <Info>{info}</Info>}</p>
@@ -26,7 +25,7 @@ export function Kpi({
       </p>
       <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
         {delta != null && Math.abs(delta) > 1e-9 && (
-          <span className={cn("rounded px-1.5 py-0.5 font-medium", good ? "bg-[var(--grass-4)] text-[var(--grass-11)]" : "bg-[var(--red-4)] text-[var(--red-11)]")}>
+          <span className="rounded bg-muted px-1.5 py-0.5 font-medium text-foreground">
             {delta > 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(decimals || 1)}{suffix ?? ""}
           </span>
         )}
@@ -56,11 +55,11 @@ export function LorenzChart({ before, after }: { before: { x: number[]; y: numbe
       <motion.path d={`${line(before)} L${px(1)},${py(0)} Z`} fill="#3987e5" opacity={0.12} initial={{ opacity: 0 }} animate={{ opacity: 0.12 }} />
       <motion.path d={line(before)} fill="none" stroke={after ? "var(--slate-9)" : "#3987e5"} strokeWidth={2} strokeLinejoin="round"
         initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, ease: EASE }} />
-      {after && <motion.path initial={{ d: line(after) }} animate={{ d: line(after) }} fill="none" stroke="#ffc53d" strokeWidth={2} strokeLinejoin="round" transition={{ duration: 0.4 }} />}
+      {after && <motion.path initial={{ d: line(after) }} animate={{ d: line(after) }} fill="none" stroke="#3987e5" strokeWidth={2} strokeLinejoin="round" transition={{ duration: 0.4 }} />}
       {cur.x.map((x, i) => i > 0 && (
         <g key={i} onPointerEnter={() => setHi(i)}>
           <rect x={px(x) - 7} y={P - 20} width={14} height={S - P} fill="transparent" />
-          <circle cx={px(x)} cy={py(cur.y[i])} r={hi === i ? 4 : 2} fill={after ? "#ffc53d" : "#3987e5"} stroke="var(--card)" strokeWidth={1.5} />
+          <circle cx={px(x)} cy={py(cur.y[i])} r={hi === i ? 4 : 2} fill="#3987e5" stroke="var(--card)" strokeWidth={1.5} />
         </g>
       ))}
       {hi != null && (
@@ -86,7 +85,7 @@ export function RankBars({
     <div className="flex flex-col">
       {rows.map((r, i) => {
         const w = (Math.abs(r.value) / m) * (diverging ? 50 : 100);
-        const fill = r.color ?? (diverging ? (r.value >= 0 ? "#3987e5" : "#e66767") : color);
+        const fill = r.color ?? (diverging ? (r.value >= 0 ? "#3987e5" : "#9a9da6") : color);
         return (
           <motion.button
             key={r.code} layout="position" onClick={() => onSelect?.(r.code)}
@@ -190,7 +189,7 @@ export function PillarBars({ scores, colors, bottleneck }: { scores: Record<stri
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-sm" style={{ background: colors[k] }} />{k}
               {k === bottleneck && (v < 50
-                ? <span className="rounded bg-[var(--amber-4)] px-1.5 py-px text-[10px] font-medium text-[var(--amber-11)]">⚠ main bottleneck</span>
+                ? <span className="rounded bg-[#3987e5]/20 px-1.5 py-px text-[10px] font-medium text-[#86b6ef]">⚠ main bottleneck</span>
                 : <span className="rounded bg-muted px-1.5 py-px text-[10px] text-muted-foreground">weakest, but above median</span>)}
             </span>
             <span className="font-medium tabular-nums">{v.toFixed(0)}</span>

@@ -49,7 +49,7 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
   return (
     <svg viewBox={`0 0 ${S} ${S}`} className="mx-auto w-full max-w-[460px]">
       <polygon points={`${px(0)},${py(0)} ${px(100)},${py(100)} ${px(0)},${py(100)}`} fill="#3987e5" opacity={0.07} />
-      <polygon points={`${px(0)},${py(0)} ${px(100)},${py(100)} ${px(100)},${py(0)}`} fill="#e66767" opacity={0.06} />
+      <polygon points={`${px(0)},${py(0)} ${px(100)},${py(100)} ${px(100)},${py(0)}`} fill="#9a9da6" opacity={0.06} />
       {[0, 25, 50, 75, 100].map((t) => (
         <g key={t}>
           <line x1={px(0)} x2={px(100)} y1={py(t)} y2={py(t)} stroke="var(--slate-4)" />
@@ -60,7 +60,7 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
       ))}
       <line x1={px(0)} y1={py(0)} x2={px(100)} y2={py(100)} stroke="var(--slate-8)" strokeDasharray="3 3" />
       <text x={px(3)} y={py(94)} className="fill-[#6da7ec] text-[9px] font-medium">UNDER-VISITED</text>
-      <text x={px(97)} y={py(4)} textAnchor="end" className="fill-[#e66767] text-[9px] font-medium">SATURATED</text>
+      <text x={px(97)} y={py(4)} textAnchor="end" className="fill-[#9a9da6] text-[9px] font-medium">SATURATED</text>
       <text x={px(50)} y={S - 4} textAnchor="middle" className="fill-[var(--slate-10)] text-[9px]">How visited it is →</text>
       <text transform={`translate(10 ${py(50)}) rotate(-90)`} textAnchor="middle" className="fill-[var(--slate-10)] text-[9px]">What it can offer →</text>
       {points.map((p, i) => {
@@ -69,7 +69,7 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
           <motion.g key={p.code} initial={{ opacity: 0 }} animate={{ opacity: 1, x: px(p.x), y: py(p.y) }} transition={{ delay: 0.03 * i, type: "spring", stiffness: 160, damping: 26 }}
             onPointerEnter={() => setHover(p.code)} onPointerLeave={() => setHover(null)} onClick={() => onSelect(p.code)} style={{ cursor: "pointer" }}>
             <circle r={12} fill="transparent" />
-            <motion.circle r={5} initial={false} animate={{ r: on ? 7 : 5 }} fill={p.y >= p.x ? "#3987e5" : "#e66767"} stroke="var(--card)" strokeWidth={2} />
+            <motion.circle r={5} initial={false} animate={{ r: on ? 7 : 5 }} fill={p.y >= p.x ? "#3987e5" : "#9a9da6"} stroke="var(--card)" strokeWidth={2} />
             <text x={lay.left[p.code] ? -9 : 9} y={3 + (on ? 0 : lay.dy[p.code])} textAnchor={lay.left[p.code] ? "end" : "start"} stroke="var(--background)" strokeWidth={on ? 3 : 0} paintOrder="stroke"
               className={cn(on ? "fill-[var(--slate-12)] text-[10px] font-semibold" : "fill-[var(--slate-11)] text-[8px]")}>{on ? STATE_LABEL[p.code] : p.code}</text>
           </motion.g>
@@ -99,7 +99,7 @@ export function WeightsSheet({ open, onClose }: { open: boolean; onClose: () => 
       </div>
       <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#6da7ec]">What a state can offer</p>
       <Sliders inds={usedP} weights={weightsP} onChange={setWeightsP} />
-      <p className="mb-2 mt-5 text-[11px] font-medium uppercase tracking-wider text-[#e66767]">How visited it already is</p>
+      <p className="mb-2 mt-5 text-[11px] font-medium uppercase tracking-wider text-[#9a9da6]">How visited it already is</p>
       <Sliders inds={usedA} weights={weightsA} onChange={setWeightsA} />
 
       <h3 className="mb-2 mt-7 flex items-center gap-1.5 text-sm font-semibold">Offer vs visits

@@ -88,8 +88,8 @@ export default function Simulator() {
               )}
             </div>
 
-            <div className="space-y-4 rounded-xl border border-dashed border-[var(--amber-7)] p-3">
-              <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-[var(--amber-11)]">Assumptions
+            <div className="space-y-4 rounded-xl border border-dashed border-border p-3">
+              <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Assumptions
                 <Info>These are your assumptions, not measurements. Target occupancy is the ceiling hotels may run at; guests per room converts visitors into rooms; the economic multiplier (off by default) uses the Malaysian input-output range 1.20-1.82, mean 1.42 (Mazumder et al. 2009).</Info></p>
               <Slider label="Target hotel occupancy (ceiling)" value={assumptions.target_occupancy_pct} min={50} max={90} step={1}
                 onChange={(v) => setAssumptions({ ...assumptions, target_occupancy_pct: v })} format={(v) => `${v}%`} />
@@ -122,8 +122,8 @@ export default function Simulator() {
           <AnimatePresence>
             {sim.capacity_binds && (
               <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                className="flex items-start gap-2.5 rounded-xl border border-[var(--amber-7)] bg-[var(--amber-3)] px-4 py-3 text-xs text-[var(--amber-12)]">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--amber-9)]" />
+                className="flex items-start gap-2.5 rounded-xl border border-foreground/25 bg-muted px-4 py-3 text-xs text-foreground">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-foreground" />
                 <p>
                   <span className="font-semibold">Capacity Limit reached.</span> You asked to move {fmt.visitorsK(sim.requested_k)} visitors, but only{" "}
                   {fmt.visitorsK(sim.moved_k)} fit before {sim.destinations.filter((d) => d.capped).map((d) => STATE_LABEL[d.code]).join(", ")}{" "}
@@ -139,7 +139,7 @@ export default function Simulator() {
               note={multOn ? `incl. ×${a.multiplier.toFixed(2)} multiplier (assumption)` : "at destination spend / visitor"} />
             <Kpi label={`Receipts lost by ${STATE_LABEL[origin]}`} {...rm(sim.receipts_lost_rm_m)} note="at origin spend / visitor" />
             <Kpi label="Gini of visitors, after" value={sim.concentration_after.gini} decimals={3}
-              delta={sim.concentration_after.gini - sim.concentration_before.gini} deltaGoodWhenNegative note={`from ${sim.concentration_before.gini.toFixed(3)}`} />
+              delta={sim.concentration_after.gini - sim.concentration_before.gini} note={`from ${sim.concentration_before.gini.toFixed(3)}`} />
           </Stagger>
 
           <div className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-muted-foreground">
@@ -171,13 +171,13 @@ export default function Simulator() {
                   return (
                     <div key={d.code}>
                       <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-xs">
-                        <span className="font-medium">{STATE_NAME[d.code]} {d.capped && <span className="ml-1 rounded bg-[var(--amber-4)] px-1.5 py-px text-[10px] text-[var(--amber-11)]">{sim.capacity_binds ? "at capacity" : "at capacity · overflow sent to the others"}</span>}</span>
+                        <span className="font-medium">{STATE_NAME[d.code]} {d.capped && <span className="ml-1 rounded bg-foreground/15 px-1.5 py-px text-[10px] text-foreground">{sim.capacity_binds ? "at capacity" : "at capacity · overflow sent to the others"}</span>}</span>
                         <span className="tabular-nums text-muted-foreground">
                           {fmt.int(d.room_nights_needed)} needed of {fmt.int(d.spare_room_nights)} spare · occupancy {fmt.pct(d.occupancy_before_pct)} → <span className="font-medium text-foreground">{fmt.pct(d.occupancy_after_pct)}</span>
                         </span>
                       </div>
                       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                        <motion.div className="h-full rounded-full" style={{ background: d.capped ? "#ffc53d" : "#3987e5" }} animate={{ width: `${used * 100}%` }} transition={{ type: "spring", stiffness: 160, damping: 26 }} />
+                        <motion.div className="h-full rounded-full" style={{ background: d.capped ? "#c4c7ce" : "#3987e5" }} animate={{ width: `${used * 100}%` }} transition={{ type: "spring", stiffness: 160, damping: 26 }} />
                       </div>
                       <p className="mt-1 text-[11px] text-muted-foreground">+{fmt.visitorsK(d.moved_k)} visitors · +{fmt.rmM(d.receipts_gained_rm_m)} receipts</p>
                     </div>

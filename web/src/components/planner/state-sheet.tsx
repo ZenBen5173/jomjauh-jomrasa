@@ -71,7 +71,7 @@ export function StateSheet({ code, open, onClose }: { code: string; open: boolea
 
       <Block title={`Quietest in Q${quiet.k} - hotels ${fmt.pct(quiet.mean, 0)} full`} info="Average hotel occupancy by quarter, Tourism Malaysia Paid Accommodation Survey. The quietest quarter (2023-2025 average) is the natural window for campaigns.">
         <LineChart years={q.map((d) => `Q${d.quarter} ${String(d.year).slice(2)}`)} format={(v) => `${v.toFixed(0)}%`} height={170}
-          series={[{ id: "occ", label: "Occupancy", color: "#199e70", values: q.map((d) => d.occupancy_pct) }]} />
+          series={[{ id: "occ", label: "Occupancy", color: "#3987e5", values: q.map((d) => d.occupancy_pct) }]} />
       </Block>
 
       <Block title={`${fmt.pct(n("out_of_state_share_pct"), 0)} of its tourists come from other states`} info={`Overnight tourists by state of origin, DOSM Domestic Tourism Survey Table 10 (${n("od_year")}). The grey bar is the state's own residents.`}>
@@ -86,7 +86,7 @@ export function StateSheet({ code, open, onClose }: { code: string; open: boolea
                 <span className="truncate text-muted-foreground">{TOPIC_LABEL[t.topic]}</span>
                 <span className="relative h-3 overflow-hidden rounded-[4px] bg-muted">
                   <motion.span className="absolute inset-y-0 left-0 rounded-[4px]" initial={{ width: 0 }} animate={{ width: `${(t.n / maxN) * 100}%` }} transition={{ duration: 0.6, ease: EASE }}
-                    style={{ background: t.sentiment >= 50 ? `color-mix(in oklab, #3987e5 ${40 + (t.sentiment - 50) * 1.2}%, #383835)` : `color-mix(in oklab, #e66767 ${40 + (50 - t.sentiment) * 1.2}%, #383835)` }} />
+                    style={{ background: t.sentiment >= 50 ? `color-mix(in oklab, #3987e5 ${40 + (t.sentiment - 50) * 1.2}%, #383835)` : `color-mix(in oklab, #c4c7ce ${40 + (50 - t.sentiment) * 1.2}%, #383835)` }} />
                 </span>
                 <span className="text-right tabular-nums">{t.sentiment.toFixed(0)}</span>
               </div>

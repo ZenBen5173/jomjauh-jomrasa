@@ -41,13 +41,13 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
               <h2 className="text-lg font-semibold tracking-tight">{STATE_NAME[code]}</h2>
               <p className="text-xs text-muted-foreground">{fmt.visitorsK(r.visitors_k as number)} visitors · {fmt.pct(r.visitor_share_pct as number)} of Malaysia</p>
             </div>
-            <span className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold tabular-nums" style={{ background: g.gap >= 0 ? "rgba(57,135,229,0.18)" : "rgba(230,103,103,0.18)", color: g.gap >= 0 ? "#86b6ef" : "#f0a3a3" }}>
+            <span className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold tabular-nums" style={{ background: g.gap >= 0 ? "rgba(57,135,229,0.18)" : "rgba(154,157,166,0.18)", color: g.gap >= 0 ? "#86b6ef" : "#c4c7ce" }}>
               Opportunity {fmt.signed(g.gap, 0)} · #{g.gap_rank}
             </span>
           </div>
 
           <div className="mt-4 space-y-2">
-            {([["What it can offer", g.potential, "#3987e5"], ["How visited it is", g.actual, "#e66767"]] as const).map(([label, v, c]) => (
+            {([["What it can offer", g.potential, "#3987e5"], ["How visited it is", g.actual, "#9a9da6"]] as const).map(([label, v, c]) => (
               <div key={label}>
                 <div className="mb-1 flex justify-between text-xs"><span className="text-muted-foreground">{label}</span><span className="font-medium tabular-nums">{v.toFixed(0)}</span></div>
                 <Bar value={v} color={c} />
@@ -66,7 +66,7 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
                   <div className="mb-1 flex items-center justify-between text-xs">
                     <span className="flex items-center gap-1.5">
                       <span className="size-2 rounded-sm" style={{ background: PILLAR_COLOR[k] }} />{k}
-                      {k === p.bottleneck && binding && <span className="rounded bg-[var(--amber-4)] px-1.5 py-px text-[10px] font-medium text-[var(--amber-11)]">bottleneck</span>}
+                      {k === p.bottleneck && binding && <span className="rounded bg-[#3987e5]/20 px-1.5 py-px text-[10px] font-medium text-[#86b6ef]">bottleneck</span>}
                     </span>
                     <span className="font-medium tabular-nums">{v.toFixed(0)}</span>
                   </div>

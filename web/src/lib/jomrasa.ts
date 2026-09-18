@@ -26,8 +26,8 @@ export const TOPIC_LABEL: Record<string, string> = {
   safety: "Safety", activities: "Activities", hospitality_service: "Hospitality & service",
 };
 
-/** Emotions are identities, so they get fixed categorical slots (validated dark palette + neutral grey). */
+/** One hue: good feelings are steps of blue, bad ones steps of grey. */
 export const EMOTION_COLOR: Record<string, string> = {
-  joy: "#c98500", calm: "#199e70", surprise: "#9085e9", trust: "#3987e5",
-  disappointment: "#d55181", frustration: "#e66767", fear: "#d95926", neutral: "#5a6169",
+  joy: "#3987e5", calm: "#86b6ef", surprise: "#b7d3f6", trust: "#24508a",
+  disappointment: "#9a9da6", frustration: "#6e727b", fear: "#c4c7ce", neutral: "#4a4d55",
 };

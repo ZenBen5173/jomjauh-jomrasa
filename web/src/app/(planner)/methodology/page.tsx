@@ -107,7 +107,7 @@ export default function Methodology() {
       <motion.div {...fade} className="mt-4">
         <Card title="Assumptions and limitations">
           <ul className="space-y-2">
-            {LIMITS.map((l) => <li key={l} className="flex gap-2 text-xs leading-relaxed text-muted-foreground"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-[var(--amber-9)]" />{l}</li>)}
+            {LIMITS.map((l) => <li key={l} className="flex gap-2 text-xs leading-relaxed text-muted-foreground"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-[#3987e5]" />{l}</li>)}
           </ul>
         </Card>
       </motion.div>

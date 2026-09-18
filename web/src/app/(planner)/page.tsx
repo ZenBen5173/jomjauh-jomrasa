@@ -36,7 +36,7 @@ function Stat({ label, value, decimals, prefix, suffix, delta, info }: { label: 
       <dt className="flex items-center gap-1 text-[11px] text-muted-foreground">{label}<Info align="right">{info}</Info></dt>
       <dd className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap text-lg font-semibold tabular-nums tracking-tight">
         <StatsCounter value={value} decimals={decimals} prefix={prefix} suffix={suffix} duration={0.9} />
-        {delta != null && Math.abs(delta) > 1e-9 && <span className={cn("text-[11px] font-medium", delta < 0 ? "text-[var(--grass-11)]" : "text-[var(--red-11)]")}>{delta > 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(3)}</span>}
+        {delta != null && Math.abs(delta) > 1e-9 && <span className="text-[11px] font-medium text-muted-foreground">{delta > 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(3)}</span>}
       </dd>
     </div>
   );
@@ -155,8 +155,8 @@ export default function Dashboard() {
                   <motion.button key={g.code} onClick={() => setSelected(g.code)} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.02 * i, duration: 0.35, ease: EASE }}
                     className={cn("flex items-center justify-between rounded-md px-1.5 py-[5px] text-left text-xs transition-colors hover:bg-accent/60", sel === g.code && "bg-accent")}>
                     <span className="text-muted-foreground">{STATE_LABEL[g.code]}</span>
-                    <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={binding ? { background: PILLAR_COLOR[p.bottleneck], color: "#fff" } : { background: "var(--muted)", color: "var(--muted-foreground)" }}>
-                      {binding ? p.bottleneck : "none"}
+                    <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: "var(--muted)", color: binding ? "var(--foreground)" : "var(--muted-foreground)" }}>
+                      {binding && <span className="mr-1.5 inline-block size-1.5 rounded-full align-middle" style={{ background: PILLAR_COLOR[p.bottleneck] }} />}{binding ? p.bottleneck : "none"}
                     </span>
                   </motion.button>
                 );
