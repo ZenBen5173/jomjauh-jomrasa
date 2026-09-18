@@ -40,7 +40,7 @@ export function SpotlightCard({
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-300"
         style={{
           opacity: visible ? 1 : 0,
           background: `radial-gradient(340px circle at ${pos.x}px ${pos.y}px, ${glow}, transparent 70%)`,

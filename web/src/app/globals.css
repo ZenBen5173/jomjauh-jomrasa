@@ -232,6 +232,37 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* The planner dashboard is a dark section inside a light document (the traveller app is light).
+   Custom properties that reference other variables are resolved where they are DECLARED, so the
+   semantic tokens must be declared again inside .dark to pick up the dark Radix scales. */
+.dark {
+  color-scheme: dark;
+  --background: var(--slate-1);
+  --foreground: var(--slate-12);
+  --card: var(--slate-2);
+  --card-foreground: var(--slate-12);
+  --popover: var(--slate-3);
+  --popover-foreground: var(--slate-12);
+  --primary: var(--indigo-9);
+  --primary-foreground: white;
+  --secondary: var(--slate-4);
+  --secondary-foreground: var(--slate-12);
+  --muted: var(--slate-3);
+  --muted-foreground: var(--slate-11);
+  --accent: var(--slate-4);
+  --accent-foreground: var(--slate-12);
+  --destructive: var(--red-9);
+  --destructive-foreground: white;
+  --border: var(--slate-6);
+  --input: var(--slate-7);
+  --ring: var(--indigo-8);
+  --sidebar: var(--slate-2);
+  --sidebar-foreground: var(--slate-12);
+  --sidebar-accent: var(--slate-4);
+  --sidebar-border: var(--slate-6);
+}
+.dark * { border-color: var(--border); }
+
 /* JomJauh data colours (on top of the library's Radix-scale tokens) */
 :root {
   --teal: #12a594;

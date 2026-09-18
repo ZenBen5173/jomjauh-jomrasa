@@ -104,15 +104,16 @@ export function recommend(prefs: Prefs, rows: Row[], gap: GapRow[], labels: Reco
     const places = JR.places.filter((p) => p.code === r.code)
       .map((p) => ({ p, s: (p.tags.filter((t) => wantedTopics.includes(t)).length + p.praised_for.filter((t) => wantedTopics.includes(t)).length) * 20 + p.sentiment * 0.4 + Math.log1p(p.mentions) * 6 }))
       .filter((x) => x.s > 45).sort((a, b) => b.s - a.s).slice(0, 4).map((x) => x.p);
-    const quotes = JR.quotes.filter((q) => q.code === r.code && q.overall > 0 && q.topics.some((t) => wantedTopics.includes(t))).slice(0, 2);
+    const quotes = JR.quotes.filter((q) => q.code === r.code && q.overall > 0 && q.topics.some((t) => wantedTopics.includes(t))).slice(0, 6);
 
     const best = wanted.map(([t]) => ({ t, v: JR.topics.find((k) => k.code === r.code && k.topic === t) })).filter((x) => x.v && x.v.n >= 3)
       .sort((a, b) => b.v!.sentiment - a.v!.sentiment)[0];
+    // plain language: these are read by travellers, not analysts
     const reasons = [
-      best ? `Travellers rate its ${topicLabel[best.t].toLowerCase()} ${best.v!.sentiment.toFixed(0)}/100 across ${best.v!.n} mentions` : null,
-      `${(r.visitors_per_resident as number).toFixed(1)} visitors per resident - ${g.actual < 45 ? "among the quietest in Malaysia" : g.actual < 60 ? "moderately visited" : "one of the busier states"} (Gap rank #${g.gap_rank})`,
-      `Visitors spend about RM ${Math.round(r.spend_per_visitor_rm as number)} per trip${prefs.budget === "low" && spend[i] < 40 ? " - easy on the budget" : ""}`,
-      `Hotels ${(r.occupancy_pct as number).toFixed(0)}% full on average, so rooms are ${(r.occupancy_pct as number) < 50 ? "easy" : "usually possible"} to find`,
+      best ? `Travellers rate its ${topicLabel[best.t].toLowerCase()} ${best.v!.sentiment.toFixed(0)}/100` : null,
+      g.actual < 45 ? "One of the quietest states in Malaysia" : g.actual < 60 ? "Moderately busy - quieter than the big names" : "One of the busier states, so expect company",
+      `Visitors spend about RM ${Math.round(r.spend_per_visitor_rm as number)} a trip${spend[i] < 40 ? " - easy on the budget" : spend[i] > 70 ? " - on the pricier side" : ""}`,
+      (r.occupancy_pct as number) < 50 ? "Rooms are easy to find" : null,
     ].filter(Boolean) as string[];
     return { code: r.code, score, parts, reasons, places, quotes };
   }).sort((a, b) => b.score - a.score);

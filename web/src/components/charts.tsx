@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import StatsCounter from "@/components/ui/stats-counter";
+import { Info } from "@/components/info";
 import { SpotlightCard } from "@/components/spotlight-card";
 import { STATE_LABEL } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -11,15 +12,15 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 // ------------------------------------------------------------ KPI tile
 export function Kpi({
-  label, value, decimals = 0, prefix, suffix, note, delta, deltaGoodWhenNegative,
+  label, value, decimals = 0, prefix, suffix, note, delta, deltaGoodWhenNegative, info,
 }: {
   label: string; value: number; decimals?: number; prefix?: string; suffix?: string; note?: string;
-  delta?: number | null; deltaGoodWhenNegative?: boolean;
+  delta?: number | null; deltaGoodWhenNegative?: boolean; info?: React.ReactNode;
 }) {
   const good = delta != null && (deltaGoodWhenNegative ? delta < 0 : delta > 0);
   return (
-    <SpotlightCard className="h-full p-5">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+    <SpotlightCard className="h-full overflow-visible p-5">
+      <p className="flex items-center gap-1 text-xs font-medium text-muted-foreground">{label}{info && <Info>{info}</Info>}</p>
       <p className="mt-2 whitespace-nowrap text-[clamp(1.35rem,2.1vw,1.875rem)] font-semibold leading-tight tracking-tight">
         <StatsCounter value={value} decimals={decimals} prefix={prefix} suffix={suffix} duration={0.9} />
       </p>
@@ -206,12 +207,12 @@ export function PillarBars({ scores, colors, bottleneck }: { scores: Record<stri
   );
 }
 
-export function Card({ title, right, children, className }: { title?: string; right?: React.ReactNode; children: React.ReactNode; className?: string }) {
+export function Card({ title, info, right, children, className }: { title?: React.ReactNode; info?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
     <section className={cn("min-w-0 rounded-2xl border border-border bg-card p-5", className)}>
       {(title || right) && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          {title && <h2 className="text-sm font-semibold">{title}</h2>}
+          {title && <h2 className="flex items-center gap-1.5 text-sm font-semibold">{title}{info && <Info>{info}</Info>}</h2>}
           {right}
         </div>
       )}

@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Card, Kpi, LorenzChart, Segmented } from "@/components/charts";
-import { PageHeader, SourceNote, Stagger } from "@/components/shell";
+import { Info } from "@/components/info";
+import { PageHeader, Stagger } from "@/components/shell";
 import { Legend, type Scale, StateMap } from "@/components/state-map";
 import { STATE_LABEL, STATE_NAME, fmt } from "@/lib/data";
 import { lorenz, simulate } from "@/lib/metrics";
@@ -31,11 +32,11 @@ function Slider({ label, value, min, max, step, onChange, format, hint }: {
 const rm = (m: number) => (m >= 1000 ? { value: m / 1000, decimals: 2, prefix: "RM ", suffix: "bn" } : { value: m, decimals: 0, prefix: "RM ", suffix: "M" });
 
 export default function Simulator() {
-  const { rows, gap, assumptions, setAssumptions, year } = useStore();
+  const { rows, gap, assumptions, setAssumptions, year, selected } = useStore();
   const ranked = useMemo(() => [...gap].sort((a, b) => b.gap - a.gap).map((g) => g.code), [gap]);
   const [origin, setOrigin] = useState("SGR");
   const [mode, setMode] = useState<"one" | "top">("one");
-  const [dest, setDest] = useState("TRG");
+  const [dest, setDest] = useState(selected && selected !== "SGR" ? selected : "TRG");
   const [topN, setTopN] = useState(3);
   const [share, setShare] = useState(5);
   const [multOn, setMultOn] = useState(false);
@@ -59,10 +60,7 @@ export default function Simulator() {
 
   return (
     <>
-      <PageHeader eyebrow={`Visitor Simulator · base year ${year}`} title="What if some visitors went somewhere quieter?">
-        A what-if calculator, not a forecast. Pick a crowded state, a share of its visitors to redirect, and where they go. The Capacity Limit
-        stops the scenario once the destination&apos;s hotels would pass the occupancy ceiling.
-      </PageHeader>
+      <PageHeader title="What if some visitors went somewhere quieter?" />
 
       <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
         <Card title="Scenario" className="self-start xl:sticky xl:top-6">
@@ -91,7 +89,8 @@ export default function Simulator() {
             </div>
 
             <div className="space-y-4 rounded-xl border border-dashed border-[var(--amber-7)] p-3">
-              <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--amber-11)]"><Info className="size-3.5" />Assumptions</p>
+              <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-[var(--amber-11)]">Assumptions
+                <Info>These are your assumptions, not measurements. Target occupancy is the ceiling hotels may run at; guests per room converts visitors into rooms; the economic multiplier (off by default) uses the Malaysian input-output range 1.20-1.82, mean 1.42 (Mazumder et al. 2009).</Info></p>
               <Slider label="Target hotel occupancy (ceiling)" value={assumptions.target_occupancy_pct} min={50} max={90} step={1}
                 onChange={(v) => setAssumptions({ ...assumptions, target_occupancy_pct: v })} format={(v) => `${v}%`} />
               <Slider label="Guests per room" value={assumptions.guests_per_room} min={1} max={3} step={0.1}
@@ -109,7 +108,7 @@ export default function Simulator() {
                       <div className="pt-3">
                         <Slider label="Output multiplier" value={a.multiplier} min={1.2} max={1.82} step={0.01}
                           onChange={(v) => setAssumptions({ ...assumptions, multiplier: v })} format={(v) => `×${v.toFixed(2)}`}
-                          hint="Malaysia input-output tourism multipliers: 1.20 (shopping) to 1.82 (food & beverage), mean 1.42 - Mazumder et al. (2009). An assumption, off by default." />
+                          />
                       </div>
                     </motion.div>
                   )}
@@ -143,13 +142,13 @@ export default function Simulator() {
               delta={sim.concentration_after.gini - sim.concentration_before.gini} deltaGoodWhenNegative note={`from ${sim.concentration_before.gini.toFixed(3)}`} />
           </Stagger>
 
-          <div className="rounded-xl border border-border bg-card px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-            <span className="font-medium text-foreground">Net national effect: {sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(sim.net_national_rm_m))}.</span>{" "}
-            This is rebalancing, not new money: the same visitors spend in a different place. The small net figure comes only from the difference in
-            spend per visitor between the two states.
+          <div className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Net effect for Malaysia: {sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(sim.net_national_rm_m))}</span>
+            <span>- this is rebalancing, not new money</span>
+            <Info>The same visitors spend in a different place, so the national total barely moves. The small net figure comes only from the difference in spend per visitor between the two states.</Info>
           </div>
 
-          <Card title="The scenario on the map" right={<Segmented id="simview" value={view} onChange={setView} options={[{ value: "change", label: "% change in visitors" }, { value: "after", label: "Visitors after" }]} />}>
+          <Card title="Who gains, who loses" right={<Segmented id="simview" value={view} onChange={setView} options={[{ value: "change", label: "% change in visitors" }, { value: "after", label: "Visitors after" }]} />}>
             <StateMap
               values={view === "change" ? change : afterVals} scale={scale}
               flows={sim.destinations.filter((d) => d.moved_k > 0).map((d) => ({ from: origin, to: d.code, weight: d.moved_k / maxMoved }))}
@@ -165,7 +164,7 @@ export default function Simulator() {
           </Card>
 
           <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-            <Card title="Can the destinations absorb them? Room-nights needed vs spare">
+            <Card title="Can the destinations absorb them?" info={`Spare room-nights = rooms x 365 x (target - current occupancy), Tourism Malaysia Paid Accommodation Survey ${year}. Only overnight visitors in paid accommodation need rooms (DOSM tourist / day-tripper split and accommodation type). Redirected visitors are assumed to behave like the destination average.`}>
               <div className="space-y-4">
                 {sim.destinations.map((d) => {
                   const used = d.spare_room_nights > 0 ? Math.min(d.room_nights_needed / d.spare_room_nights, 1) : 1;
@@ -190,14 +189,9 @@ export default function Simulator() {
                   {fmt.int(sim.origin.room_nights_freed)} room-nights freed (occupancy {fmt.pct(sim.origin.occupancy_before_pct)} → {fmt.pct(sim.origin.occupancy_after_pct)}).
                 </div>
               </div>
-              <SourceNote>
-                Spare room-nights = rooms × 365 × (target − current occupancy), Tourism Malaysia Paid Accommodation Survey {year}. Only overnight visitors in paid
-                accommodation need rooms (DOSM tourist / excursionist split and accommodation type); redirected visitors are assumed to behave like the destination&apos;s average visitor.
-              </SourceNote>
             </Card>
-            <Card title="Lorenz curve, before → after">
+            <Card title="Tourism gets more even" info={`Lorenz curve of visitors: grey is today, yellow is this scenario. Spending Gini ${sim.receipts_gini_before.toFixed(3)} to ${sim.receipts_gini_after.toFixed(3)}.`}>
               <LorenzChart before={lorenz(rows.map((r) => r.visitors_k as number))} after={lorenz(sim.after.map((r) => r.visitors_k as number))} />
-              <SourceNote>Grey: today. Yellow: this scenario. Receipts Gini {sim.receipts_gini_before.toFixed(3)} → {sim.receipts_gini_after.toFixed(3)}.</SourceNote>
             </Card>
           </div>
         </div>
