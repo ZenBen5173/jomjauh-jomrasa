@@ -124,7 +124,7 @@ export function StateMap({
                 key={`${f.from}-${f.to}`}
                 d={`M${x1},${y1} Q${mx},${my} ${x2},${y2}`}
                 fill="none" stroke="#ffc53d" strokeLinecap="round" markerEnd="url(#arrow)" pointerEvents="none"
-                initial={{ pathLength: 0, opacity: 0 }}
+                initial={{ pathLength: 0, opacity: 0, strokeWidth: 1.5 }}
                 animate={{ pathLength: 1, opacity: 0.95, strokeWidth: 1.5 + 3 * f.weight }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}

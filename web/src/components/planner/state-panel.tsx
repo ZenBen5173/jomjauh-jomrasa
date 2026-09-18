@@ -42,7 +42,7 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
               <p className="text-xs text-muted-foreground">{fmt.visitorsK(r.visitors_k as number)} visitors · {fmt.pct(r.visitor_share_pct as number)} of Malaysia</p>
             </div>
             <span className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold tabular-nums" style={{ background: g.gap >= 0 ? "rgba(57,135,229,0.18)" : "rgba(230,103,103,0.18)", color: g.gap >= 0 ? "#86b6ef" : "#f0a3a3" }}>
-              Gap {fmt.signed(g.gap, 0)} · #{g.gap_rank}
+              Opportunity {fmt.signed(g.gap, 0)} · #{g.gap_rank}
             </span>
           </div>
 

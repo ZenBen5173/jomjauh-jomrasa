@@ -56,7 +56,7 @@ export function LorenzChart({ before, after }: { before: { x: number[]; y: numbe
       <motion.path d={`${line(before)} L${px(1)},${py(0)} Z`} fill="#3987e5" opacity={0.12} initial={{ opacity: 0 }} animate={{ opacity: 0.12 }} />
       <motion.path d={line(before)} fill="none" stroke={after ? "var(--slate-9)" : "#3987e5"} strokeWidth={2} strokeLinejoin="round"
         initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, ease: EASE }} />
-      {after && <motion.path animate={{ d: line(after) }} fill="none" stroke="#ffc53d" strokeWidth={2} strokeLinejoin="round" transition={{ duration: 0.4 }} />}
+      {after && <motion.path initial={{ d: line(after) }} animate={{ d: line(after) }} fill="none" stroke="#ffc53d" strokeWidth={2} strokeLinejoin="round" transition={{ duration: 0.4 }} />}
       {cur.x.map((x, i) => i > 0 && (
         <g key={i} onPointerEnter={() => setHi(i)}>
           <rect x={px(x) - 7} y={P - 20} width={14} height={S - P} fill="transparent" />

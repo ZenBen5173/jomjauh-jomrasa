@@ -26,6 +26,9 @@ export function SpotlightCard({
     <div
       ref={ref}
       onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onClick(); } } : undefined}
       onMouseMove={(e) => {
         const rect = ref.current?.getBoundingClientRect();
         if (rect) setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -34,7 +37,7 @@ export function SpotlightCard({
       onMouseLeave={() => setVisible(false)}
       className={cn(
         "group relative overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-300 hover:border-foreground/20",
-        onClick && "cursor-pointer",
+        onClick && "cursor-pointer outline-none focus-visible:border-primary",
         className,
       )}
     >

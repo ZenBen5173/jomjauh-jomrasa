@@ -1,17 +1,21 @@
 "use client";
 
 /**
- * The planner dashboard: one screen. Headline numbers on top; a ranked list, the map and the
- * selected state side by side, all driven by the same metric and the same selection; three
- * findings underneath. Analyst tools and full profiles slide in instead of being separate pages.
+ * The planner dashboard, in an executive layout: the question and headline numbers on top; the
+ * argument in four steps (problem, opportunity, obstacle, payoff); then a ranked list, the map
+ * and the selected state side by side, all driven by the same metric and the same selection;
+ * the evidence underneath. Analyst tools and full profiles slide in instead of being separate pages.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { SlidersHorizontal } from "lucide-react";
-import { Card, Kpi, LineChart, LorenzChart, RankBars, Segmented } from "@/components/charts";
+import { Card, LineChart, LorenzChart, RankBars, Segmented } from "@/components/charts";
+import { Info } from "@/components/info";
 import { StatePanel } from "@/components/planner/state-panel";
+import { Story } from "@/components/planner/story";
 import { StateSheet } from "@/components/planner/state-sheet";
 import { WeightsSheet } from "@/components/planner/weights-sheet";
+import StatsCounter from "@/components/ui/stats-counter";
 import { Legend, type Scale, StateMap } from "@/components/state-map";
 import { PILLAR_COLOR, STATE_LABEL, TREND, fmt } from "@/lib/data";
 import { JR } from "@/lib/jomrasa";
@@ -26,11 +30,34 @@ const METRICS: { value: MetricKey; label: string }[] = [
 ];
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+function Stat({ label, value, decimals, prefix, suffix, delta, info }: { label: string; value: number; decimals: number; prefix?: string; suffix?: string; delta?: number | null; info: React.ReactNode }) {
+  return (
+    <div>
+      <dt className="flex items-center gap-1 text-[11px] text-muted-foreground">{label}<Info align="right">{info}</Info></dt>
+      <dd className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap text-lg font-semibold tabular-nums tracking-tight">
+        <StatsCounter value={value} decimals={decimals} prefix={prefix} suffix={suffix} duration={0.9} />
+        {delta != null && Math.abs(delta) > 1e-9 && <span className={cn("text-[11px] font-medium", delta < 0 ? "text-[var(--grass-11)]" : "text-[var(--red-11)]")}>{delta > 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(3)}</span>}
+      </dd>
+    </div>
+  );
+}
+
+function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
+  return (
+    <div className="mb-2.5 mt-5 flex items-center gap-3">
+      <h2 className="shrink-0 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{children}</h2>
+      <span className="h-px flex-1 bg-border" />
+      {hint && <span className="hidden shrink-0 text-[11px] text-muted-foreground/70 sm:block">{hint}</span>}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { rows, gap, pillars, concentration, year, selected, setSelected } = useStore();
   const [metric, setMetric] = useState<MetricKey>("gap");
   const [profile, setProfile] = useState(false);
   const [weights, setWeights] = useState(false);
+  const explore = useRef<HTMLDivElement>(null);
 
   const ranked = useMemo(() => [...gap].sort((a, b) => b.gap - a.gap), [gap]);
   // open on the top-ranked full state; the three tiny federal territories stay one click away
@@ -39,27 +66,27 @@ export default function Dashboard() {
 
   const view = useMemo(() => {
     const col = (c: string) => Object.fromEntries(rows.map((r) => [r.code, r[c] as number]));
-    const seq = (v: Record<string, number>, title: string, left: string, right: string, format: (n: number) => string, info: string) => ({
-      title, info, left, right, format, diverging: false, values: v as Record<string, number | string>,
+    const seq = (v: Record<string, number>, rank: string, title: string, left: string, right: string, format: (n: number) => string, info: string) => ({
+      rank, title, info, left, right, format, diverging: false, values: v as Record<string, number | string>,
       scale: { kind: "sequential", min: Math.min(...Object.values(v)), max: Math.max(...Object.values(v)) } as Scale,
       list: Object.entries(v).sort((a, b) => b[1] - a[1]).map(([code, value]) => ({ code, value })),
     });
     switch (metric) {
-      case "visitors": return seq(col("visitors_k"), "Where the crowds are", "fewer", "more visitors", fmt.visitorsK, `Domestic visitors by state, DOSM Domestic Tourism Survey ${year} (Table 9).`);
-      case "occupancy": return seq(col("occupancy_pct"), "Where hotels still have room", "emptier", "fuller hotels", (v) => fmt.pct(v, 0), `Average hotel occupancy rate, Tourism Malaysia Paid Accommodation Survey ${year}.`);
-      case "spend": return seq(col("spend_per_visitor_rm"), "Where a visitor is worth the most", "lower", "higher spend per visitor", (v) => `RM ${fmt.int(v)}`, "Average spend per domestic visitor, DOSM Domestic Tourism Survey by State 2023 - the latest state-level release.");
-      case "feel": return seq(Object.fromEntries(JR.states.map((s) => [s.code, s.experience_score])), "How travellers rate each state", "lower", "higher Experience Score", (v) => v.toFixed(1),
+      case "visitors": return seq(col("visitors_k"), "Busiest first", "Where the crowds are", "fewer", "more visitors", fmt.visitorsK, `Domestic visitors by state, DOSM Domestic Tourism Survey ${year} (Table 9).`);
+      case "occupancy": return seq(col("occupancy_pct"), "Fullest hotels first", "Where hotels still have room", "emptier", "fuller hotels", (v) => fmt.pct(v, 0), `Average hotel occupancy rate, Tourism Malaysia Paid Accommodation Survey ${year}.`);
+      case "spend": return seq(col("spend_per_visitor_rm"), "Biggest spenders first", "Where a visitor is worth the most", "lower", "higher spend per visitor", (v) => `RM ${fmt.int(v)}`, "Average spend per domestic visitor, DOSM Domestic Tourism Survey by State 2023 - the latest state-level release.");
+      case "feel": return seq(Object.fromEntries(JR.states.map((s) => [s.code, s.experience_score])), "Best rated first", "How travellers rate each state", "lower", "higher Experience Score", (v) => v.toFixed(1),
         "JomRasa Experience Score: the average of 11 aspect sentiments from public travel text, adjusted for sample size. An indicator, not an official statistic.");
       case "bottleneck": return {
-        title: "What holds each state back", left: "", right: "", format: (v: number) => fmt.signed(v, 0), diverging: true,
+        rank: "Bottleneck by state", title: "What holds each state back", left: "", right: "", format: (v: number) => fmt.signed(v, 0), diverging: true,
         info: "The weakest of three pillars - Access, Awareness, Amenities - when it is below the national median. Grey means nothing is below the median.",
         values: Object.fromEntries(pillars.map((p) => [p.code, p.bottleneck_score < 50 ? p.bottleneck : "None"])) as Record<string, number | string>,
         scale: { kind: "categorical", colors: { ...PILLAR_COLOR, None: "#383835" } } as Scale,
         list: ranked.map((g) => ({ code: g.code, value: g.gap })),
       };
       default: return {
-        title: "Where the untapped potential is", left: "over-visited", right: "under-visited", format: (v: number) => fmt.signed(v, 0), diverging: true,
-        info: "Gap Score = what a state can offer (rooms, spare capacity, spend, stay length, attractions, amenities, traveller experience) minus how intensely it is already visited. Each side is scaled 0-100 with equal weights - use Adjust weights to change that.",
+        rank: "Most untapped first", title: "Where the untapped potential is", left: "over-visited", right: "under-visited", format: (v: number) => fmt.signed(v, 0), diverging: true,
+        info: "Gap Score = what a state can offer (rooms, spare capacity, spend, stay length, attractions, amenities, traveller experience) minus how intensely it is already visited. Each side is scaled 0-100 with equal weights - use Weights to change that.",
         values: Object.fromEntries(gap.map((g) => [g.code, g.gap])) as Record<string, number | string>,
         scale: { kind: "diverging", max: Math.max(...gap.map((g) => Math.abs(g.gap))) } as Scale,
         list: ranked.map((g) => ({ code: g.code, value: g.gap })),
@@ -98,25 +125,28 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          <Kpi key="v" label="Domestic visits" value={total / 1000} decimals={1} suffix="M" note={`${year}`}
-            info="Sum of visits to each state (someone visiting two states counts in both) - this is how DOSM defines the national figure. Domestic Tourism Survey, Table 9." />,
-          <Kpi key="t" label="Share taken by the top 3 states" value={concentration.top3_share * 100} decimals={0} suffix="%" note="of all visits"
-            info="Visits to the three most-visited states as a share of all state visits." />,
-          <Kpi key="g" label="Concentration (Gini)" value={concentration.gini} decimals={3} delta={giniPrev ? concentration.gini - giniPrev : null} deltaGoodWhenNegative note={`vs ${year - 1}`}
-            info={`0 = visits spread evenly across the 16 states, 1 = all in one state. ${fmt.pct(concentration.hoover_vs_population * 100, 0)} of visits would have to move for visits to match where people live (Hoover index).`} />,
-          <Kpi key="r" label="Visitor spending" value={receipts / 1000} decimals={1} prefix="RM " suffix="bn" note={year > 2023 ? "estimate" : "DOSM 2023"}
-            info={year > 2023 ? `Estimated: ${year} visitors multiplied by 2023 spend per visitor, the latest state-level spending DOSM has published.` : "Domestic visitor receipts, DOSM Domestic Tourism Survey by State 2023."} />,
-        ].map((k, i) => (
-          <motion.div key={i} className="min-w-0" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i, duration: 0.5, ease: EASE }}>{k}</motion.div>
-        ))}
-      </div>
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }} className="mb-4 flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Malaysia · domestic tourism · 16 states · {year}</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-[28px]">Where should the next visitor go?</h1>
+        </div>
+        <dl className="flex flex-wrap gap-x-8 gap-y-2">
+          <Stat label="Visits" value={total / 1000} decimals={1} suffix="M"
+            info="Sum of visits to each state (someone visiting two states counts in both) - this is how DOSM defines the national figure. Domestic Tourism Survey, Table 9." />
+          <Stat label={year > 2023 ? "Spending (est.)" : "Spending"} value={receipts / 1000} decimals={1} prefix="RM " suffix="bn"
+            info={year > 2023 ? `Estimated: ${year} visitors multiplied by 2023 spend per visitor, the latest state-level spending DOSM has published.` : "Domestic visitor receipts, DOSM Domestic Tourism Survey by State 2023."} />
+          <Stat label="Concentration" value={concentration.gini} decimals={3} delta={giniPrev ? concentration.gini - giniPrev : null}
+            info={`Gini coefficient: 0 = visits spread evenly across the 16 states, 1 = all in one state. The arrow compares with ${year - 1}. ${fmt.pct(concentration.hoover_vs_population * 100, 0)} of visits would have to move for visits to match where people live (Hoover index).`} />
+        </dl>
+      </motion.div>
 
-      <div className="mt-3 grid gap-3 xl:grid-cols-[290px_minmax(0,1fr)_340px]">
-        <Card className="order-2 xl:order-1" title="Ranking"
+      <Story metric={metric} onMetric={(m) => { setMetric(m); explore.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }} />
+
+      <SectionLabel hint="Click a state anywhere to focus it">Explore the 16 states</SectionLabel>
+      <div ref={explore} className="grid scroll-mt-20 gap-3 xl:grid-cols-[290px_minmax(0,1fr)_340px]">
+        <Card className="order-2 xl:order-1" title={view.rank}
           right={<button onClick={() => setWeights(true)} className="group inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
-            <SlidersHorizontal className="size-3 transition-transform group-hover:rotate-90" />Adjust weights</button>}>
+            <SlidersHorizontal className="size-3 transition-transform group-hover:rotate-90" />Weights</button>}>
           {metric === "bottleneck" ? (
             <div className="flex flex-col">
               {ranked.map((g, i) => {
@@ -143,7 +173,7 @@ export default function Dashboard() {
               const r = rows.find((x) => x.code === c)!, g = gap.find((x) => x.code === c)!, p = pilBy[c];
               return (
                 <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 text-muted-foreground [&_dd]:text-right [&_dd]:font-medium [&_dd]:tabular-nums [&_dd]:text-foreground">
-                  <dt>Gap Score</dt><dd>{fmt.signed(g.gap, 0)} · #{g.gap_rank}</dd>
+                  <dt>Opportunity</dt><dd>{fmt.signed(g.gap, 0)} · #{g.gap_rank}</dd>
                   <dt>Visitors</dt><dd>{fmt.visitorsK(r.visitors_k as number)}</dd>
                   <dt>Hotels full</dt><dd>{fmt.pct(r.occupancy_pct as number, 0)}</dd>
                   <dt>Bottleneck</dt><dd>{p.bottleneck_score < 50 ? p.bottleneck : "none"}</dd>
@@ -171,7 +201,8 @@ export default function Dashboard() {
         <div className="order-3 min-w-0"><StatePanel code={sel} onOpenProfile={() => setProfile(true)} /></div>
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-3">
+      <SectionLabel>The evidence</SectionLabel>
+      <div className="grid gap-3 lg:grid-cols-3">
         <Card title={`The quietest half of the states get ${fmt.pct(lorenz(rows.map((r) => r.visitors_k as number)).y[8] * 100, 0)} of visits`}
           info="Lorenz curve of domestic visitors across the 16 states: the further it sags below the dashed line, the more concentrated tourism is. Hover the dots to read it.">
           <div className="flex justify-center"><LorenzChart before={lorenz(rows.map((r) => r.visitors_k as number))} /></div>
