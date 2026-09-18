@@ -11,20 +11,18 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { SpotlightCard } from "@/components/spotlight-card";
 import StatsCounter from "@/components/ui/stats-counter";
 import { PILLAR_COLOR, STAGE, STATE_LABEL, fmt } from "@/lib/data";
-import { simulate } from "@/lib/metrics";
+import { storyFacts } from "@/lib/story";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-const TERRITORIES = ["KUL", "LBN", "PJY"];
-const PILLARS = ["Access", "Awareness", "Amenities"];
 export type StoryMetric = "visitors" | "gap" | "bottleneck";
 
-function Step({ n, kicker, color, cue, active, last, onClick, children }: {
-  n: number; kicker: string; color: string; cue: string; active?: boolean; last?: boolean; onClick: () => void; children: React.ReactNode;
+function Step({ n, guide, kicker, color, cue, active, last, onClick, children }: {
+  n: number; guide: string; kicker: string; color: string; cue: string; active?: boolean; last?: boolean; onClick: () => void; children: React.ReactNode;
 }) {
   return (
-    <motion.div className="relative min-w-0" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 * (n - 1), duration: 0.5, ease: EASE }}>
+    <motion.div data-guide={guide} className="relative min-w-0" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 * (n - 1), duration: 0.5, ease: EASE }}>
       <SpotlightCard onClick={onClick} glow={`${color}29`} className={cn("h-full overflow-visible p-4 md:p-5", active && "border-foreground/30")}>
         <div className="flex h-full flex-col">
           <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -54,29 +52,13 @@ export function Story({ metric, onMetric }: { metric: string; onMetric: (m: Stor
   const router = useRouter();
   const { rows, gap, pillars, capacity, concentration, assumptions, setSelected } = useStore();
 
-  const s = useMemo(() => {
-    const total = rows.reduce((a, r) => a + (r.visitors_k as number), 0);
-    const byVisits = [...rows].sort((a, b) => (b.visitors_k as number) - (a.visitors_k as number));
-    const ranked = [...gap].sort((a, b) => b.gap - a.gap);
-    const untapped = ranked.slice(0, 5).map((g) => g.code);
-    const room = capacity.filter((c) => untapped.includes(c.code)).reduce((a, c) => a + c.max_extra_visitors_k, 0);
-    const held = pillars.filter((p) => p.bottleneck_score < 50);
-    const dests = ranked.filter((g) => !TERRITORIES.includes(g.code)).slice(0, 3).map((g) => g.code);
-    const origin = byVisits[0].code;
-    const sim = simulate(rows, { origin, destinations: Object.fromEntries(dests.map((d) => [d, 1])), share_pct: 10 }, assumptions);
-    return {
-      total, untapped, room, held, dests, origin, sim,
-      shares: byVisits.map((r) => ({ code: r.code, share: (r.visitors_k as number) / total })),
-      groups: PILLARS.map((k) => ({ k, n: held.filter((p) => p.bottleneck === k).length })),
-    };
-  }, [rows, gap, pillars, capacity, assumptions]);
+  const s = useMemo(() => storyFacts(rows, gap, pillars, capacity, assumptions), [rows, gap, pillars, capacity, assumptions]);
 
   const names = (codes: string[]) => codes.map((c) => STATE_LABEL[c]).join(", ").replace(/, ([^,]*)$/, " and $1");
-  const giniChange = (s.sim.concentration_after.gini / s.sim.concentration_before.gini - 1) * 100;
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <Step n={1} kicker="The problem" color={STAGE.problem.base} cue="Show crowds" active={metric === "visitors"} onClick={() => onMetric("visitors")}>
+      <Step n={1} guide="problem" kicker="The problem" color={STAGE.problem.base} cue="Show crowds" active={metric === "visitors"} onClick={() => onMetric("visitors")}>
         <Big><StatsCounter value={concentration.top3_share * 100} suffix="%" duration={0.9} /></Big>
         <Line>of {fmt.visitorsK(s.total)} visits go to just 3 of 16 states</Line>
         <div className="mt-auto pt-3">
@@ -90,18 +72,18 @@ export function Story({ metric, onMetric }: { metric: string; onMetric: (m: Stor
         </div>
       </Step>
 
-      <Step n={2} kicker="The opportunity" color={STAGE.opportunity.base} cue="Show potential" active={metric === "gap"} onClick={() => onMetric("gap")}>
+      <Step n={2} guide="opportunity" kicker="The opportunity" color={STAGE.opportunity.base} cue="Show potential" active={metric === "gap"} onClick={() => onMetric("gap")}>
         <Big><StatsCounter value={s.room / 1000} decimals={1} prefix="+" suffix="M" duration={0.9} /></Big>
         <Line>more visitors fit in the 5 most under-visited states before hotels fill up</Line>
         <div className="mt-auto flex flex-wrap gap-1 pt-3">
           {s.untapped.map((c) => (
-            <button key={c} onClick={(e) => { e.stopPropagation(); setSelected(c); onMetric("gap"); }}
+            <button key={c} data-guide={`state:${c}`} onClick={(e) => { e.stopPropagation(); setSelected(c); onMetric("gap"); }}
               className="whitespace-nowrap rounded-full border border-[#3987e5]/40 px-1.5 py-0.5 text-[10.5px] text-[#86b6ef] transition-colors hover:border-[#3987e5] hover:bg-[#3987e5]/15">{STATE_LABEL[c]}</button>
           ))}
         </div>
       </Step>
 
-      <Step n={3} kicker="The obstacle" color={STAGE.obstacle.base} cue="Show bottlenecks" active={metric === "bottleneck"} onClick={() => onMetric("bottleneck")}>
+      <Step n={3} guide="obstacle" kicker="The obstacle" color={STAGE.obstacle.base} cue="Show bottlenecks" active={metric === "bottleneck"} onClick={() => onMetric("bottleneck")}>
         <Big><StatsCounter value={s.held.length} duration={0.9} /><span className="text-[0.55em] font-medium text-muted-foreground"> of 16 states</span></Big>
         <Line>are held back by one weak link - and it is a different one in each</Line>
         <div className="mt-auto pt-3">
@@ -116,11 +98,11 @@ export function Story({ metric, onMetric }: { metric: string; onMetric: (m: Stor
         </div>
       </Step>
 
-      <Step n={4} kicker="The payoff" color={STAGE.payoff.base} cue="Open simulator" last onClick={() => router.push("/simulator")}>
+      <Step n={4} guide="payoff" kicker="The payoff" color={STAGE.payoff.base} cue="Open simulator" last onClick={() => router.push("/simulator")}>
         <Big><StatsCounter value={s.sim.moved_k / 1000} decimals={1} suffix="M" duration={0.9} /><span className="text-[0.55em] font-medium text-muted-foreground"> visitors moved</span></Big>
         <Line>if 10% of {STATE_LABEL[s.origin]}&apos;s trips went to {names(s.dests)}</Line>
         <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-3 text-[11px] text-muted-foreground">
-          <span>Concentration <b className="font-semibold" style={{ color: STAGE.payoff.soft }}>{fmt.signed(giniChange, 1)}%</b></span>
+          <span>Concentration <b className="font-semibold" style={{ color: STAGE.payoff.soft }}>{fmt.signed(s.giniChangePct, 1)}%</b></span>
           <span>National spending <b className="font-semibold" style={{ color: STAGE.payoff.soft }}>{s.sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(s.sim.net_national_rm_m))}</b></span>
         </div>
       </Step>

@@ -30,9 +30,9 @@ const METRICS: { value: MetricKey; label: string }[] = [
 ];
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-function Stat({ label, value, decimals, prefix, suffix, delta, info }: { label: string; value: number; decimals: number; prefix?: string; suffix?: string; delta?: number | null; info: React.ReactNode }) {
+function Stat({ guide, label, value, decimals, prefix, suffix, delta, info }: { guide: string; label: string; value: number; decimals: number; prefix?: string; suffix?: string; delta?: number | null; info: React.ReactNode }) {
   return (
-    <div>
+    <div data-guide={guide}>
       <dt className="flex items-center gap-1 text-[11px] text-muted-foreground">{label}<Info align="right">{info}</Info></dt>
       <dd className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap text-lg font-semibold tabular-nums tracking-tight">
         <StatsCounter value={value} decimals={decimals} prefix={prefix} suffix={suffix} duration={0.9} />
@@ -131,11 +131,11 @@ export default function Dashboard() {
           <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-[28px]">Where should the next visitor go?</h1>
         </div>
         <dl className="flex flex-wrap gap-x-8 gap-y-2">
-          <Stat label="Visits" value={total / 1000} decimals={1} suffix="M"
+          <Stat guide="stat:visits" label="Visits" value={total / 1000} decimals={1} suffix="M"
             info="Sum of visits to each state (someone visiting two states counts in both) - this is how DOSM defines the national figure. Domestic Tourism Survey, Table 9." />
-          <Stat label={year > 2023 ? "Spending (est.)" : "Spending"} value={receipts / 1000} decimals={1} prefix="RM " suffix="bn"
+          <Stat guide="stat:spending" label={year > 2023 ? "Spending (est.)" : "Spending"} value={receipts / 1000} decimals={1} prefix="RM " suffix="bn"
             info={year > 2023 ? `Estimated: ${year} visitors multiplied by 2023 spend per visitor, the latest state-level spending DOSM has published.` : "Domestic visitor receipts, DOSM Domestic Tourism Survey by State 2023."} />
-          <Stat label="Concentration" value={concentration.gini} decimals={3} delta={giniPrev ? concentration.gini - giniPrev : null}
+          <Stat guide="stat:gini" label="Concentration" value={concentration.gini} decimals={3} delta={giniPrev ? concentration.gini - giniPrev : null}
             info={`Gini coefficient: 0 = visits spread evenly across the 16 states, 1 = all in one state. The arrow compares with ${year - 1}. ${fmt.pct(concentration.hoover_vs_population * 100, 0)} of visits would have to move for visits to match where people live (Hoover index).`} />
         </dl>
       </motion.div>
@@ -144,15 +144,15 @@ export default function Dashboard() {
 
       <SectionLabel hint="Click a state anywhere to focus it">Explore the 16 states</SectionLabel>
       <div ref={explore} className="grid scroll-mt-20 gap-3 xl:grid-cols-[290px_minmax(0,1fr)_340px]">
-        <Card className="order-2 xl:order-1" title={view.rank}
-          right={<button onClick={() => setWeights(true)} className="group inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
+        <Card guide="ranking" className="order-2 xl:order-1" title={view.rank}
+          right={<button data-guide="weights" onClick={() => setWeights(true)} className="group inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
             <SlidersHorizontal className="size-3 transition-transform group-hover:rotate-90" />Weights</button>}>
           {metric === "bottleneck" ? (
             <div className="flex flex-col">
               {ranked.map((g, i) => {
                 const p = pilBy[g.code], binding = p.bottleneck_score < 50;
                 return (
-                  <motion.button key={g.code} onClick={() => setSelected(g.code)} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.02 * i, duration: 0.35, ease: EASE }}
+                  <motion.button key={g.code} data-guide={`state:${g.code}`} onClick={() => setSelected(g.code)} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.02 * i, duration: 0.35, ease: EASE }}
                     className={cn("flex items-center justify-between rounded-md px-1.5 py-[5px] text-left text-xs transition-colors hover:bg-accent/60", sel === g.code && "bg-accent")}>
                     <span className="text-muted-foreground">{STATE_LABEL[g.code]}</span>
                     <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: "var(--muted)", color: binding ? "var(--foreground)" : "var(--muted-foreground)" }}>
@@ -167,7 +167,7 @@ export default function Dashboard() {
           )}
         </Card>
 
-        <Card className="order-1 xl:order-2" title={view.title} info={view.info} right={<Segmented id="metric" value={metric} onChange={setMetric} options={METRICS} />}>
+        <Card guide={`metric:${metric}`} className="order-1 xl:order-2" title={view.title} info={view.info} right={<Segmented guide="metric" id="metric" value={metric} onChange={setMetric} options={METRICS} />}>
           <StateMap values={view.values} scale={view.scale} selected={sel} onSelect={setSelected}
             tooltip={(c) => {
               const r = rows.find((x) => x.code === c)!, g = gap.find((x) => x.code === c)!, p = pilBy[c];
@@ -181,13 +181,13 @@ export default function Dashboard() {
               );
             }} />
           <Legend scale={view.scale} left={view.left} right={view.right} />
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <div data-guide="reading" className="mt-4 grid gap-2 sm:grid-cols-2">
             {reading.map((g) => (
               <div key={g.label} className="rounded-xl bg-muted/50 px-3 py-2.5">
                 <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{g.label}</p>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {g.items.map((it) => (
-                    <button key={it.code + it.text} onClick={() => it.code && setSelected(it.code)} style={it.color ? { borderColor: it.color } : undefined}
+                    <button key={it.code + it.text} data-guide={it.code ? `state:${it.code}` : undefined} onClick={() => it.code && setSelected(it.code)} style={it.color ? { borderColor: it.color } : undefined}
                       className={cn("rounded-full border border-border px-2.5 py-1 text-xs transition-colors hover:border-foreground/40", sel === it.code && "bg-accent")}>
                       {it.text}
                     </button>
@@ -203,19 +203,19 @@ export default function Dashboard() {
 
       <SectionLabel>The evidence</SectionLabel>
       <div className="grid gap-3 lg:grid-cols-3">
-        <Card title={`The quietest half of the states get ${fmt.pct(lorenz(rows.map((r) => r.visitors_k as number)).y[8] * 100, 0)} of visits`}
+        <Card guide="chart:lorenz" title={`The quietest half of the states get ${fmt.pct(lorenz(rows.map((r) => r.visitors_k as number)).y[8] * 100, 0)} of visits`}
           info="Lorenz curve of domestic visitors across the 16 states: the further it sags below the dashed line, the more concentrated tourism is. Hover the dots to read it.">
           <div className="flex justify-center"><LorenzChart color={STAGE.problem.base} before={lorenz(rows.map((r) => r.visitors_k as number))} /></div>
         </Card>
-        <Card title={TREND.gini_by_year[String(year)] > gini2018 ? "Tourism is more concentrated than in 2018" : "Tourism is less concentrated than in 2018"}
+        <Card guide="chart:gini" title={TREND.gini_by_year[String(year)] > gini2018 ? "Tourism is more concentrated than in 2018" : "Tourism is less concentrated than in 2018"}
           info="Gini coefficient of visitors across states, by year. It spiked when travel collapsed in 2021. Source: DOSM Domestic Tourism Survey, Table 9 (2017-2025).">
           <LineChart years={years} format={(v) => v.toFixed(2)} zeroBase={false} height={400} series={[{ id: "gini", label: "Gini", color: STAGE.problem.base, values: years.map((y) => TREND.gini_by_year[y]) }]} />
         </Card>
-        <Card title="People who go, like it - almost equally everywhere"
+        <Card guide="chart:feel" title="People who go, like it - almost equally everywhere"
           info={`JomRasa Experience Score per state from ${fmt.int(JR.meta.items_travel)} first-hand travel texts. Dot = score, band = 95% interval, tick = national mean. Most bands overlap, so low visitor numbers are not explained by bad experiences.`}>
           <div className="space-y-[2px]">
             {feel.map((x) => (
-              <button key={x.code} onClick={() => setSelected(x.code)} className={cn("grid w-full grid-cols-[84px_1fr_34px] items-center gap-2 rounded-md px-1.5 py-[3px] text-left text-xs transition-colors hover:bg-accent/60", sel === x.code && "bg-accent")}>
+              <button key={x.code} data-guide={`state:${x.code}`} onClick={() => setSelected(x.code)} className={cn("grid w-full grid-cols-[84px_1fr_34px] items-center gap-2 rounded-md px-1.5 py-[3px] text-left text-xs transition-colors hover:bg-accent/60", sel === x.code && "bg-accent")}>
                 <span className="truncate text-muted-foreground">{STATE_LABEL[x.code]}</span>
                 <span className="relative h-3">
                   <span className="absolute inset-x-0 top-1/2 h-px bg-[var(--slate-5)]" />

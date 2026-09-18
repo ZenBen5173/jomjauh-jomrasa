@@ -70,6 +70,7 @@ export function StateMap({
     if (r) setPos({ x: e.clientX - r.left, y: e.clientY - r.top });
   };
   const bind = (code: string) => ({
+    "data-guide": `state:${code}`,
     onPointerEnter: () => setHover(code),
     onPointerLeave: () => setHover((h) => (h === code ? null : h)),
     onClick: () => onSelect?.(code),

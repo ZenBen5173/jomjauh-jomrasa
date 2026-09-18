@@ -74,7 +74,7 @@ export function TopBar() {
         <div className="order-3 w-full overflow-x-auto md:order-none md:ml-2 md:w-auto"><SpotlightTabs /></div>
 
         <div className="ml-auto flex items-center gap-1.5">
-          <div className="relative flex rounded-lg bg-muted p-0.5" role="group" aria-label="Base year">
+          <div data-guide="year" className="relative flex rounded-lg bg-muted p-0.5" role="group" aria-label="Base year">
             {YEARS.map((y) => (
               <button key={y} onClick={() => setYear(y)} className="relative z-10 rounded-md px-2.5 py-1 text-xs font-medium tabular-nums">
                 {year === y && <motion.span layoutId="year-pill" className="absolute inset-0 -z-10 rounded-md bg-background shadow-sm" transition={SPRING.default} />}
@@ -86,7 +86,7 @@ export function TopBar() {
             <b className="font-medium text-foreground">Base year.</b> Visitors, hotel occupancy and rooms use the year you pick. DOSM has published state-level spending only up to
             2023, so for 2024 and 2025 spend per visitor and length of stay are carried forward from 2023. 2023 is the fully aligned year.
           </Info>
-          <Link href="/trip" className="group ml-2 inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
+          <Link href="/trip" data-guide="travellers" className="group ml-2 inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
             For travellers <ArrowUpRight className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
         </div>

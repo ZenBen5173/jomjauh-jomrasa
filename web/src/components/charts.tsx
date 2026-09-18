@@ -88,7 +88,7 @@ export function RankBars({
         const fill = r.color ?? (diverging ? (r.value >= 0 ? "#3987e5" : "#e66767") : color);
         return (
           <motion.button
-            key={r.code} layout="position" onClick={() => onSelect?.(r.code)}
+            key={r.code} layout="position" data-guide={`state:${r.code}`} onClick={() => onSelect?.(r.code)}
             initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.025 * i, duration: 0.4, ease: EASE }}
             className={cn("group grid grid-cols-[92px_1fr_64px] items-center gap-2 rounded-md px-1.5 py-[5px] text-left text-xs transition-colors hover:bg-accent/60",
               selected === r.code && "bg-accent")}
@@ -206,9 +206,9 @@ export function PillarBars({ scores, colors, bottleneck }: { scores: Record<stri
   );
 }
 
-export function Card({ title, info, right, children, className }: { title?: React.ReactNode; info?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode; className?: string }) {
+export function Card({ title, info, right, children, className, guide, say }: { title?: React.ReactNode; info?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode; className?: string; guide?: string; say?: string }) {
   return (
-    <section className={cn("min-w-0 rounded-2xl border border-border bg-card p-5", className)}>
+    <section data-guide={guide} data-guide-say={say} data-guide-stage={say ? "payoff" : undefined} className={cn("min-w-0 rounded-2xl border border-border bg-card p-5", className)}>
       {(title || right) && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           {title && <h2 className="flex items-center gap-1.5 text-sm font-semibold">{title}{info && <Info>{info}</Info>}</h2>}
@@ -221,11 +221,11 @@ export function Card({ title, info, right, children, className }: { title?: Reac
 }
 
 /** Segmented control with a sliding pill (same shared-layout trick as the library's tabs). */
-export function Segmented<T extends string>({ id, value, onChange, options }: { id: string; value: T; onChange: (v: T) => void; options: { value: T; label: string }[] }) {
+export function Segmented<T extends string>({ id, value, onChange, options, guide }: { id: string; value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; guide?: string }) {
   return (
     <div className="relative flex max-w-full overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none]">
       {options.map((o) => (
-        <button key={o.value} onClick={() => onChange(o.value)} className="relative z-10 shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium">
+        <button key={o.value} data-guide={guide && `${guide}:${o.value}`} onClick={() => onChange(o.value)} className="relative z-10 shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium">
           {value === o.value && <motion.span layoutId={`seg-${id}`} className="absolute inset-0 -z-10 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 300, damping: 24 }} />}
           <span className={value === o.value ? "text-foreground" : "text-muted-foreground"}>{o.label}</span>
         </button>
