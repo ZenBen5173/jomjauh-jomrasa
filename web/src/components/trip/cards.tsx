@@ -6,7 +6,7 @@
  * Every place, description and figure is read from the data - nothing is generated.
  */
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { Component, type ReactNode, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, BedDouble, Camera, CloudRain, Coffee, ExternalLink, Footprints, Lightbulb, MapPin, Moon, Navigation, Sailboat, ShoppingBag, Sparkles, Sun, UtensilsCrossed, Wallet } from "lucide-react";
 import { SpotlightCard } from "@/components/spotlight-card";
@@ -18,6 +18,17 @@ import { cn } from "@/lib/utils";
 
 // the street map needs the browser, so it is loaded on the client only
 const RouteMap = dynamic(() => import("@/components/trip/route-map").then((m) => m.RouteMap), { ssr: false, loading: () => <div className="h-[300px] w-full animate-pulse rounded-xl bg-muted/60" /> });
+
+/** The map is a nicety: if it ever fails, the plan underneath must stay usable. */
+class MapGuard extends Component<{ children: ReactNode }, { broken: boolean }> {
+  state = { broken: false };
+  static getDerivedStateFromError() { return { broken: true }; }
+  render() {
+    return this.state.broken
+      ? <div className="grid h-[300px] w-full place-items-center rounded-xl border border-border bg-muted/50 px-6 text-center text-xs text-muted-foreground">The map could not load. The route button below still works.</div>
+      : this.props.children;
+  }
+}
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const GOOD = "#2a7e3b", WET = "#ab6400";
@@ -271,7 +282,7 @@ export function PlanCard({ plan }: { plan: TripPlan }) {
           </AnimatePresence>
 
           <div className="md:sticky md:top-4 md:self-start">
-            <RouteMap day={day} stay={plan.stay?.stay ?? null} hi={hi} onHover={setHi} />
+            <MapGuard><RouteMap day={day} stay={plan.stay?.stay ?? null} hi={hi} onHover={setHi} /></MapGuard>
             <a href={day.mapUrl} target="_blank" rel="noreferrer"
               className="group/m mt-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-transform active:scale-[0.98]">
               <Navigation className="size-3.5 transition-transform group-hover/m:translate-x-0.5 group-hover/m:-translate-y-0.5" />Open Day {day.day} driving route in Google Maps

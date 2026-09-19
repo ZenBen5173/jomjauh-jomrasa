@@ -20,11 +20,13 @@ export function RouteMap({ day, stay, hi, onHover }: { day: DayPlan; stay: GStay
 
   useEffect(() => {
     let dead = false;
+    pins.current = [];                       // the old day's pins must not be matched against the new day's stops
     import("leaflet").then((mod) => {
       if (dead || !box.current) return;
       const lf = (L.current = mod.default ?? mod);
       const m = (map.current ??= lf.map(box.current, { zoomControl: true, scrollWheelZoom: false, attributionControl: true }));
       m.eachLayer((layer) => m.removeLayer(layer));
+      pins.current = [];
       lf.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(m);
@@ -45,6 +47,7 @@ export function RouteMap({ day, stay, hi, onHover }: { day: DayPlan; stay: GStay
     if (!lf) return;
     pins.current.forEach((p, i) => {
       const s = day.stops[i];
+      if (!s) return;                       // the day just changed and the new pins are not drawn yet
       p.setIcon(lf.divIcon({ className: "", html: pin(String(i + 1), s.meal ? "#ffba18" : "#3e63dd", hi === i), iconSize: hi === i ? [30, 30] : [24, 24], iconAnchor: hi === i ? [15, 15] : [12, 12] }));
       p.setZIndexOffset(hi === i ? 1000 : 0);
     });
