@@ -5,15 +5,19 @@
  * when to go and why, what a trip costs, and a day-by-day route from breakfast to supper.
  * Every place, description and figure is read from the data - nothing is generated.
  */
-import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Camera, CloudRain, Coffee, ExternalLink, Footprints, MapPin, Moon, Navigation, ShoppingBag, Sun, UtensilsCrossed, Wallet } from "lucide-react";
+import { ArrowRight, BedDouble, Camera, CloudRain, Coffee, ExternalLink, Footprints, Lightbulb, MapPin, Moon, Navigation, Sailboat, ShoppingBag, Sparkles, Sun, UtensilsCrossed, Wallet } from "lucide-react";
 import { SpotlightCard } from "@/components/spotlight-card";
 import type { Pick, StateBrief } from "@/lib/chat";
 import { STATE_NAME } from "@/lib/data";
 import { TOPIC_LABEL } from "@/lib/jomrasa";
-import { type DayPlan, type GDest, type GPlace, type Meal, type Stop, type TripPlan, clock, monthName, monthRanges, rainWords, whenToGo, worthIt } from "@/lib/trip";
+import { type GDest, type GStay, type Meal, type Stop, type TripPlan, clock, monthName, monthRanges, rainWords, whenToGo, worthIt } from "@/lib/trip";
 import { cn } from "@/lib/utils";
+
+// the street map needs the browser, so it is loaded on the client only
+const RouteMap = dynamic(() => import("@/components/trip/route-map").then((m) => m.RouteMap), { ssr: false, loading: () => <div className="h-[300px] w-full animate-pulse rounded-xl bg-muted/60" /> });
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const GOOD = "#2a7e3b", WET = "#ab6400";
@@ -201,42 +205,14 @@ function StopIcon({ stop }: { stop: Stop }) {
   return stop.place.kind === "do" ? <Footprints className={c} /> : stop.place.kind === "buy" ? <ShoppingBag className={c} /> : <Camera className={c} />;
 }
 
-/** The shape of the day's route: no basemap needed to see whether it is a tidy loop or a zig-zag. */
-function RouteSketch({ day, hi, onHover }: { day: DayPlan; hi: number | null; onHover: (i: number | null) => void }) {
-  const W = 300, H = 210, P = 22;
-  const pts = useMemo(() => {
-    const ps = day.stops.map((s) => s.place as GPlace);
-    const lat0 = ps.reduce((s, p) => s + p.lat, 0) / ps.length, kx = Math.cos((lat0 * Math.PI) / 180);
-    const xs = ps.map((p) => p.lon * kx), ys = ps.map((p) => p.lat);
-    const minX = Math.min(...xs), minY = Math.min(...ys), span = Math.max(Math.max(...xs) - minX, Math.max(...ys) - minY, 0.002);
-    const scale = Math.min(W - 2 * P, H - 2 * P) / span;
-    const offX = (W - (Math.max(...xs) - minX) * scale) / 2, offY = (H - (Math.max(...ys) - minY) * scale) / 2;
-    return xs.map((x, i) => ({ x: offX + (x - minX) * scale, y: H - offY - (ys[i] - minY) * scale }));
-  }, [day]);
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl bg-muted/50" onPointerLeave={() => onHover(null)} role="img" aria-label={`Route for day ${day.day}`}>
-      <motion.path key={day.day} d={pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")} fill="none" stroke="var(--indigo-8)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" strokeDasharray="1 6"
-        initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.1, ease: EASE }} />
-      {pts.map((p, i) => {
-        const meal = day.stops[i].meal, on = hi === i;
-        return (
-          <motion.g key={`${day.day}-${i}`} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.25 + 0.07 * i, type: "spring", stiffness: 300, damping: 18 }}
-            style={{ transformOrigin: `${p.x}px ${p.y}px`, cursor: "default" }} onPointerEnter={() => onHover(i)}>
-            <motion.circle cx={p.x} cy={p.y} initial={false} animate={{ r: on ? 12 : 9 }} fill={meal ? "var(--amber-9)" : "var(--indigo-9)"} stroke="white" strokeWidth={2} />
-            <text x={p.x} y={p.y + 3.5} textAnchor="middle" className="pointer-events-none fill-white text-[10px] font-semibold">{i + 1}</text>
-          </motion.g>
-        );
-      })}
-    </svg>
-  );
-}
+const stayKind = (h: GStay) => (h.tier ? h.tier : h.stars ? `${h.stars}-star ${h.type || "hotel"}` : h.type || "place to stay");
 
 export function PlanCard({ plan }: { plan: TripPlan }) {
   const [active, setActive] = useState(0);
   const [hi, setHi] = useState<number | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const day = plan.days[Math.min(active, plan.days.length - 1)];
-  const driving = day.stops.reduce((s, x) => s + (x.leg && !x.leg.walk ? x.leg.mins : 0), 0);
+  const driving = day.stops.reduce((s, x) => s + (x.leg && !x.leg.walk && !x.leg.boat ? x.leg.mins : 0), 0);
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }}>
       <SpotlightCard className="overflow-visible p-4 shadow-sm md:p-5" glow="rgba(62,99,221,0.08)">
@@ -249,17 +225,22 @@ export function PlanCard({ plan }: { plan: TripPlan }) {
               </button>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">{day.stops.length} stops · roughly {driving < 60 ? `${driving} min` : `${(driving / 60).toFixed(1)} h`} of driving in total</p>
+          <p className="flex items-center gap-2 text-xs text-muted-foreground">
+            {plan.by === "ai" && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--indigo-3)] px-2 py-0.5 text-[10px] font-medium text-[var(--indigo-11)]"><Sparkles className="size-3" />planned by AI from real listings</span>}
+            {day.stops.length} stops · roughly {driving < 60 ? `${driving} min` : `${(driving / 60).toFixed(1)} h`} on the road
+          </p>
         </div>
 
-        <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,1fr)_300px]">
+        {day.theme && <motion.p key={day.theme} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="mt-3 text-sm font-medium">Day {day.day}: {day.theme}</motion.p>}
+        <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,1fr)_340px]">
           <AnimatePresence mode="wait">
             <motion.ol key={day.day} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
               {day.stops.map((s, i) => (
                 <motion.li key={s.place.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i, duration: 0.4, ease: EASE }}>
                   {s.leg && (
                     <p className="ml-[68px] flex items-center gap-1.5 border-l border-dashed border-border py-1.5 pl-5 text-[11px] text-muted-foreground">
-                      {s.leg.walk ? <Footprints className="size-3" /> : <Navigation className="size-3" />}about {s.leg.mins} min {s.leg.walk ? "on foot" : "by car"}
+                      {s.leg.boat ? <Sailboat className="size-3" /> : s.leg.walk ? <Footprints className="size-3" /> : <Navigation className="size-3" />}
+                      {s.leg.boat ? "by boat - check the jetty for times, the last one back leaves early" : `about ${s.leg.mins} min ${s.leg.walk ? "on foot" : "by car"}`}
                     </p>
                   )}
                   <div onPointerEnter={() => setHi(i)} onPointerLeave={() => setHi(null)} onClick={() => setOpen(open === s.place.id ? null : s.place.id)}
@@ -272,7 +253,8 @@ export function PlanCard({ plan }: { plan: TripPlan }) {
                         {s.meal && <span className="rounded-full bg-[var(--amber-3)] px-2 py-px text-[10px] font-medium text-[var(--amber-11)]">{MEAL_LABEL[s.meal]}</span>}
                         {s.place.famous.slice(0, 2).map((f) => <span key={f} className="rounded-full border border-border px-2 py-px text-[10px] capitalize text-muted-foreground">{f}</span>)}
                       </p>
-                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{open === s.place.id ? s.place.text : clip(s.place.text, 130)}</p>
+                      {s.note && <p className="mt-0.5 text-[13px] leading-relaxed">{s.note}</p>}
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{open === s.place.id ? s.place.text : clip(s.place.text, s.note ? 90 : 130)}</p>
                       <AnimatePresence initial={false}>
                         {open === s.place.id && (
                           <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden text-[11px] text-muted-foreground">
@@ -289,16 +271,40 @@ export function PlanCard({ plan }: { plan: TripPlan }) {
           </AnimatePresence>
 
           <div className="md:sticky md:top-4 md:self-start">
-            <RouteSketch day={day} hi={hi} onHover={setHi} />
+            <RouteMap day={day} stay={plan.stay?.stay ?? null} hi={hi} onHover={setHi} />
             <a href={day.mapUrl} target="_blank" rel="noreferrer"
               className="group/m mt-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-transform active:scale-[0.98]">
-              <Navigation className="size-3.5 transition-transform group-hover/m:translate-x-0.5 group-hover/m:-translate-y-0.5" />Open Day {day.day} route in Google Maps
+              <Navigation className="size-3.5 transition-transform group-hover/m:translate-x-0.5 group-hover/m:-translate-y-0.5" />Open Day {day.day} driving route in Google Maps
             </a>
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Times are a sensible pace, not a booking. Travel times are estimated from distance. Opening hours change - tap a stop to check.</p>
           </div>
         </div>
+        {(plan.stay || plan.tips.length > 0) && (
+          <div className="mt-5 grid gap-5 border-t border-border pt-4 md:grid-cols-2">
+            {plan.stay && (
+              <div>
+                <Label icon={<BedDouble className="size-3.5" />}>Where to sleep</Label>
+                <p className="mt-2 text-sm font-medium">{plan.stay.stay.name} <span className="ml-1 rounded-full bg-[var(--grass-3)] px-2 py-px text-[10px] font-medium capitalize text-[var(--grass-11)]">{stayKind(plan.stay.stay)}</span></p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{plan.stay.why}</p>
+                {plan.stay.stay.text && <p className="mt-1 text-xs italic leading-relaxed text-muted-foreground">“{clip(plan.stay.stay.text, 170)}”</p>}
+                {plan.stay.others.length > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">Also handy: {plan.stay.others.map((h, i) => (
+                    <span key={h.id}>{i > 0 && ", "}<a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${h.name}, ${plan.dest.name}`)}`} target="_blank" rel="noreferrer" className="text-foreground underline decoration-border underline-offset-2 hover:decoration-primary">{h.name}</a> <span className="opacity-70">({stayKind(h)})</span></span>
+                  ))}.</p>
+                )}
+                <p className="mt-1.5 text-[11px] text-muted-foreground">I don&apos;t know tonight&apos;s prices or what&apos;s free - check before you book.</p>
+              </div>
+            )}
+            {plan.tips.length > 0 && (
+              <div>
+                <Label icon={<Lightbulb className="size-3.5" />}>Before you go</Label>
+                <ul className="mt-2 space-y-1.5">{plan.tips.map((t) => <li key={t} className="flex gap-2 text-xs leading-relaxed text-muted-foreground"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-primary" />{t}</li>)}</ul>
+              </div>
+            )}
+          </div>
+        )}
         <p className="mt-4 border-t border-border pt-3 text-[11px] text-muted-foreground">
-          Places and descriptions are travellers&apos; own notes from <a href={plan.dest.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">Wikivoyage</a> (CC BY-SA), trimmed and otherwise unchanged. The route is worked out from their map locations.
+          Places and descriptions are travellers&apos; own notes from <a href={plan.dest.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">Wikivoyage</a> (CC BY-SA), trimmed and otherwise unchanged; hotels and a few extra eateries are from OpenStreetMap.{plan.by === "ai" ? " The AI chose and ordered the stops and wrote the one-line tips; it can only pick from these listings, never add its own." : " The route is worked out from their map locations."}
         </p>
       </SpotlightCard>
     </motion.div>

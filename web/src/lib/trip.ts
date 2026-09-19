@@ -7,20 +7,24 @@
 
 export interface GPlace {
   id: string; kind: "see" | "do" | "eat" | "drink" | "buy"; name: string; lat: number; lon: number; text: string;
-  hours: string; address: string; slots: Meal[]; famous: string[]; weight: number; approx?: boolean;
+  hours: string; address: string; slots: Meal[]; famous: string[]; weight: number; approx?: boolean; source?: "osm";
 }
+export interface GStay { id: string; name: string; lat: number; lon: number; tier: string; text: string; type: string; stars: number | null; source: "wikivoyage" | "osm" }
 export interface GNote { months: number[]; title: string; text: string; moves: boolean }
 export interface GDest {
   id: string; code: string; name: string; lat: number; lon: number; intro: string; eat_notes: string; url: string; known_for: string[];
   climate: { month: number; rain_mm: number; rainy_days: number }[];
-  when: { best: number[]; avoid: number[]; sea_closed: number[]; even: boolean }; notes: GNote[]; places: GPlace[];
+  when: { best: number[]; avoid: number[]; sea_closed: number[]; even: boolean }; notes: GNote[]; places: GPlace[]; stays?: GStay[];
 }
 export interface Guide { attribution: string; destinations: GDest[] }
 
 export type Meal = "breakfast" | "lunch" | "dinner" | "supper";
-export interface Stop { at: number; mins: number; place: GPlace; meal: Meal | null; leg: { km: number; mins: number; walk: boolean } | null }
-export interface DayPlan { day: number; stops: Stop[]; km: number; mapUrl: string }
-export interface TripPlan { dest: GDest; days: DayPlan[]; asked: number; note: string | null }
+export interface Stop { at: number; mins: number; place: GPlace; meal: Meal | null; note?: string; leg: { km: number; mins: number; walk: boolean; boat?: boolean } | null }
+export interface DayPlan { day: number; theme?: string; stops: Stop[]; km: number; mapUrl: string }
+export interface StayPick { stay: GStay; why: string; others: GStay[] }
+export interface TripPlan { dest: GDest; days: DayPlan[]; asked: number; note: string | null; stay: StayPick | null; tips: string[]; by: "ai" | "rules" }
+/** What the language model hands back: only ids from the list it was given, plus its own one-line notes. */
+export interface AiPlan { days: { theme: string; stops: { id: string; meal: Meal | "none"; note: string }[] }[]; stay: { id: string; why: string }; tips: string[] }
 
 const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const monthName = (m: number) => MONTH[(m - 1 + 12) % 12];
@@ -106,8 +110,11 @@ export function km(a: { lat: number; lon: number }, b: { lat: number; lon: numbe
   return 12742 * Math.asin(Math.sqrt(h));
 }
 /** Straight-line distance to a rough door-to-door time: roads wind (x1.35), towns are slow, open road is faster. */
+const OFFSHORE = /\b(pulau|island|islands)\b/i;
 function leg(a: GPlace, b: GPlace): Stop["leg"] {
   const d = km(a, b), road = d * 1.35;
+  // an island off the coast is a boat ride, and no road-routing app will take you there
+  if (d > 2 && OFFSHORE.test(a.name) !== OFFSHORE.test(b.name)) return { km: d, mins: Math.max(30, Math.round((d * 3 + 20) / 5) * 5), walk: false, boat: true };
   if (road < 0.7) return { km: d, mins: Math.max(3, Math.round((road / 4.5) * 60)), walk: true };
   const speed = road < 6 ? 22 : road < 25 ? 38 : 60;
   return { km: d, mins: Math.max(5, Math.round(((road / speed) * 60 + 4) / 5) * 5), walk: false };
@@ -171,6 +178,48 @@ const SLOT_START: Record<Meal, number> = { breakfast: 8 * 60, lunch: 12 * 60 + 3
 const SLOT_MINS: Record<Meal, number> = { breakfast: 45, lunch: 60, dinner: 75, supper: 45 };
 const SIGHTS_PER_DAY = 4;
 
+type Seq = { place: GPlace; meal: Meal | null; note?: string }[];
+
+/** Put clock times and travel legs on an ordered list of stops. Meals wait for mealtime; sights just follow on. */
+export function timeline(seq: Seq, day: number, theme?: string, town = ""): DayPlan {
+  let at = seq[0]?.meal === "breakfast" ? SLOT_START.breakfast : 9 * 60, total = 0;
+  const stops: Stop[] = seq.map((s, j) => {
+    const hop = j ? leg(seq[j - 1].place, s.place) : null;
+    if (hop) { at += hop.mins; total += hop.km; }
+    if (s.meal) at = Math.max(at, SLOT_START[s.meal]);
+    const mins = s.meal ? SLOT_MINS[s.meal] : s.place.kind === "do" ? 105 : 75;
+    const stop: Stop = { at, mins, place: s.place, meal: s.meal, note: s.note, leg: hop };
+    at += mins;
+    return stop;
+  });
+  // the driving link leaves out anything reached by boat - the app would refuse the whole route otherwise
+  const boats = stops.some((x) => x.leg?.boat);
+  const road = stops.filter((x) => !(boats && OFFSHORE.test(x.place.name)));
+  const where = (x: Stop) => (x.place.approx ? encodeURIComponent(`${x.place.name}, ${town}`) : `${x.place.lat},${x.place.lon}`);   // street-level pins: let Maps find the door by name
+  const pts = (road.length >= 2 ? road : stops).map(where);
+  const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${pts[0]}&destination=${pts[pts.length - 1]}${pts.length > 2 ? `&waypoints=${pts.slice(1, -1).slice(0, 9).join("%7C")}` : ""}&travelmode=driving`;
+  return { day, theme, stops, km: total, mapUrl };
+}
+
+const TIER_WORD: Record<string, string> = { budget: "easy on the wallet", "mid-range": "comfortable without being pricey", splurge: "a treat" };
+/** Where to sleep: the place with the least running around to everything on the plan; a traveller's write-up beats a bare map pin. */
+export function pickStay(dest: GDest, days: DayPlan[], preferId?: string, why?: string): StayPick | null {
+  const stays = dest.stays ?? [];
+  if (!stays.length) return null;
+  const stops = days.flatMap((d) => d.stops.map((x) => x.place)).filter((pl) => !OFFSHORE.test(pl.name) || OFFSHORE.test(dest.name));
+  const reach = (h: GStay) => (stops.length ? stops.reduce((t, pl) => t + km(h, pl), 0) / stops.length : km(h, dest));
+  const cost = (h: GStay) => reach(h) - (h.text ? 1.5 : 0) - (h.stars ? 0.3 : 0);
+  const ranked = [...stays].sort((a, b) => cost(a) - cost(b));
+  const stay = stays.find((h) => h.id === preferId) ?? ranked[0];
+  const mins = Math.max(5, Math.round((reach(stay) * 1.35 / 25) * 60 / 5) * 5);
+  const kind = stay.tier ? TIER_WORD[stay.tier] : stay.stars ? `a ${stay.stars}-star ${stay.type || "hotel"}` : `a ${stay.type || "place to stay"}`;
+  return { stay, why: why || `It is ${kind}, and about ${mins} minutes from most of your stops - the least running around of the places I know here.`, others: ranked.filter((h) => h.id !== stay.id).slice(0, 3) };
+}
+
+/** How many days this town can honestly fill. */
+export const maxDays = (dest: GDest) => Math.max(1, Math.min(5, Math.floor(dest.places.filter((p) => (p.kind === "see" || p.kind === "do") && km(dest, p) <= 25).length / 2)));
+
+/** The rule-based plan: used when the language model is unreachable, and as its safety net. */
 export function planTrip(dest: GDest, asked: number): TripPlan {
   const worth = (p: GPlace) => worthIt(dest, p);
   const all = dest.places.filter((p) => p.kind === "see" || p.kind === "do");
@@ -180,48 +229,60 @@ export function planTrip(dest: GDest, asked: number): TripPlan {
   const possible = Math.max(1, Math.min(asked, Math.floor(sights.length / 2) || 1));
   const chosen = sights.slice(0, possible * SIGHTS_PER_DAY);
   const used = new Set<string>();
-  const pickMeal = (meal: Meal, near: { lat: number; lon: number }): GPlace | null => {
-    const pool = eats.filter((e) => !used.has(e.id) && e.slots.includes(meal) && km(near, e) < 25);
-    if (!pool.length) return null;
-    // close by, well written-up, and above all known for a local dish: that stall is worth a few minutes' detour
-    const cost = (e: GPlace) => km(near, e) - e.weight / 400 - Math.min(e.famous.length, 2) * 2.5;
-    const best = pool.reduce((b, e) => (cost(e) < cost(b) ? e : b));
-    used.add(best.id);
-    return best;
-  };
 
   const days = cluster(chosen, possible).map((group, i): DayPlan => {
-    const centre = { lat: group.reduce((s, p) => s + p.lat, 0) / group.length, lon: group.reduce((s, p) => s + p.lon, 0) / group.length };
+    const eaten = new Set<string>();                       // nobody wants the same dish three times in a day
+    const pickMeal = (meal: Meal, near: { lat: number; lon: number }): GPlace | null => {
+      const pool = eats.filter((e) => !used.has(e.id) && e.slots.includes(meal) && km(near, e) < 25);
+      if (!pool.length) return null;
+      // close by, well written-up, and above all known for a local dish: that stall is worth a few minutes' detour
+      const cost = (e: GPlace) => km(near, e) - e.weight / 400 - Math.min(e.famous.length, 2) * 2.5 + (e.famous.some((f) => eaten.has(f)) ? 6 : 0);
+      const best = pool.reduce((b, e) => (cost(e) < cost(b) ? e : b));
+      used.add(best.id); best.famous.forEach((f) => eaten.add(f));
+      return best;
+    };
+    const centre = { lat: group.reduce((t, p) => t + p.lat, 0) / group.length, lon: group.reduce((t, p) => t + p.lon, 0) / group.length };
     const breakfast = pickMeal("breakfast", centre);
-    const ordered = nearestOrder(breakfast ?? group.reduce((w, p) => (p.lon < w.lon ? p : w)), group);
+    // anything reached by boat goes last among the sights, so the day is not split by two crossings
+    const ordered = nearestOrder(breakfast ?? group.reduce((w, p) => (p.lon < w.lon ? p : w)), group).sort((a, b) => Number(OFFSHORE.test(a.name) && !OFFSHORE.test(dest.name)) - Number(OFFSHORE.test(b.name) && !OFFSHORE.test(dest.name)));
     const half = Math.ceil(ordered.length / 2);
     const morning = ordered.slice(0, half), afternoon = ordered.slice(half);
     const lunch = pickMeal("lunch", morning[morning.length - 1] ?? centre);
     const dinner = pickMeal("dinner", afternoon[afternoon.length - 1] ?? morning[morning.length - 1] ?? centre);
     const supper = dinner ? pickMeal("supper", dinner) : null;
-
-    const seq: { place: GPlace; meal: Meal | null }[] = [
+    return timeline([
       ...(breakfast ? [{ place: breakfast, meal: "breakfast" as Meal }] : []), ...morning.map((place) => ({ place, meal: null })),
       ...(lunch ? [{ place: lunch, meal: "lunch" as Meal }] : []), ...afternoon.map((place) => ({ place, meal: null })),
       ...(dinner ? [{ place: dinner, meal: "dinner" as Meal }] : []), ...(supper ? [{ place: supper, meal: "supper" as Meal }] : []),
-    ];
-    let clock = breakfast ? SLOT_START.breakfast : 9 * 60, total = 0;
-    const stops: Stop[] = seq.map((s, j) => {
-      const hop = j ? leg(seq[j - 1].place, s.place) : null;
-      if (hop) { clock += hop.mins; total += hop.km; }
-      if (s.meal) clock = Math.max(clock, SLOT_START[s.meal]);
-      const mins = s.meal ? SLOT_MINS[s.meal] : s.place.kind === "do" ? 105 : 75;
-      const stop: Stop = { at: clock, mins, place: s.place, meal: s.meal, leg: hop };
-      clock += mins;
-      return stop;
-    });
-    const pts = stops.map((s) => `${s.place.lat},${s.place.lon}`);
-    const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${pts[0]}&destination=${pts[pts.length - 1]}${pts.length > 2 ? `&waypoints=${pts.slice(1, -1).slice(0, 9).join("%7C")}` : ""}&travelmode=driving`;
-    return { day: i + 1, stops, km: total, mapUrl };
+    ], i + 1, undefined, dest.name);
   });
 
   const note = days.length < asked ? `There is about ${days.length === 1 ? "one good day" : `${days.length} good days`} of things to see here, so I kept it to that rather than padding it out.` : null;
-  return { dest, days, asked, note };
+  return { dest, days, asked, note, stay: pickStay(dest, days), tips: [], by: "rules" };
+}
+
+/** Turn the language model's choice of ids into a plan. Anything it did not get from our list is dropped, so it cannot add a place that does not exist. */
+export function fromAi(dest: GDest, ai: AiPlan, asked: number): TripPlan | null {
+  const byId = new Map(dest.places.map((pl) => [pl.id, pl]));
+  const seen = new Set<string>();
+  const order: Meal[] = ["breakfast", "lunch", "dinner", "supper"];
+  const days = ai.days.slice(0, Math.max(1, asked)).map((d, i) => {
+    const seq: Seq = [];
+    for (const x of d.stops.slice(0, 10)) {
+      const place = byId.get(x.id);
+      if (!place || seen.has(place.id)) continue;
+      seen.add(place.id);
+      const meal = x.meal !== "none" && (place.kind === "eat" || place.kind === "drink") ? x.meal : null;
+      seq.push({ place, meal, note: x.note?.trim().slice(0, 220) || undefined });
+    }
+    // meals must run in order through the day; a meal that would go backwards in time is shown as a snack stop instead
+    let last = -1;
+    for (const x of seq) if (x.meal) { const k = order.indexOf(x.meal); if (k <= last) x.meal = null; else last = k; }
+    return seq.length >= 2 ? timeline(seq, i + 1, d.theme?.trim().slice(0, 60), dest.name) : null;
+  }).filter((d): d is DayPlan => d !== null).map((d, i) => ({ ...d, day: i + 1 }));
+  if (!days.length) return null;
+  const note = days.length < asked ? `I kept it to ${days.length === 1 ? "one day" : `${days.length} days`}: that is what there is to do here without padding it out.` : null;
+  return { dest, days, asked, note, stay: pickStay(dest, days, ai.stay?.id, ai.stay?.why?.trim().slice(0, 240)), tips: (ai.tips ?? []).map((t) => t.trim().slice(0, 200)).filter(Boolean).slice(0, 4), by: "ai" };
 }
 
 export const clock = (mins: number) => {

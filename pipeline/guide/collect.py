@@ -26,7 +26,7 @@ MANIFEST = ROOT / "data" / "raw" / "_manifest.json"
 CLEAN = ROOT / "data" / "clean"
 API = "https://en.wikivoyage.org/w/api.php"
 UA = {"User-Agent": "jomjauh-datathon/1.0 (DOSM Datathon 2026 student project)"}
-KINDS = {"see", "do", "eat", "drink", "buy"}
+KINDS = {"see", "do", "eat", "drink", "buy", "sleep"}
 
 # state code -> Wikivoyage destination pages (district sub-pages such as "Kuala Lumpur/Golden Triangle" are discovered)
 PAGES: dict[str, list[str]] = {
@@ -86,6 +86,12 @@ def fetch(title: str, manifest: dict, force: bool = False) -> dict | None:
 # ------------------------------------------------------------------ wikitext parsing
 def templates(text: str):
     """Yield every top-level {{...}} block (nested templates stay inside their parent)."""
+    for _, body in templates_at(text):
+        yield body
+
+
+def templates_at(text: str):
+    """The same, with the position each block starts at (to know which heading it sits under)."""
     i, n = 0, len(text)
     while i < n - 1:
         if text[i:i + 2] == "{{":
@@ -97,7 +103,7 @@ def templates(text: str):
                     depth, j = depth - 1, j + 2
                 else:
                     j += 1
-            yield text[i + 2:j - 2]
+            yield i, text[i + 2:j - 2]
             i = j
         else:
             i += 1
@@ -168,9 +174,24 @@ def section(wikitext: str, name: str) -> str:
     return " ".join(p for p in paras if len(p) > 50)[:900]
 
 
+def _tier(headings: list[str]) -> str:
+    """Wikivoyage sorts places to sleep under Budget / Mid-range / Splurge headings."""
+    for h in reversed(headings):
+        if "budget" in h or "backpack" in h or "hostel" in h:
+            return "budget"
+        if "mid" in h:
+            return "mid-range"
+        if "splurge" in h or "luxury" in h or "upscale" in h:
+            return "splurge"
+        if h in ("sleep", "eat", "drink", "buy", "see", "do"):
+            break
+    return ""
+
+
 def listings(page: dict, code: str, destination: str) -> list[dict]:
     rows = []
-    for order, body in enumerate(templates(page["wikitext"])):
+    heads = [(m.start(), m.group(1).strip().lower()) for m in re.finditer(r"\n=+\s*([^=\n]+?)\s*=+", page["wikitext"])]
+    for order, (at, body) in enumerate(templates_at(page["wikitext"])):
         kind, p = params(body)
         if kind not in KINDS or not p.get("name"):
             continue
@@ -188,6 +209,7 @@ def listings(page: dict, code: str, destination: str) -> list[dict]:
             "code": code, "destination": destination, "page": page["title"], "url": page["url"], "revid": page["revid"], "order": order,
             "kind": kind, "name": name, "alt": clean(p.get("alt", "")), "address": clean(p.get("address", "")), "directions": clean(p.get("directions", "")),
             "hours": clean(p.get("hours", "")), "lat": num(p.get("lat")), "lon": num(p.get("long")), "content": text,
+            "tier": _tier([h for pos, h in heads if pos < at]) if kind == "sleep" else "",
         })
     return rows
 

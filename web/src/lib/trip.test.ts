@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { type GDest, type GPlace, type Guide, clock, findDestination, km, monthRanges, parseDays, planTrip, wantsPlan, whenToGo } from "./trip";
+import { type AiPlan, type GDest, type GPlace, type GStay, type Guide, clock, findDestination, fromAi, km, maxDays, monthRanges, parseDays, pickStay, planTrip, wantsPlan, whenToGo } from "./trip";
 
 // a small made-up town for testing the geometry only (the app itself never uses made-up places)
 const place = (id: string, kind: GPlace["kind"], lat: number, lon: number, slots: GPlace["slots"] = [], weight = 300): GPlace =>
@@ -90,6 +90,55 @@ describe("planning the days", () => {
     expect(planTrip(town([...WEST, ...EAST, ...EATS]), 2).days.map((d) => d.stops.map((s) => s.place.id))).toEqual(plan.days.map((d) => d.stops.map((s) => s.place.id)));
   });
   it("formats clock times", () => { expect(clock(8 * 60)).toBe("8:00 am"); expect(clock(12 * 60 + 30)).toBe("12:30 pm"); expect(clock(22 * 60 + 15)).toBe("10:15 pm"); });
+});
+
+const stay = (id: string, lat: number, lon: number, over: Partial<GStay> = {}): GStay => ({ id, name: id, lat, lon, tier: "", text: "", type: "hotel", stars: null, source: "osm", ...over });
+
+describe("where to sleep", () => {
+  const dest = town([...WEST, ...EATS.slice(0, 4)], { stays: [stay("far", 4.9, 101.4), stay("near", 4.602, 101.051), stay("written-up", 4.604, 101.055, { text: "Clean rooms above a kopitiam.", tier: "budget", source: "wikivoyage" })] });
+  it("picks the place with the least running around, and a traveller's write-up beats a bare map pin nearby", () => {
+    const plan = planTrip(dest, 1);
+    expect(plan.stay!.stay.id).toBe("written-up");
+    expect(plan.stay!.why).toContain("easy on the wallet");
+    expect(plan.stay!.others.map((h) => h.id)).toEqual(["near", "far"]);
+  });
+  it("says nothing rather than inventing a hotel", () => { expect(planTrip(town([...WEST, ...EATS.slice(0, 4)]), 1).stay).toBeNull(); expect(pickStay(town([]), [])).toBeNull(); });
+});
+
+describe("what the language model may and may not do", () => {
+  const dest = town([...WEST, ...EAST, ...EATS]);
+  const ai = (stops: [string, AiPlan["days"][number]["stops"][number]["meal"]][]): AiPlan => ({ days: [{ theme: "Old town", stops: stops.map(([id, meal]) => ({ id, meal, note: `note for ${id}` })) }], stay: { id: "nope", why: "" }, tips: ["Bring an umbrella"] });
+  it("keeps only places from our list - an invented place is dropped", () => {
+    const plan = fromAi(dest, ai([["kopitiam", "breakfast"], ["west0", "none"], ["Hallucinated Cafe", "lunch"], ["west1", "none"], ["noodles", "lunch"]]), 1)!;
+    expect(plan.by).toBe("ai");
+    expect(plan.days[0].stops.map((x) => x.place.id)).toEqual(["kopitiam", "west0", "west1", "noodles"]);
+    expect(plan.days[0].stops[1].note).toBe("note for west0");
+    expect(plan.tips).toEqual(["Bring an umbrella"]);
+  });
+  it("never serves a meal at a sight, the same place twice, or dinner before lunch", () => {
+    const plan = fromAi(dest, ai([["west0", "breakfast"], ["grill", "dinner"], ["grill", "dinner"], ["noodles", "lunch"], ["west1", "none"]]), 1)!;
+    const stops = plan.days[0].stops;
+    expect(stops.map((x) => x.place.id)).toEqual(["west0", "grill", "noodles", "west1"]);
+    expect(stops[0].meal).toBeNull();                       // a sight is not breakfast
+    expect(stops[1].meal).toBe("dinner");
+    expect(stops[2].meal).toBeNull();                       // lunch after dinner is shown as a plain stop, not a meal out of order
+    stops.forEach((x, i) => { if (i) expect(x.at).toBeGreaterThanOrEqual(stops[i - 1].at + stops[i - 1].mins); });
+  });
+  it("gives nothing back when the model returned nothing usable, so the rule-based plan takes over", () => {
+    expect(fromAi(dest, ai([["ghost", "none"], ["phantom", "lunch"]]), 1)).toBeNull();
+  });
+});
+
+describe("boats and honest day counts", () => {
+  it("treats an island off a mainland town as a boat ride and keeps it out of the driving link", () => {
+    const island = place("Pulau Ketam", "see", 4.60, 100.95);
+    const plan = planTrip(town([...WEST.slice(0, 3), island, ...EATS.slice(0, 4)]), 1);
+    const stops = plan.days[0].stops, k = stops.findIndex((x) => x.place.id === "Pulau Ketam");
+    expect(stops[k].leg!.boat).toBe(true);
+    expect(plan.days[0].mapUrl).not.toContain("100.95");
+    expect(stops.filter((x) => !x.meal).at(-1)!.place.id).toBe("Pulau Ketam");      // last sight of the day: one crossing out, one back
+  });
+  it("knows how many days a town can fill", () => { expect(maxDays(town(WEST.slice(0, 3)))).toBe(1); expect(maxDays(town([...WEST, ...EAST]))).toBe(4); });
 });
 
 const file = join(__dirname, "../../public/data/guide.json");

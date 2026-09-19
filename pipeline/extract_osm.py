@@ -30,6 +30,9 @@ LAYERS = {
     "heritage": '(nwr["historic"]["name"](area.a);nwr["heritage"](area.a););',
     "airports": 'nwr["aeroway"="aerodrome"]["iata"](area.a);',
     "rail": 'nwr["railway"="station"]["station"!~"subway|light_rail|monorail"](area.a);',
+    # traveller guide: named places to stay and to eat (for towns where travellers' write-ups are thin)
+    "stay": 'nwr["tourism"~"^(hotel|guest_house|hostel|resort|chalet|motel)$"]["name"](area.a);',
+    "food": 'nwr["amenity"~"^(restaurant|cafe|food_court)$"]["name"]["cuisine"](area.a);',
 }
 
 

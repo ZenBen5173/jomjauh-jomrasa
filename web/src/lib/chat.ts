@@ -10,7 +10,7 @@ import { QUARTERLY, STATE_LABEL, STATE_NAME } from "./data";
 import { JR, TOPIC_LABEL, type JrPlace, type JrQuote, type JrTopic } from "./jomrasa";
 import type { GapRow, Row } from "./metrics";
 import { type Prefs, type Recommendation, parseLocal, recommend } from "./planner";
-import { type GDest, type Guide, type TripPlan, planTrip } from "./trip";
+import { type GDest, type Guide, type TripPlan, km, maxDays, planTrip } from "./trip";
 
 export type Intent = "recommend" | "about_state" | "other";
 export interface Understanding { intent: Intent; state: string | null; topic: string | null; prefs: Prefs }
@@ -137,12 +137,15 @@ export function guideReply(dest: GDest, rows: Row[], lang: string = "en"): Reply
   };
 }
 
-/** A day-by-day route. */
-export function planReply(dest: GDest, days: number): Reply {
-  const plan = planTrip(dest, days);
-  const n = plan.days.length;
-  const text = `Here's ${n === 1 ? "a day" : `${n} days`} in ${dest.name}. I put places that are close together on the same day, so you spend your time eating and looking around, not sitting in the car.${plan.note ? ` ${plan.note}` : ""}`;
-  return { kind: "plan", text, plan, followUps: [n < 3 ? `Make it ${n + 1} days` : "Make it 2 days", `When should I go to ${dest.name}?`, `Tell me about ${dest.name}`] };
+/** A day-by-day route. `plan` is the language model's (already checked against our places); without it, the rule-based one. */
+export function planReply(dest: GDest, days: number, guide: Guide | null = null, plan: TripPlan | null = null): Reply {
+  const p = plan ?? planTrip(dest, days);
+  const n = p.days.length;
+  const text = `Here's ${n === 1 ? "a day" : `${n} days`} in ${dest.name}.${p.by === "ai" ? "" : " I put places that are close together on the same day, so you spend your time eating and looking around, not sitting in the car."}${p.note ? ` ${p.note}` : ""}${p.stay ? "" : " I don't know a place to sleep here that I'd vouch for, so that part is on you."}`;
+  // only offer what the town can actually deliver; otherwise point to the nearest other town worth a day
+  const next = (guide?.destinations ?? []).filter((d) => d.id !== dest.id && km(d, dest) < 120).sort((a, b) => km(a, dest) - km(b, dest))[0];
+  const more = n < maxDays(dest) && n < 4 ? `Make it ${n + 1} days` : next ? `Add a day in ${next.name}` : `When should I go to ${dest.name}?`;
+  return { kind: "plan", text, plan: p, followUps: [more, "No pork, please", "We have kids with us", "Make it more relaxed"] };
 }
 
 /** Turn an understanding into a reply. Every fact comes from the data passed in. */

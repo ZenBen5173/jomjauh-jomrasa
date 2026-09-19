@@ -16,7 +16,7 @@ import { EMPTY_PREFS, type Reply, type Understanding, guideReply, langOf, planRe
 import { JR } from "@/lib/jomrasa";
 import { EXAMPLES, type Prefs } from "@/lib/planner";
 import { useStore } from "@/lib/store";
-import { type GDest, type Guide, findDestination, parseDays, wantsPlan } from "@/lib/trip";
+import { type AiPlan, type GDest, type Guide, findDestination, fromAi, parseDays, wantsPlan } from "@/lib/trip";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -32,6 +32,7 @@ export default function Trip() {
   const [busy, setBusy] = useState(false);
   const [guide, setGuide] = useState<Guide | null>(null);
   const lastDest = useRef<GDest | null>(null);
+  const trip = useRef<{ dest: string; days: number; wishes: string[] } | null>(null);   // the plan being refined: "no pork", "with kids"...
   const end = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const started = msgs.length > 0;
@@ -49,11 +50,21 @@ export default function Trip() {
     // naming a town needs no language model: we either introduce it or plan it
     const g = guide ?? { attribution: "", destinations: [] };
     const days = parseDays(t), named = findDestination(t, g);
-    const dest = named ?? (days || /^(make it|when should i go|bila|几时)/i.test(t) ? lastDest.current : null);
+    // a wish about the plan on screen ("no pork", "we have kids", "slower") refines it rather than starting over
+    const tweak = !named && trip.current && /\b(no|without|halal|vegetarian|vegan|kids?|child|children|baby|elderly|parents|slow|relax|relaxed|late|early|cheap|cheaper|budget|swap|replace|more|less|skip|add|instead|spicy|seafood|walk|walking|tanpa|tak nak|anak|murah)\b|不要|素食|小孩|清真/i.test(t);
+    const dest = named ?? (days || tweak || /^(make it|when should i go|bila|几时)/i.test(t) ? lastDest.current : null);
     let reply: Reply, via: Via = "keywords";
-    if (dest && (days || wantsPlan(t)) && !/^when\b|\bwhen (should|to)\b|bila/i.test(t)) {
-      reply = planReply(dest, days ?? 2);
-      via = "example";
+    if (dest && (days || tweak || wantsPlan(t)) && !/^when\b|\bwhen (should|to)\b|bila/i.test(t)) {
+      const same = trip.current?.dest === dest.id;
+      const wish = t.replace(/\b(plan|itinerary|trip|days?|in|to|a|for|my|me)\b|\d+/gi, " ").replace(new RegExp(dest.name, "ig"), " ").replace(/\s+/g, " ").trim();
+      trip.current = { dest: dest.id, days: days ?? (same ? trip.current!.days : 2), wishes: [...(same ? trip.current!.wishes : []), ...(wish.length > 3 ? [wish] : [])].slice(-4) };
+      let plan = null;
+      try {
+        const r = await fetch("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ dest: dest.id, days: trip.current.days, wishes: trip.current.wishes.join("; ") }) });
+        if (r.ok) plan = fromAi(dest, (await r.json()) as AiPlan, trip.current.days);
+      } catch { /* fall through to the rule-based plan */ }
+      reply = planReply(dest, trip.current.days, g, plan);
+      via = plan ? "ai" : "keywords";
     } else if (dest) {
       reply = guideReply(dest, rows, langOf(t));
       via = "example";
@@ -84,7 +95,7 @@ export default function Trip() {
     input.current?.focus();
   }
 
-  const reset = () => { setMsgs([]); setPrefs(EMPTY_PREFS); setText(""); lastDest.current = null; };
+  const reset = () => { setMsgs([]); setPrefs(EMPTY_PREFS); setText(""); lastDest.current = null; trip.current = null; };
 
   const composer = (
     <form onSubmit={(e) => { e.preventDefault(); send(text); }}
@@ -164,7 +175,7 @@ export default function Trip() {
                     </motion.div>
                   )}
                   {m.reply.kind !== "text" && m.via === "keywords" && m.id === msgs[msgs.length - 1].id && (
-                    <p className="mt-2 text-[10px] text-muted-foreground/70">Understood with keyword rules.</p>
+                    <p className="mt-2 text-[10px] text-muted-foreground/70">{m.reply.kind === "plan" ? "The AI planner was out of reach, so this plan was put together by distance rules." : "Understood with keyword rules."}</p>
                   )}
                 </div>
               ))}

@@ -131,6 +131,76 @@ def famous(text: str, name: str) -> list[str]:
     return [h.replace("char kuey teow", "char kway teow").replace("otak otak", "otak-otak") for h in hits][:3]
 
 
+# ------------------------------------------------------------------ OpenStreetMap: places to stay, and eateries for towns with thin write-ups
+def osm_layer(name: str) -> list[dict]:
+    path = ROOT / "data" / "raw" / "osm" / f"{name}.json"
+    if not path.exists():
+        return []
+    out = []
+    for e in json.loads(path.read_text(encoding="utf8"))["elements"]:
+        lat, lon = e.get("lat") or (e.get("center") or {}).get("lat"), e.get("lon") or (e.get("center") or {}).get("lon")
+        tags = e.get("tags", {})
+        if lat and lon and tags.get("name"):
+            out.append({"lat": lat, "lon": lon, **tags})
+    return out
+
+
+def _key(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", re.sub(r"\b(hotel|resort|hostel|guest ?house|the|inn|boutique|residence|suites?)\b", "", name.lower()))
+
+
+STAY_KIND = {"hotel": "hotel", "guest_house": "guesthouse", "hostel": "hostel", "resort": "resort", "chalet": "chalet", "motel": "motel"}
+MIN_EATS, MAX_EATS_FROM_MAP = 8, 10
+
+
+def stays_for(sleep: pd.DataFrame, centre: tuple[float, float], hotels: list[dict], code: str) -> list[dict]:
+    """Places to sleep: travellers' write-ups first (located via the map when they gave no coordinates), then mapped hotels close to the centre."""
+    near = [h for h in hotels if km(centre, (h["lat"], h["lon"])) <= 40]
+    by_key = {_key(h["name"]): h for h in near}
+    out, seen = [], set()
+    for r in sleep.sort_values("order").itertuples():
+        lat, lon, approx = r.lat, r.lon, False
+        if pd.isna(lat) or pd.isna(lon):
+            hit = by_key.get(_key(r.name))
+            if not hit:
+                continue
+            lat, lon = hit["lat"], hit["lon"]
+        if km(centre, (lat, lon)) > MAX_KM_FROM_TOWN or _key(r.name) in seen:
+            continue
+        seen.add(_key(r.name))
+        text = blurb(r.content, 200)
+        out.append({"id": f"{code}-s{len(out)}", "name": r.name, "lat": round(lat, 5), "lon": round(lon, 5), "tier": r.tier, "text": text if len(text) >= 25 else "",
+                    "type": "", "stars": None, "source": "wikivoyage", "approx": approx})
+    for h in sorted(near, key=lambda h: km(centre, (h["lat"], h["lon"]))):
+        if len(out) >= 16 or km(centre, (h["lat"], h["lon"])) > 8:
+            break
+        if _key(h["name"]) in seen or not _key(h["name"]):
+            continue
+        seen.add(_key(h["name"]))
+        stars = re.match(r"\d", str(h.get("stars", "")))
+        out.append({"id": f"{code}-s{len(out)}", "name": h["name"], "lat": round(h["lat"], 5), "lon": round(h["lon"], 5), "tier": "", "text": "",
+                    "type": STAY_KIND.get(h.get("tourism", ""), "hotel"), "stars": int(stars.group(0)) if stars else None, "source": "osm", "approx": False})
+    return out
+
+
+def eats_from_map(have: int, centre: tuple[float, float], food: list[dict], code: str, start: int) -> list[dict]:
+    """Where travellers have written up few eateries, add named, cuisine-tagged ones from the map near the centre. No description is invented for them."""
+    if have >= MIN_EATS:
+        return []
+    near = sorted((f for f in food if km(centre, (f["lat"], f["lon"])) <= 4), key=lambda f: km(centre, (f["lat"], f["lon"])))
+    local = [f for f in near if re.search(r"malay|chinese|indian|regional|asian|noodle|seafood|local|nasi|mamak|bak_kut_teh|dim_sum|satay|laksa|kopitiam|coffee_shop", f.get("cuisine", ""))]
+    out = []
+    for f in (local + [f for f in near if f not in local])[:min(MAX_EATS_FROM_MAP, MIN_EATS + 4 - have)]:
+        cuisine = [c.replace("_", " ").strip() for c in re.split(r"[;,]", f.get("cuisine", "")) if c.strip()][:2]
+        hours = f.get("opening_hours", "")[:80]
+        kind = "food court" if f.get("amenity") == "food_court" else "cafe" if f.get("amenity") == "cafe" else "restaurant"
+        out.append({"id": f"{code}-m{start + len(out)}", "kind": "eat", "name": f["name"], "lat": round(f["lat"], 5), "lon": round(f["lon"], 5),
+                    "text": f"A {'/'.join(cuisine) + ' ' if cuisine else ''}{kind} on the map near the centre. No traveller has written it up yet, so go by the crowd.",
+                    "hours": hours, "address": f.get("addr:street", "")[:90], "slots": slots("eat", hours, " ".join(cuisine)), "famous": famous(" ".join(cuisine), ""), "weight": 30,
+                    "approx": False, "source": "osm"})
+    return out
+
+
 # ------------------------------------------------------------------ location
 def locate(df: pd.DataFrame, lookup: bool = True) -> pd.DataFrame:
     """Fill missing coordinates from OpenStreetMap (Nominatim), one polite request a second, cached.
@@ -138,7 +208,7 @@ def locate(df: pd.DataFrame, lookup: bool = True) -> pd.DataFrame:
     path = CACHE / "guide_geocode.json"
     cache = json.loads(path.read_text(encoding="utf8")) if path.exists() else {}
     names = STATES.set_index("code")["state"].str.replace("W.P. ", "", regex=False)
-    todo = df[df.lat.isna() & (df.content.str.len() > 40)]
+    todo = df[df.lat.isna() & (df.content.str.len() > 40) & (df.kind != "sleep")]   # places to sleep are matched to mapped hotels instead
     have = df[df.lat.notna() & df.kind.isin(["see", "do"])].groupby("destination").size()
     todo = todo.assign(_have=todo.destination.map(have).fillna(0), _k=todo.kind.map({"see": 0, "do": 0, "eat": 1}).fillna(2)).sort_values(["_have", "_k"])
     print(f"  locating {len(todo)} places without coordinates ({sum(1 for r in todo.itertuples() if f'{r.name}|{r.destination}' not in cache)} new)")
@@ -197,9 +267,11 @@ def run(lookup: bool = False) -> dict:
     raw = pd.read_parquet(CLEAN / "guide_places_raw.parquet")
     dests = pd.read_parquet(CLEAN / "guide_destinations_raw.parquet").drop_duplicates("destination")   # two names can redirect to one page
     raw["located_by"] = raw.lat.notna().map({True: "wikivoyage", False: None})
-    raw = raw[raw.content.str.len() > 40].copy()
+    sleep_all = raw[raw.kind == "sleep"].copy()
+    hotels, food = osm_layer("stay"), osm_layer("food")
+    raw = raw[(raw.content.str.len() > 40) & (raw.kind != "sleep")].copy()
     raw = locate(raw, lookup)
-    raw = raw[raw.lat.notna() & raw.lat.between(0.8, 7.6) & raw.lon.between(99.5, 119.5)].copy()
+    raw = raw[raw.lat.notna() & raw.lon.notna() & raw.lat.between(0.8, 7.6) & raw.lon.between(99.5, 119.5)].copy()
 
     manifest_path = ROOT / "data" / "raw" / "_manifest.json"
     manifest = json.loads(manifest_path.read_text())
@@ -230,20 +302,22 @@ def run(lookup: bool = False) -> dict:
                 "famous": famous(r.content, r.name) if r.kind in ("eat", "drink") else [], "weight": min(len(r.content), 600),
                 "approx": r.located_by == "osm-street",   # we know the street, not the door
             })
-        dishes = pd.Series([f for x in places for f in x["famous"]]).value_counts()
+        places += eats_from_map(sum(1 for x in places if x["kind"] == "eat"), centre, food, d.code, len(places))
+        dishes = pd.Series([f for x in places for f in x["famous"]] or ["-"]).value_counts().drop("-", errors="ignore")
         out.append({
             "id": re.sub(r"[^a-z0-9]+", "-", d.destination.lower()).strip("-"), "code": d.code, "name": LOCAL_NAME.get(d.destination, re.sub(r"\s*\(.*\)", "", d.destination)),
             "lat": centre[0], "lon": centre[1], "intro": blurb(d.intro, 420), "eat_notes": blurb(d.eat_notes, 380), "url": d.url,
             "known_for": [x for x in dishes.index[:5] if x not in ("seafood", "kopitiam", "mamak")] or list(dishes.index[:3]),
             "climate": months, "when": seasons.verdict(months, d.destination), "notes": seasons.notes_for(d.code, d.destination), "places": places,
+            "stays": stays_for(sleep_all[sleep_all.destination == d.destination], centre, hotels, d.code),
         })
     manifest_path.write_text(json.dumps(manifest, indent=1, sort_keys=True))
 
     guide = {
-        "attribution": "Place descriptions: Wikivoyage contributors, CC BY-SA 4.0 (trimmed, otherwise unchanged). Rainfall: Open-Meteo / ERA5, CC BY 4.0. Missing coordinates: OpenStreetMap contributors, ODbL.",
+        "attribution": "Place descriptions: Wikivoyage contributors, CC BY-SA 4.0 (trimmed, otherwise unchanged). Rainfall: Open-Meteo / ERA5, CC BY 4.0. Hotels, extra eateries and missing coordinates: OpenStreetMap contributors, ODbL.",
         "destinations": sorted(out, key=lambda x: (x["code"], -len(x["places"]))),
     }
-    (WEB / "guide.json").write_text(json.dumps(guide, ensure_ascii=False, separators=(",", ":")), encoding="utf8")
+    (WEB / "guide.json").write_text(json.dumps(guide, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf8")   # allow_nan=False: fail here, not in the browser
     return guide
 
 
@@ -254,4 +328,5 @@ if __name__ == "__main__":
     print(f"\n{len(g['destinations'])} destinations, {n} places")
     for d in g["destinations"]:
         kinds = pd.Series([p["kind"] for p in d["places"]]).value_counts().to_dict()
+        kinds["stay"] = len(d["stays"])
         print(f"  {d['code']} {d['name']:<26} {kinds}  best={d['when']['best']} avoid={d['when']['avoid']} known_for={d['known_for'][:3]}")
