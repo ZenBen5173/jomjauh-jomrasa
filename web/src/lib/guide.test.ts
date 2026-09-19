@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { type GuideCtx, explain } from "./guide";
+import { type GuideCtx, explain, inWords } from "./guide";
 import { bottlenecks, capacity, concentration, gapTable, type Row } from "./metrics";
 import { storyFacts } from "./story";
 
@@ -33,11 +33,20 @@ describe("the guide's lines", () => {
     expect(explain("nonsense", ctx)).toBeNull();
     expect(explain("state:XXX", ctx)).toBeNull();
   });
-  it("quotes the same numbers the story cards show", () => {
-    const top3 = [...rows].sort((a, b) => (b.visitors_k as number) - (a.visitors_k as number)).slice(0, 3).reduce((s, r) => s + (r.visitors_k as number), 0);
-    const total = rows.reduce((s, r) => s + (r.visitors_k as number), 0);
-    expect(explain("problem", ctx)!.text).toContain(`${((top3 / total) * 100).toFixed(0)}%`);
-    expect(explain("obstacle", ctx)!.text).toContain(`${pillars.filter((p) => p.bottleneck_score < 50).length} of 16`);
+  it("speaks in words, not figures", () => {
+    // at most one number per line (years and "16 states" aside): the screen already shows the figures
+    for (const k of KEYS) {
+      const digits = explain(k, ctx)!.text.replace(/\b(20\d\d|16|100|0|1)\b/g, "").match(/\d+/g) ?? [];
+      expect(digits.length, k).toBeLessThanOrEqual(1);
+    }
+    expect(inWords(0.33)).toBe("about a third");
+    expect(inWords(0.26)).toBe("about a quarter");
+    expect(inWords(0.5)).toBe("about half");
+  });
+  it("still follows the data", () => {
+    const busiest = [...rows].sort((a, b) => (b.visitors_k as number) - (a.visitors_k as number))[0];
+    expect(explain("metric:visitors", ctx)!.text).toContain(busiest.label as string);
+    expect(explain(`state:${busiest.code}`, ctx)!.text).toContain("one of the busiest");
   });
   it("colours each line by the stage it belongs to", () => {
     expect(explain("problem", ctx)!.stage).toBe("problem");

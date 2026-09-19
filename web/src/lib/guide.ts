@@ -1,11 +1,12 @@
 /**
  * What Jojo (the guide in the corner of the planner) says when the pointer rests on something.
  *
- * No language model: every line is a template filled from the same data the dashboard shows, so the
- * guide can never state a number the screen does not back up. A zone names itself with
+ * Jojo talks to someone who has never read a chart: everyday words, and almost no numbers - the
+ * screen already shows those. No language model: every line is a template filled from the same data
+ * the dashboard shows, so the guide can never contradict it. A zone names itself with
  * `data-guide="key"`; `explain(key, ctx)` turns the key into a sentence or two and the stage it belongs to.
  */
-import { PILLAR_BLURB, STATE_LABEL, STATE_NAME, TREND, fmt } from "./data";
+import { PILLAR_BLURB, STATE_LABEL, STATE_NAME, TREND } from "./data";
 import { JR, TOPIC_LABEL } from "./jomrasa";
 import type { Assumptions, CapacityRow, GapRow, PillarRow, Row } from "./metrics";
 import type { StoryFacts } from "./story";
@@ -17,62 +18,77 @@ export interface GuideCtx {
   concentration: { gini: number }; year: number; facts: StoryFacts;
 }
 
-export const GREETING = "Hi, I'm Jojo! Rest your mouse on anything and I'll tell you what it means.";
+export const GREETING = "Hi, I'm Jojo! Point at anything and I'll explain it in plain words.";
 
 const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 const labels = (codes: string[]) => list(codes.map((c) => STATE_LABEL[c]));
 const short = (code: string) => STATE_NAME[code].replace("W.P. ", "");
 const say = (stage: Stage | null, text: string): Say => ({ stage, text });
 
+/** A share as people say it out loud: 0.33 -> "about a third". */
+export function inWords(share: number): string {
+  if (share < 0.15) return "a small slice";
+  if (share < 0.22) return "about a fifth";
+  if (share < 0.29) return "about a quarter";
+  if (share < 0.38) return "about a third";
+  if (share < 0.45) return "about two in five";
+  if (share < 0.56) return "about half";
+  return "more than half";
+}
+
+// the three weak spots, the way you would say them to a friend
+const WEAK: Record<string, string> = { Access: "it is hard to get to", Awareness: "not many people know about it", Amenities: "it does not have enough places to stay and eat" };
+
 function aboutState(code: string, c: GuideCtx): Say | null {
   const r = c.rows.find((x) => x.code === code), g = c.gap.find((x) => x.code === code);
   const p = c.pillars.find((x) => x.code === code), cap = c.capacity.find((x) => x.code === code);
   if (!r || !g || !p || !cap) return null;
   const name = short(code);
-  const verdict = g.gap >= 5 ? `It has more to offer than its visitor numbers suggest - #${g.gap_rank} of 16 for untapped potential.`
-    : g.gap <= -5 ? "It is already busier than what it offers would predict, so it is one of the saturated ones."
-      : "Its visitor numbers roughly match what it has to offer.";
-  const hold = p.bottleneck_score < 50 ? `Its weak link is ${p.bottleneck.toLowerCase()}: ${PILLAR_BLURB[p.bottleneck].toLowerCase()}.`
-    : cap.max_extra_visitors_k > 0 ? `Nothing much holds it back, and its hotels could still take about ${fmt.visitorsK(cap.max_extra_visitors_k)} more visitors.`
-      : `Its hotels are already past the ${c.assumptions.target_occupancy_pct}% ceiling, so it needs rooms before it needs marketing.`;
-  return say(g.gap >= 0 ? "opportunity" : "problem", `${name} gets ${fmt.visitorsK(r.visitors_k as number)} visits a year, ${fmt.pct(r.visitor_share_pct as number)} of Malaysia's total. ${verdict} ${hold}`);
+  const place = [...c.rows].sort((a, b) => (b.visitors_k as number) - (a.visitors_k as number)).findIndex((x) => x.code === code);
+  const crowd = place < 4 ? "is one of the busiest places in Malaysia" : place >= c.rows.length - 4 ? "is one of the quietest places in Malaysia" : "gets a middling number of visitors";
+  const verdict = g.gap >= 5 && place < 4 ? "Even so, it has so much to offer that it could still handle more."
+    : g.gap >= 5 ? "It has more to offer than its visitor numbers suggest, so it deserves more attention."
+    : g.gap <= -5 ? "It is already busier than you would expect for what it offers."
+      : "That is about right for what it offers.";
+  const hold = p.bottleneck_score < 50 ? `What holds it back: ${WEAK[p.bottleneck]}.`
+    : cap.max_extra_visitors_k > 0 ? "Nothing major holds it back, and its hotels still have room."
+      : "Its hotels are already nearly full, so it needs more rooms before more visitors.";
+  return say(g.gap >= 0 ? "opportunity" : "problem", `${name} ${crowd}. ${verdict} ${hold}`);
 }
 
 function aboutMetric(m: string, c: GuideCtx): Say | null {
-  const ends = (col: string, f: (v: number) => string) => {
+  const ends = (col: string) => {
     const s = [...c.rows].sort((a, b) => (b[col] as number) - (a[col] as number));
-    return [`${STATE_LABEL[s[0].code]} (${f(s[0][col] as number)})`, `${STATE_LABEL[s[s.length - 1].code]} (${f(s[s.length - 1][col] as number)})`];
+    return [STATE_LABEL[s[0].code], STATE_LABEL[s[s.length - 1].code]];
   };
   switch (m) {
-    case "gap": return say("opportunity", "Opportunity compares what a state can offer - rooms, attractions, spending, traveller experience - with how visited it already is. Blue states have more to offer than visitors; red ones are already busy.");
-    case "visitors": { const [hi, lo] = ends("visitors_k", fmt.visitorsK); return say("problem", `Plain visitor counts - the brighter the red, the bigger the crowd. Busiest is ${hi}, quietest is ${lo}.`); }
-    case "occupancy": { const [hi, lo] = ends("occupancy_pct", (v) => fmt.pct(v, 0)); return say("opportunity", `How full hotels are on average. Emptier hotels mean a state can grow without building anything. Fullest: ${hi}. Emptiest: ${lo}.`); }
-    case "spend": { const [hi, lo] = ends("spend_per_visitor_rm", (v) => `RM ${fmt.int(v)}`); return say("opportunity", `What a typical domestic visitor spends on a trip. Highest: ${hi}. Lowest: ${lo}. These are 2023 figures - the latest DOSM has published by state.`); }
-    case "feel": return say("opportunity", `The Experience Score, built from ${fmt.int(JR.meta.items_travel)} public travel posts scored on 11 things like food, scenery and cleanliness. Treat it as an indicator, not an official statistic.`);
-    case "bottleneck": return say("obstacle", "Each state's weakest of three pillars - access, awareness, amenities - but only when it is below the typical state. Grey states have no real weak link.");
+    case "gap": return say("opportunity", "This map shows who deserves more visitors. Blue states have a lot to offer but few people go. Red states are already busy.");
+    case "visitors": { const [hi, lo] = ends("visitors_k"); return say("problem", `Where the crowds are. The brighter the red, the more visitors. ${hi} is the busiest and ${lo} is the quietest.`); }
+    case "occupancy": { const [hi, lo] = ends("occupancy_pct"); return say("opportunity", `How full the hotels are. Emptier hotels mean a state can welcome more people straight away. Hotels are fullest in ${hi} and emptiest in ${lo}.`); }
+    case "spend": { const [hi, lo] = ends("spend_per_visitor_rm"); return say("opportunity", `How much a typical visitor spends on a trip. People spend the most in ${hi} and the least in ${lo}.`); }
+    case "feel": return say("opportunity", "What travellers think of each state. We read thousands of public travel posts and comments to see what people liked and disliked. It is a helpful hint, not an official figure.");
+    case "bottleneck": return say("obstacle", "The main thing holding each state back: hard to get to, not well known, or not enough places to stay. Grey states are doing fine.");
     default: return null;
   }
 }
 
 function aboutPanel(part: string, code: string, c: GuideCtx): Say | null {
-  const r = c.rows.find((x) => x.code === code), g = c.gap.find((x) => x.code === code);
-  const p = c.pillars.find((x) => x.code === code), cap = c.capacity.find((x) => x.code === code);
-  if (!r || !g || !p || !cap) return null;
+  const g = c.gap.find((x) => x.code === code), p = c.pillars.find((x) => x.code === code), cap = c.capacity.find((x) => x.code === code);
+  if (!g || !p || !cap) return null;
   const name = short(code);
   switch (part) {
-    case "visited": return say("problem", `How intensely ${name} is visited, scored 0-100 against the other states: its share of all visits, visitors per resident and visitors per km2. It scores ${g.actual.toFixed(0)}.`);
-    case "offer": return say("opportunity", `What ${name} has to offer, scored 0-100: rooms, spare hotel capacity, spending, length of stay, attractions, amenities and traveller experience. It scores ${g.potential.toFixed(0)} - ${g.potential > g.actual ? "more than its visitor score, so there is room to grow" : "less than its visitor score, so it is already well used"}.`);
-    case "pillars": return say("obstacle", `Three things can hold a state back. 50 is the typical state - that's the tick mark. ${name}'s weakest is ${p.bottleneck.toLowerCase()} at ${p.bottleneck_score.toFixed(0)}${p.bottleneck_score < 50 ? `, below the tick, so that's its bottleneck: ${PILLAR_BLURB[p.bottleneck].toLowerCase()}.` : ", still above the tick, so nothing is really holding it back."}`);
+    case "visited": return say("problem", `How busy ${name} already is compared with the other states. A longer bar means more crowded. ${name} is ${g.actual < 35 ? "on the quiet side" : g.actual < 65 ? "about average" : "on the busy side"}.`);
+    case "offer": return say("opportunity", `How much ${name} has going for it: hotels, things to see, and how much travellers enjoy it. ${g.potential > g.actual ? "Its blue bar is longer than its red one, so it could handle more visitors." : "Its red bar is longer than its blue one, so it is already well used."}`);
+    case "pillars": return say("obstacle", `Three things can hold a state back: getting there (access), being known (awareness) and places to stay (amenities). The little line marks a typical state. ${p.bottleneck_score < 50 ? `${name} falls short on ${p.bottleneck.toLowerCase()}: ${PILLAR_BLURB[p.bottleneck].toLowerCase()}.` : `${name} is fine on all three.`}`);
     case "room": return say("opportunity", cap.max_extra_visitors_k > 0
-      ? `${name}'s hotels are ${fmt.pct(r.occupancy_pct as number, 0)} full. Before they reach the ${c.assumptions.target_occupancy_pct}% ceiling they could take about ${fmt.visitorsK(cap.max_extra_visitors_k)} more visitors a year. Only overnight guests in paid rooms count.`
-      : `${name}'s hotels are ${fmt.pct(r.occupancy_pct as number, 0)} full - already past the ${c.assumptions.target_occupancy_pct}% ceiling. It needs more rooms before more marketing.`);
+      ? `${name}'s hotels still have empty rooms on most nights. The big number is roughly how many more visitors they could take in a year before filling up.`
+      : `${name}'s hotels are already nearly full. It needs more rooms before it can take more visitors.`);
     case "feel": {
-      const jr = JR.states.find((x) => x.code === code);
       const t = JR.topics.filter((x) => x.code === code && x.n >= 8).sort((a, b) => b.sentiment - a.sentiment);
-      if (!jr || !t.length) return say("opportunity", "What travellers wrote about this state, scored 0-100.");
-      return say("opportunity", `Travellers rate ${name} ${jr.experience_score.toFixed(0)} out of 100 across ${fmt.int(jr.mentions_n)} posts. They are happiest about ${TOPIC_LABEL[t[0].topic].toLowerCase()}; the sore point is ${TOPIC_LABEL[t[t.length - 1].topic].toLowerCase()}.`);
+      if (!t.length) return say("opportunity", `What travellers say about ${name}, as a score out of 100.`);
+      return say("opportunity", `What travellers say about ${name}, as a score out of 100. They love its ${TOPIC_LABEL[t[0].topic].toLowerCase()}; they grumble most about ${TOPIC_LABEL[t[t.length - 1].topic].toLowerCase()}.`);
     }
-    case "profile": return say(null, `Open ${name}'s full profile: its trend, its quiet season, where its tourists come from and what travellers wrote.`);
+    case "profile": return say(null, `Open ${name}'s full story: is it getting busier, when is it quiet, where do its visitors come from and what do people say about it.`);
     case "simulate": return say("payoff", `Curious what happens if more visitors went to ${name}? The simulator lets you try it.`);
     default: return null;
   }
@@ -82,38 +98,35 @@ export function explain(key: string, c: GuideCtx): Say | null {
   const [kind, a, b] = key.split(":");
   const f = c.facts;
   switch (kind) {
-    case "problem": return say("problem", `Ah, you're looking at the problem. Did you know? ${fmt.pct(f.top3Share * 100, 0)} of all ${fmt.visitorsK(f.total)} visits go to just three states - ${labels(f.top3)}. That's a bit crowded, isn't it? Click and I'll show you where the crowds are.`);
-    case "opportunity": return say("opportunity", `Here's the good news. The five most under-visited states - ${labels(f.untapped)} - could host about ${fmt.visitorsK(f.room)} more visitors a year before their hotels reach the ${c.assumptions.target_occupancy_pct}% ceiling. The room is already there.`);
-    case "obstacle": return say("obstacle", `So why aren't people going? ${f.held.length} of 16 states have one weak link: ${f.groups.map((g) => `${g.n} ${g.k.toLowerCase()}`).join(", ")}. Each needs a different fix - click to see which state has which.`);
-    case "payoff": return say("payoff", `Let's test it. If 10% of ${STATE_LABEL[f.origin]}'s trips went to ${labels(f.dests)}, ${fmt.visitorsK(f.sim.moved_k)} visitors would move and concentration would ${f.giniChangePct <= 0 ? "fall" : "rise"} ${Math.abs(f.giniChangePct).toFixed(1)}%. National spending barely changes - it's rebalancing, not new money. Click to try your own.`);
+    case "problem": return say("problem", `Ah, you're looking at the problem. Did you know? ${inWords(f.top3Share).replace(/^a/, "A")} of all trips go to just three places - ${labels(f.top3)}. That's a bit crowded, isn't it? Click and I'll show you where the crowds are.`);
+    case "opportunity": return say("opportunity", `Here's the good news. Quiet states like ${labels(f.untapped.slice(0, 3))} have lots of empty hotel rooms right now. They could welcome many more visitors without building anything new.`);
+    case "obstacle": return say("obstacle", "So why aren't people going? Almost every quiet state has one weak spot: some are hard to get to, some are not well known, and some don't have enough places to stay. Click to see which is which.");
+    case "payoff": return say("payoff", `Let's play what-if. Imagine one in ten of ${STATE_LABEL[f.origin]}'s visitors went to ${labels(f.dests)} instead. Tourism would be shared ${f.giniChangePct <= 0 ? "a little more fairly" : "a little less fairly"}. The country would not earn more - the money just moves around. Click to try your own idea.`);
     case "stat":
-      if (a === "visits") return say(null, `${fmt.visitorsK(f.total)} domestic visits in ${c.year}. Someone who visits two states is counted in both - that's how DOSM counts the national figure too.`);
+      if (a === "visits") return say(null, `How many trips Malaysians made inside Malaysia in ${c.year}. If someone visits two states on one holiday, that counts as two.`);
       if (a === "spending") return say(null, c.year > 2023
-        ? `What domestic visitors spent. Heads up: this one is an estimate - ${c.year} visitors multiplied by 2023 spend per visitor, because DOSM's state-level spending stops at 2023.`
-        : "What domestic visitors spent in 2023, straight from DOSM's Domestic Tourism Survey by state.");
+        ? "Roughly how much those travellers spent. It is our best estimate, because the government's latest state-by-state spending figures are from 2023."
+        : "How much those travellers spent, straight from the government's 2023 survey.");
       if (a === "gini") {
         const prev = TREND.gini_by_year[String(c.year - 1)];
-        return say("problem", `This is the Gini coefficient: 0 means visits are spread evenly across the 16 states, 1 means everyone goes to one state. Malaysia sits at ${c.concentration.gini.toFixed(3)}${prev ? `, ${c.concentration.gini > prev ? "a little more" : "a little less"} concentrated than in ${c.year - 1}` : ""}.`);
+        return say("problem", `This number shows how lopsided tourism is. Closer to 0 means visitors are nicely spread out; closer to 1 means everyone crowds into one place.${prev ? ` It is ${c.concentration.gini > prev ? "a little more" : "a little less"} lopsided than last year.` : ""}`);
       }
       return null;
     case "metric": return aboutMetric(a, c);
     case "state": return aboutState(a, c);
     case "panel": return aboutPanel(a, b, c);
-    case "ranking": return say(null, "All 16 states, ranked by whichever view the map is showing. Click a row and that state lights up everywhere.");
-    case "weights": return say(null, "Think hotels should count more than attractions? Open this to change the weights and watch the ranking reshuffle. It also shows how stable the ranking is.");
-    case "reading": return say(null, "The map in one line: the three states at each end. Click a name to focus it.");
+    case "ranking": return say(null, "All 16 states in order, for whatever the map is showing. Click a row and that state lights up everywhere.");
+    case "weights": return say(null, "Not sure hotels should count as much as attractions? Open this to change what matters most and watch the ranking change.");
+    case "reading": return say(null, "The map in one line: the three states at each end. Click a name to focus on it.");
     case "chart":
-      if (a === "lorenz") return say("problem", `If tourism were perfectly even, this curve would follow the dashed line. It sags: the quietest 8 of 16 states receive only ${fmt.pct((1 - f.shares.slice(0, 8).reduce((s, x) => s + x.share, 0)) * 100, 0)} of visits.`);
+      if (a === "lorenz") return say("problem", `If every state got a fair share of visitors, this curve would follow the dotted line. The more it sags, the more lopsided tourism is. The quieter half of the states get only ${inWords(f.shares.slice(8).reduce((s, x) => s + x.share, 0))} of the visitors.`);
       if (a === "gini") {
         const g18 = TREND.gini_by_year["2018"], now = TREND.gini_by_year[String(c.year)];
-        return say("problem", `Concentration year by year. The spike in 2021 is the pandemic - few trips, mostly close to home. At ${now.toFixed(3)} it is now ${now > g18 ? "slightly higher" : "slightly lower"} than 2018's ${g18.toFixed(3)}.`);
+        return say("problem", `How lopsided tourism has been, year by year. The jump in 2021 was the pandemic, when few people travelled. Today it is ${now > g18 ? "slightly more" : "slightly less"} lopsided than in 2018.`);
       }
-      if (a === "feel") {
-        const s = JR.states.map((x) => x.experience_score);
-        return say("opportunity", `Here's the twist: people who do go rate every state about the same - scores only run from ${Math.min(...s).toFixed(0)} to ${Math.max(...s).toFixed(0)}. Quiet states aren't quiet because they're bad.`);
-      }
+      if (a === "feel") return say("opportunity", "Here's the twist: people who visit the quiet states enjoy them just as much as the famous ones. So quiet states are not quiet because they are bad.");
       return null;
-    case "year": return say(null, "Switch the base year. 2023 is the only year with official state-level spending, so for 2024 and 2025 I carry 2023 spend per visitor forward.");
+    case "year": return say(null, "Pick which year to look at. Spending figures by state only go up to 2023, so for later years we reuse those.");
     case "travellers": return say(null, "That's JomRasa, the traveller side: a chat that suggests quieter places that fit what you like.");
     default: return null;
   }

@@ -89,7 +89,7 @@ export default function Simulator() {
               )}
             </div>
 
-            <div data-guide-say={`These are assumptions, not measurements. The big one is the hotel ceiling: at ${assumptions.target_occupancy_pct}% occupancy I treat a state as full. Raise it and every state can absorb more.`} data-guide-stage="payoff" className="space-y-4 rounded-xl border border-dashed border-border p-3">
+            <div data-guide-say="These are our guesses, not measurements. The main one: we count a state's hotels as full once most rooms are taken. Slide it up and every state can take more visitors." data-guide-stage="payoff" className="space-y-4 rounded-xl border border-dashed border-border p-3">
               <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Assumptions
                 <Info>These are your assumptions, not measurements. Target occupancy is the ceiling hotels may run at; guests per room converts visitors into rooms; the economic multiplier (off by default) uses the Malaysian input-output range 1.20-1.82, mean 1.42 (Mazumder et al. 2009).</Info></p>
               <Slider label="Target hotel occupancy (ceiling)" value={assumptions.target_occupancy_pct} min={50} max={90} step={1}
@@ -123,7 +123,7 @@ export default function Simulator() {
           <AnimatePresence>
             {sim.capacity_binds && (
               <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                data-guide-say={`You asked for more than the destination hotels can take: only ${fmt.visitorsK(sim.moved_k)} of ${fmt.visitorsK(sim.requested_k)} fit. That is the Capacity Limit doing its job - here the fix is more rooms, not more marketing.`} data-guide-stage="obstacle"
+                data-guide-say="You asked for more visitors than the hotels there can take, so only some of them fit. Here the fix is more rooms, not more advertising." data-guide-stage="obstacle"
                 className="flex items-start gap-2.5 rounded-xl border border-foreground/25 bg-muted px-4 py-3 text-xs text-foreground">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0 text-foreground" />
                 <p>
@@ -135,7 +135,7 @@ export default function Simulator() {
             )}
           </AnimatePresence>
 
-          <div data-guide-say={`${fmt.visitorsK(sim.moved_k)} visitors move. The destinations gain ${fmt.rmM(sim.receipts_gained_rm_m)} in spending while ${STATE_LABEL[origin]} gives up ${fmt.rmM(sim.receipts_lost_rm_m)}, and concentration goes from ${sim.concentration_before.gini.toFixed(3)} to ${sim.concentration_after.gini.toFixed(3)}.`} data-guide-stage="payoff">
+          <div data-guide-say={`This row is the result: how many visitors moved, what the quiet states gained, what ${STATE_LABEL[origin]} gave up, and whether tourism ended up more evenly spread.`} data-guide-stage="payoff">
           <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Kpi label="Visitors moved" value={sim.moved_k / 1000} decimals={2} suffix="M" note={`of ${fmt.visitorsK(sim.requested_k)} requested`} />
             <Kpi label={multOn ? "Economic impact at destinations" : "Receipts gained by destinations"} {...rm(multOn ? sim.economic_impact_gained_rm_m : sim.receipts_gained_rm_m)}
@@ -146,7 +146,7 @@ export default function Simulator() {
           </Stagger>
           </div>
 
-          <div data-guide-say={`Net for Malaysia: ${sim.net_national_rm_m >= 0 ? "+" : "-"}${fmt.rmM(Math.abs(sim.net_national_rm_m))}. The same people spend the same kind of money somewhere else, so the national total hardly moves. The win is spreading tourism out, not growing it.`} data-guide-stage="payoff" className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-muted-foreground">
+          <div data-guide-say="The country as a whole earns about the same. The same people spend similar money, just somewhere else. The win is sharing tourism more fairly, not making it bigger." data-guide-stage="payoff" className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">Net effect for Malaysia: {sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(sim.net_national_rm_m))}</span>
             <span>- this is rebalancing, not new money</span>
             <Info>The same visitors spend in a different place, so the national total barely moves. The small net figure comes only from the difference in spend per visitor between the two states.</Info>
@@ -168,7 +168,7 @@ export default function Simulator() {
           </Card>
 
           <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-            <Card title="Can the destinations absorb them?" say="Can the hotels cope? Each bar shows how much of a destination's spare room-nights this scenario would use. A full bar means it has hit the ceiling." info={`Spare room-nights = rooms x 365 x (target - current occupancy), Tourism Malaysia Paid Accommodation Survey ${year}. Only overnight visitors in paid accommodation need rooms (DOSM tourist / day-tripper split and accommodation type). Redirected visitors are assumed to behave like the destination average.`}>
+            <Card title="Can the destinations absorb them?" say="Can the hotels cope? Each bar shows how much of a state's empty rooms your idea would fill. A full bar means the hotels there are full." info={`Spare room-nights = rooms x 365 x (target - current occupancy), Tourism Malaysia Paid Accommodation Survey ${year}. Only overnight visitors in paid accommodation need rooms (DOSM tourist / day-tripper split and accommodation type). Redirected visitors are assumed to behave like the destination average.`}>
               <div className="space-y-4">
                 {sim.destinations.map((d) => {
                   const used = d.spare_room_nights > 0 ? Math.min(d.room_nights_needed / d.spare_room_nights, 1) : 1;
@@ -194,7 +194,7 @@ export default function Simulator() {
                 </div>
               </div>
             </Card>
-            <Card title="Tourism gets more even" say={`The grey curve is today and the green one is your scenario. The closer to the dashed line, the more evenly visitors are spread: Gini goes from ${sim.concentration_before.gini.toFixed(3)} to ${sim.concentration_after.gini.toFixed(3)}.`} info={`Lorenz curve of visitors: grey is today, green is this scenario. Spending Gini ${sim.receipts_gini_before.toFixed(3)} to ${sim.receipts_gini_after.toFixed(3)}.`}>
+            <Card title="Tourism gets more even" say="Grey is today, green is your idea. The closer the green line gets to the dotted line, the more fairly visitors are spread." info={`Lorenz curve of visitors: grey is today, green is this scenario. Spending Gini ${sim.receipts_gini_before.toFixed(3)} to ${sim.receipts_gini_after.toFixed(3)}.`}>
               <LorenzChart color={STAGE.payoff.base} before={lorenz(rows.map((r) => r.visitors_k as number))} after={lorenz(sim.after.map((r) => r.visitors_k as number))} />
             </Card>
           </div>
