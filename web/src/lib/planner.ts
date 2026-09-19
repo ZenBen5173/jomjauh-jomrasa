@@ -110,9 +110,9 @@ export function recommend(prefs: Prefs, rows: Row[], gap: GapRow[], labels: Reco
       .sort((a, b) => b.v!.sentiment - a.v!.sentiment)[0];
     // plain language: these are read by travellers, not analysts
     const reasons = [
-      best ? `Travellers rate its ${topicLabel[best.t].toLowerCase()} ${best.v!.sentiment.toFixed(0)}/100` : null,
+      best ? `People who went ${best.v!.sentiment >= 90 ? "rave about" : best.v!.sentiment >= 75 ? "really liked" : "liked"} the ${topicLabel[best.t].toLowerCase()}` : null,
       g.actual < 45 ? "One of the quietest states in Malaysia" : g.actual < 60 ? "Moderately busy - quieter than the big names" : "One of the busier states, so expect company",
-      `Visitors spend about RM ${Math.round(r.spend_per_visitor_rm as number)} a trip${spend[i] < 40 ? " - easy on the budget" : spend[i] > 70 ? " - on the pricier side" : ""}`,
+      spend[i] < 40 ? "Easy on the wallet compared with most states" : spend[i] > 70 ? "On the pricier side" : "Middle of the road on cost",
       (r.occupancy_pct as number) < 50 ? "Rooms are easy to find" : null,
     ].filter(Boolean) as string[];
     return { code: r.code, score, parts, reasons, places, quotes };

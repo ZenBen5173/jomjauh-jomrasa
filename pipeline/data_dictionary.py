@@ -28,6 +28,8 @@ TABLES = {
     "jomrasa_state": ("Experience Score (raw, shrunk, interval), sample size, emotion mix, access / amenity sentiment", "JomRasa (pipeline/text)", None),
     "jomrasa_topics": ("Topic sentiment per state with sample size (empirical-Bayes shrunk)", "JomRasa", None),
     "jomrasa_quotes": ("Representative short quotes with source links", "JomRasa", None),
+    "guide_places_raw": ("Traveller-guide listings: see / do / eat / drink / buy, with description, opening hours, address and coordinates where given", "English Wikivoyage destination pages, CC BY-SA 4.0 (pipeline/guide/collect.py)", None),
+    "guide_destinations_raw": ("Traveller-guide towns: state, source page and revision id, opening paragraph, food notes", "English Wikivoyage, CC BY-SA 4.0", None),
     "jomrasa_places": ("Place catalogue: place, state, coordinates (Nominatim), tags, sentiment, quote", "JomRasa + OpenStreetMap Nominatim", None),
 }
 

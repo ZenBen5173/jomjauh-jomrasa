@@ -43,6 +43,13 @@ python -m pipeline.text.score sample                # 200 items to hand-label ->
 python -m pipeline.build_panel && python -m pipeline.export_web
 ```
 
+Traveller guide (no keys needed; pages, rainfall and geocoding are cached):
+
+```bash
+python -m pipeline.guide.collect          # Wikivoyage destination pages -> see / do / eat listings (raw pages kept with revision ids)
+python -m pipeline.guide.build            # locate, assign meals, rainfall 2015-2024, best months -> web/public/data/guide.json
+```
+
 ## Run the dashboard
 
 ```bash
@@ -55,6 +62,8 @@ npm test                                  # TypeScript metrics must reproduce th
 - `data/raw/` holds the untouched official downloads (DOSM, data.gov.my, Tourism Malaysia, geoBoundaries, OpenStreetMap) with access dates in `_manifest.json`.
 - The collected travel text corpus (`data/clean/text_items.parquet`, `data/raw/text/`) is **not** in this repository: it is third-party writing.
   Only derived, aggregated tables and short attributed quotes are published. Re-create it with the JomRasa commands above.
+- Place descriptions in the traveller guide are from English Wikivoyage (CC BY-SA 4.0), trimmed and otherwise unchanged, and are published under the same licence;
+  rainfall is from the Open-Meteo archive (ERA5, CC BY 4.0); missing coordinates are from OpenStreetMap (ODbL).
 - JomRasa validation figures are agreement with blind reference labels from a stronger model, not human-labelled accuracy (see `docs/validation_*.`).
 
 Live dashboard: https://jomjauh.vercel.app · Team ANAK SUNWAY · DOSM Datathon 2026

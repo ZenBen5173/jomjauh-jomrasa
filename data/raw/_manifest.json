@@ -1,172 +1,1067 @@
 {
-  "datagovmy/arrivals_soe.parquet": {
-    "accessed": "2026-09-17",
-    "bytes": 190816,
-    "sha256": "b939733cb9b8d9f6de76ab48fd2350920167f43d64ff45e224216b39d661937c",
-    "url": "https://storage.data.gov.my/demography/arrivals_soe.parquet"
-  },
-  "datagovmy/gdp_state_real_supply.parquet": {
-    "accessed": "2026-09-17",
-    "bytes": 13514,
-    "sha256": "eb422ca7b041a029c2452dbf0b3d0cbfb53b4270c31706d05ce02a0c8686d656",
-    "url": "https://storage.dosm.gov.my/gdp/gdp_state_real_supply.parquet"
-  },
-  "datagovmy/hh_access_amenities.parquet": {
-    "accessed": "2026-09-17",
-    "bytes": 9976,
-    "sha256": "1720d4be9d2a11f549a9076d159b845ba14af9b0d9d4cef5435b580f7ed41609",
-    "url": "https://storage.dosm.gov.my/hies/hh_access_amenities.parquet"
-  },
-  "datagovmy/hh_income_state.parquet": {
-    "accessed": "2026-09-17",
-    "bytes": 5274,
-    "sha256": "606ad545aa8d0f4b4e590bffa28a84a9fc79091b1bbb0f66e1779ec9c1dc7e8f",
-    "url": "https://storage.dosm.gov.my/hies/hh_income_state.parquet"
-  },
-  "datagovmy/hh_poverty_state.parquet": {
-    "accessed": "2026-09-17",
-    "bytes": 5666,
-    "sha256": "af3fd822ba0fcecce1a74c990e061ffcff35555605125f3b1e33338fe4e2d9c7",
-    "url": "https://storage.dosm.gov.my/hies/hh_poverty_state.parquet"
-  },
-  "datagovmy/population_state.parquet": {
-    "accessed": "2026-09-17",
-    "bytes": 389489,
-    "sha256": "3ae425f5cf5a053ae799adfd59480ea46455f8ed6eb34a47dcece76f7fae63da",
-    "url": "https://storage.dosm.gov.my/population/population_state.parquet"
-  },
-  "datagovmy/ridership_headline.parquet": {
-    "accessed": "2026-09-17",
-    "bytes": 110033,
-    "sha256": "1602e91d534c7f7571c60b42694f160a368a7aaef51cdc040ff48b8fb589937d",
-    "url": "https://storage.data.gov.my/transportation/ridership_headline.parquet"
-  },
-  "dosm/state/tourism_domestic_2023_johor.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380928,
-    "sha256": "81631136111471db23fea8ba5ec869da708398aca888c0d00e1f656a22596307",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_johor.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_kedah.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380906,
-    "sha256": "c7a89b0a314e73f5c370aca1297a9f1b2d29f87e9f775ee9d47440c28e93656b",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_kedah.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_kelantan.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380842,
-    "sha256": "9827f7014aa01092990f59c6134b2d2e98de583a30884194b4e3c8a2ef0b3402",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_kelantan.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_melaka.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380818,
-    "sha256": "1df9b2af25724ba5194557dec67e718adff0c52d6aee562e97a2a1e685749f4d",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_melaka.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_negerisembilan.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380795,
-    "sha256": "052d91c8303248f69367e1fa51c67597066fc957738b5f4d5fa28be7985aa1b3",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_negerisembilan.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_pahang.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380768,
-    "sha256": "feb28bc41cb0cfafcd18bcd0c48746e187022fd86261c17e2fdd0615abc46181",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_pahang.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_perak.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 382213,
-    "sha256": "e526e377077943eabbf930663da28f474e08fe584521e562e442800b8f3b33e0",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_perak.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_perlis.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 381065,
-    "sha256": "cf972dbe3bb5f793888825b1c2f3e996499a93b70192f455ea60bd0c8e159a04",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_perlis.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_pulaupinang.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380921,
-    "sha256": "fdcbdb484d4e342708236e2df5c5f7312772741c408c6812e50a38f5d7351ae4",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_pulaupinang.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_sabah.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380888,
-    "sha256": "6ed793ceaf56def33c5434cf85ea781324dfbb203399e7b52c3775a1fef5af9b",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_sabah.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_sarawak.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380870,
-    "sha256": "5f4fb809cc51408e3169aa1f6d5b7a3106e0282e7eb60470177ba999ec3419f9",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_sarawak.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_selangor.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380890,
-    "sha256": "61fe9d133e354b8ec2ec8916e5f786d0bb3215840b2d5a93e45711dfee4f4f0f",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_selangor.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_terengganu.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380909,
-    "sha256": "a44e11285f0a34deeafbe414cebd2cca2ef545ceb2a878b22325a254d586afae",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_terengganu.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_wpkualalumpur.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380794,
-    "sha256": "d6e5e86d63088ee43a077c1dc960b9aa656436b757f6cf395a23bed8964e76c5",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wpkualalumpur.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_wplabuan.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380962,
-    "sha256": "40021d44a9607cd7e68816b2f3077981ed14717671c0ac6ea7b054272bf62005",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wplabuan.xlsx"
-  },
-  "dosm/state/tourism_domestic_2023_wpputrajaya.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 380766,
-    "sha256": "671708bdf7aa5bfd8e86e00a104baa98d244c07dea6f8678f8dea55abab4a711",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wpputrajaya.xlsx"
-  },
-  "dosm/tourism_2025.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 715191,
-    "sha256": "d33836e9e6ebc8e4d520313af376ec7016d82e68d6af217ba971fb854a4a7b63",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_2025.xlsx"
-  },
-  "dosm/tourism_domestic_2023.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 53441,
-    "sha256": "c24245c79011f50c00008c59a277ffa8f8b7a2b19fc665aebff96873d56d22b2",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023.xlsx"
-  },
-  "dosm/tourism_domestic_2024.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 83272,
-    "sha256": "67e2aac05c5dc06dc045969e1608cc76ac6b526a3f789b5bb9db4e53e415026c",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2024.xlsx"
-  },
-  "dosm/tourism_domestic_2025.xlsx": {
-    "accessed": "2026-09-17",
-    "bytes": 57094,
-    "sha256": "c9fe28d1c516e58e6a79bfefa2ff53ddcfef109511c8c8dbe117a7bf87d04c96",
-    "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2025.xlsx"
-  },
-  "geo/geoBoundaries-MYS-ADM1_simplified.geojson": {
-    "accessed": "2026-09-17",
-    "boundary_source": "OpenStreetMap, Wambacher",
-    "bytes": 583194,
-    "license": "Open Data Commons Open Database License 1.0",
-    "sha256": "fb0f76f0f987c748b732ef02049113946db2dd5fc604130d4a0fbab4e74d4012",
-    "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MYS/ADM1/geoBoundaries-MYS-ADM1_simplified.geojson"
-  }
+ "climate/air_itam.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67218,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "5f33133ced46c1386442141877c2a2585d473fb23d4d4fcdbb659f48ccedaf1e",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.407&longitude=100.276&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/alor_setar.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67142,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "a1c831da6706087799b31db785a00d286d52a71327bab9158f601f69903bf31e",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=6.122&longitude=100.367&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/balik_pulau.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67388,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "f73200759457266b53c0051f725cd1d84e11a9ff727ceb699c0a21fd8c04707c",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.399&longitude=100.221&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/batu_ferringhi.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67295,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "2367366075b8d89f637736e58a3e483bcd474574f4aa4714d128f9246df3ca0e",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.461&longitude=100.233&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/bintulu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67572,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "149957abe9b3d4156693ba8ad0dbf2d0cfff94f51b03da4908b974a13e550f19",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=3.173&longitude=113.04&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/butterworth.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67140,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "3bb42497d0ec6ffed65c034d9bb5701ab843c42d2a56b1b8d64528d52b7a8bce",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.442&longitude=100.39&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/cameron_highlands.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66954,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "0dd038492ed8fac52eb6610759e0e20c28011513f3765f90ab39c0b41dd9c384",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=4.479&longitude=101.386&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/genting_highlands.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66951,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "78a535a2878c181c3d03fce1b6cddf400382eff8460bfd731c494f02182e7fe1",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=3.423&longitude=101.793&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/george_town_malaysia.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67246,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "2f8950f3d9a3d239666a5b2a08c9b09281c6fc4eb741fec3d56491d2ba7cbf8e",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.42&longitude=100.333&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/ipoh.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67258,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "d8d9b48c0ddd501f03682a78836c4001d346dfb73823706957a9006fbb5ae52f",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=4.596&longitude=101.084&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/klang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67247,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "18b4fb2a2bad1cd4a0d2bd271243ab884aadf4a040be281ee5984627fabb6b2a",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=3.047&longitude=101.447&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kota_bharu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67139,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "a3b3b3423b54352e691b810006e6883ab0cde2268be9a401e19dc9de22d2da35",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=6.132&longitude=102.237&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kota_kinabalu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66944,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "3bd53ba3c26498b89e8e0980dc6f4273d63eed360a93495db9a920da7872f500",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.978&longitude=116.075&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kota_tinggi.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67223,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "0c8502759544009dcb980828915a48662e29c84ef8d2c8ef1eaa804711818495",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=1.736&longitude=103.912&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kuala_kangsar.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67140,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "fc8bfceaaa7e79015b6b349279014d487b34fdd36bc63325f8304c14a0eae5a9",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=4.773&longitude=100.945&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kuala_lumpur.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67139,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "5cb2782911e6a958367d85e9615fbbb1ab5328b2e499f80ca22758428222c9ce",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=3.146&longitude=101.697&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kuala_terengganu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67212,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "4d7e42082c8dcc52d5a1ab8c34d091fcb95914b860da297ce04c4527b48fdb03",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.328&longitude=103.134&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kuching.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67640,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "2396b12ff82ac178db45b6087bb1a71ed860791fadd518067c1208065afe340d",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=1.555&longitude=110.348&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kudat.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66684,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "620210b88b52af787675aeeb40c5d72a35f66850f4597f8aace4324547cc77c3",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=6.884&longitude=116.856&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/kulim.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67600,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "65c3f6c0ec0bc8762d5291df2873909c9a0c0832f5d320c1368bdcba3c23f7e4",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.394&longitude=100.555&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/labuan.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67108,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "ccfaf3037d91345360ed8b44a4476c1a56762f1bea5d793febd214f8cc8c4954",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.283&longitude=115.248&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/langkawi.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66985,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "3cfe354f75178c67bda2f88b2255b5fb27f7ecce492658bf795bb4292bce3d47",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=6.325&longitude=99.729&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/malacca.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66923,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "5fb616d0f347189543430fe6611b0c5c778532d95d1e74ecab28e238018b69f9",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=2.196&longitude=102.249&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/miri.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67188,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "b6370109344dc29c81aa3f59ea1a57f22b0f422d543e916be54a4e8fbfc79240",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=4.37&longitude=113.968&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/pangkor.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67010,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "55920428d272ccc836865542d444147ab115f641163a35de05e9cf301f30b698",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=4.212&longitude=100.566&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/perhentian_islands.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66832,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "c5282042ee2256d8affb03db93b5202bf3a1c879ad2cf0e2b53525554f321473",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.916&longitude=102.722&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/port_dickson.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67110,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "1522d059e6883afa4e9dc3422ff8a5d317c2c3667d70d4380e01f53b1e02fa0d",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=2.443&longitude=101.855&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/putrajaya.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67281,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "078f06b09248ce8754db99e86abd81b1d8e37784e0a39564b8c63c948b7e741f",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=2.937&longitude=101.689&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/sandakan.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67232,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "ac0f2829bb686becf8b989217416742cfdb910a311939b6352ebad9917b229d3",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=5.841&longitude=118.099&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/semporna.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66861,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "b8d03d0f7d333408ca9d2547cf583f82a7bc9702de049d67aad0fcd783fd2cb1",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=4.479&longitude=118.614&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/sibu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67402,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "0ec17a3b6af1b84362f3506bb19bb99afc601ddc75683db8845093dd65f75705",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=2.288&longitude=111.834&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/taiping.json": {
+  "accessed": "2026-09-19",
+  "bytes": 67346,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "22afb9a79a6c30a3be999e61cd05d288a497edea90a3fa493f7e8215f35e583f",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=4.854&longitude=100.733&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "climate/tioman.json": {
+  "accessed": "2026-09-19",
+  "bytes": 66625,
+  "license": "CC BY 4.0 (Open-Meteo, ERA5)",
+  "sha256": "b6b92cc7efbdc8f8d9ff3774fd74ae2a899b1a4e69b75dc8ab0ae44e284310bd",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=2.822&longitude=104.16&start_date=2015-01-01&end_date=2024-12-31&daily=precipitation_sum&timezone=Asia%2FKuala_Lumpur"
+ },
+ "datagovmy/arrivals_soe.parquet": {
+  "accessed": "2026-09-17",
+  "bytes": 190816,
+  "sha256": "b939733cb9b8d9f6de76ab48fd2350920167f43d64ff45e224216b39d661937c",
+  "url": "https://storage.data.gov.my/demography/arrivals_soe.parquet"
+ },
+ "datagovmy/gdp_state_real_supply.parquet": {
+  "accessed": "2026-09-17",
+  "bytes": 13514,
+  "sha256": "eb422ca7b041a029c2452dbf0b3d0cbfb53b4270c31706d05ce02a0c8686d656",
+  "url": "https://storage.dosm.gov.my/gdp/gdp_state_real_supply.parquet"
+ },
+ "datagovmy/hh_access_amenities.parquet": {
+  "accessed": "2026-09-17",
+  "bytes": 9976,
+  "sha256": "1720d4be9d2a11f549a9076d159b845ba14af9b0d9d4cef5435b580f7ed41609",
+  "url": "https://storage.dosm.gov.my/hies/hh_access_amenities.parquet"
+ },
+ "datagovmy/hh_income_state.parquet": {
+  "accessed": "2026-09-17",
+  "bytes": 5274,
+  "sha256": "606ad545aa8d0f4b4e590bffa28a84a9fc79091b1bbb0f66e1779ec9c1dc7e8f",
+  "url": "https://storage.dosm.gov.my/hies/hh_income_state.parquet"
+ },
+ "datagovmy/hh_poverty_state.parquet": {
+  "accessed": "2026-09-17",
+  "bytes": 5666,
+  "sha256": "af3fd822ba0fcecce1a74c990e061ffcff35555605125f3b1e33338fe4e2d9c7",
+  "url": "https://storage.dosm.gov.my/hies/hh_poverty_state.parquet"
+ },
+ "datagovmy/population_state.parquet": {
+  "accessed": "2026-09-17",
+  "bytes": 389489,
+  "sha256": "3ae425f5cf5a053ae799adfd59480ea46455f8ed6eb34a47dcece76f7fae63da",
+  "url": "https://storage.dosm.gov.my/population/population_state.parquet"
+ },
+ "datagovmy/ridership_headline.parquet": {
+  "accessed": "2026-09-17",
+  "bytes": 110033,
+  "sha256": "1602e91d534c7f7571c60b42694f160a368a7aaef51cdc040ff48b8fb589937d",
+  "url": "https://storage.data.gov.my/transportation/ridership_headline.parquet"
+ },
+ "dosm/state/tourism_domestic_2023_johor.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380928,
+  "sha256": "81631136111471db23fea8ba5ec869da708398aca888c0d00e1f656a22596307",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_johor.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_kedah.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380906,
+  "sha256": "c7a89b0a314e73f5c370aca1297a9f1b2d29f87e9f775ee9d47440c28e93656b",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_kedah.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_kelantan.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380842,
+  "sha256": "9827f7014aa01092990f59c6134b2d2e98de583a30884194b4e3c8a2ef0b3402",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_kelantan.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_melaka.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380818,
+  "sha256": "1df9b2af25724ba5194557dec67e718adff0c52d6aee562e97a2a1e685749f4d",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_melaka.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_negerisembilan.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380795,
+  "sha256": "052d91c8303248f69367e1fa51c67597066fc957738b5f4d5fa28be7985aa1b3",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_negerisembilan.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_pahang.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380768,
+  "sha256": "feb28bc41cb0cfafcd18bcd0c48746e187022fd86261c17e2fdd0615abc46181",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_pahang.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_perak.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 382213,
+  "sha256": "e526e377077943eabbf930663da28f474e08fe584521e562e442800b8f3b33e0",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_perak.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_perlis.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 381065,
+  "sha256": "cf972dbe3bb5f793888825b1c2f3e996499a93b70192f455ea60bd0c8e159a04",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_perlis.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_pulaupinang.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380921,
+  "sha256": "fdcbdb484d4e342708236e2df5c5f7312772741c408c6812e50a38f5d7351ae4",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_pulaupinang.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_sabah.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380888,
+  "sha256": "6ed793ceaf56def33c5434cf85ea781324dfbb203399e7b52c3775a1fef5af9b",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_sabah.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_sarawak.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380870,
+  "sha256": "5f4fb809cc51408e3169aa1f6d5b7a3106e0282e7eb60470177ba999ec3419f9",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_sarawak.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_selangor.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380890,
+  "sha256": "61fe9d133e354b8ec2ec8916e5f786d0bb3215840b2d5a93e45711dfee4f4f0f",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_selangor.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_terengganu.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380909,
+  "sha256": "a44e11285f0a34deeafbe414cebd2cca2ef545ceb2a878b22325a254d586afae",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_terengganu.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_wpkualalumpur.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380794,
+  "sha256": "d6e5e86d63088ee43a077c1dc960b9aa656436b757f6cf395a23bed8964e76c5",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wpkualalumpur.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_wplabuan.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380962,
+  "sha256": "40021d44a9607cd7e68816b2f3077981ed14717671c0ac6ea7b054272bf62005",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wplabuan.xlsx"
+ },
+ "dosm/state/tourism_domestic_2023_wpputrajaya.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 380766,
+  "sha256": "671708bdf7aa5bfd8e86e00a104baa98d244c07dea6f8678f8dea55abab4a711",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023_wpputrajaya.xlsx"
+ },
+ "dosm/tourism_2025.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 715191,
+  "sha256": "d33836e9e6ebc8e4d520313af376ec7016d82e68d6af217ba971fb854a4a7b63",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_2025.xlsx"
+ },
+ "dosm/tourism_domestic_2023.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 53441,
+  "sha256": "c24245c79011f50c00008c59a277ffa8f8b7a2b19fc665aebff96873d56d22b2",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2023.xlsx"
+ },
+ "dosm/tourism_domestic_2024.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 83272,
+  "sha256": "67e2aac05c5dc06dc045969e1608cc76ac6b526a3f789b5bb9db4e53e415026c",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2024.xlsx"
+ },
+ "dosm/tourism_domestic_2025.xlsx": {
+  "accessed": "2026-09-17",
+  "bytes": 57094,
+  "sha256": "c9fe28d1c516e58e6a79bfefa2ff53ddcfef109511c8c8dbe117a7bf87d04c96",
+  "url": "https://storage.dosm.gov.my/tourism/tourism_domestic_2025.xlsx"
+ },
+ "geo/geoBoundaries-MYS-ADM1_simplified.geojson": {
+  "accessed": "2026-09-17",
+  "boundary_source": "OpenStreetMap, Wambacher",
+  "bytes": 583194,
+  "license": "Open Data Commons Open Database License 1.0",
+  "sha256": "fb0f76f0f987c748b732ef02049113946db2dd5fc604130d4a0fbab4e74d4012",
+  "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MYS/ADM1/geoBoundaries-MYS-ADM1_simplified.geojson"
+ },
+ "wikivoyage/air_itam.json": {
+  "accessed": "2026-09-19",
+  "bytes": 17170,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5348021,
+  "sha256": "15a6087d700d2346acceb2adbae1a37ca4cd89d86bf23c3d36aea509e21e11d3",
+  "url": "https://en.wikivoyage.org/wiki/Air_Itam"
+ },
+ "wikivoyage/alor_gajah.json": {
+  "accessed": "2026-09-19",
+  "bytes": 1808,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 4800647,
+  "sha256": "da57ddbd1bd7a5d392588ef0fe415fac904bba3ff53d4d7b038185796238ccc1",
+  "url": "https://en.wikivoyage.org/wiki/Alor_Gajah"
+ },
+ "wikivoyage/arau.json": {
+  "accessed": "2026-09-19",
+  "bytes": 3151,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 4449999,
+  "sha256": "612f86b015f9099007b94f1d67b985711eab02f282ab80d72263fcf2250ab968",
+  "url": "https://en.wikivoyage.org/wiki/Arau"
+ },
+ "wikivoyage/balik_pulau.json": {
+  "accessed": "2026-09-19",
+  "bytes": 9077,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5348525,
+  "sha256": "a7f5f34ee5f3303f60311c9ef3baed646e2bb36379d4349516c197bbf55f9207",
+  "url": "https://en.wikivoyage.org/wiki/Balik_Pulau"
+ },
+ "wikivoyage/batu_ferringhi.json": {
+  "accessed": "2026-09-19",
+  "bytes": 21200,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5365043,
+  "sha256": "a30d9ba88049283a4d9b8d2f848fa1b3f16e6277ba3efbf83fdf50686f0ab1c7",
+  "url": "https://en.wikivoyage.org/wiki/Batu_Ferringhi"
+ },
+ "wikivoyage/bentong.json": {
+  "accessed": "2026-09-19",
+  "bytes": 41,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": null,
+  "sha256": "1e888fe0c4821c8ccfbf86012e2c99f2a92af0e0ab502cbc91f7a96018c29d57",
+  "url": "https://en.wikivoyage.org/w/api.php?page=Bentong"
+ },
+ "wikivoyage/bintulu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 45296,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5242057,
+  "sha256": "082f7abe3405a1cb47866ea016dbdf965e0b56e5115e0388e6599d7787fc1863",
+  "url": "https://en.wikivoyage.org/wiki/Bintulu"
+ },
+ "wikivoyage/bukit_mertajam.json": {
+  "accessed": "2026-09-19",
+  "bytes": 7277,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5309453,
+  "sha256": "a2e55685a6d6b3991082674d7dc566fa8283f273d94848bc3c10f5e242fc7262",
+  "url": "https://en.wikivoyage.org/wiki/Bukit_Mertajam"
+ },
+ "wikivoyage/butterworth.json": {
+  "accessed": "2026-09-19",
+  "bytes": 15660,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5349366,
+  "sha256": "951b38e768d99d4d6d642d63160b3d99a8c6137bcb6b19c856fde79f2d8e46f4",
+  "url": "https://en.wikivoyage.org/wiki/Butterworth"
+ },
+ "wikivoyage/cameron_highlands.json": {
+  "accessed": "2026-09-19",
+  "bytes": 56906,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5272425,
+  "sha256": "c4462ff0882f732366bc051e39431bf2da28343d1211c329a2fd29017e27293a",
+  "url": "https://en.wikivoyage.org/wiki/Cameron_Highlands"
+ },
+ "wikivoyage/cherating.json": {
+  "accessed": "2026-09-19",
+  "bytes": 14696,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5349758,
+  "sha256": "08e2bf0d630b91994708723f8a6469578a36bef1a0bc9991b3682f21ef4f8916",
+  "url": "https://en.wikivoyage.org/wiki/Cherating"
+ },
+ "wikivoyage/dungun.json": {
+  "accessed": "2026-09-19",
+  "bytes": 40,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": null,
+  "sha256": "56a295c208a9bc0e681fd8ec3149a296396080840ce4afa8585bab6cd33f1a2c",
+  "url": "https://en.wikivoyage.org/w/api.php?page=Dungun"
+ },
+ "wikivoyage/fraser_s_hill.json": {
+  "accessed": "2026-09-19",
+  "bytes": 11844,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5242296,
+  "sha256": "6716bb9e330b0ee1857df96035d76b30c60beb942f4ad2c0451dd06e40561deb",
+  "url": "https://en.wikivoyage.org/wiki/Fraser's_Hill"
+ },
+ "wikivoyage/genting_highlands.json": {
+  "accessed": "2026-09-19",
+  "bytes": 48410,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5351170,
+  "sha256": "f5c2f08f15c49f5de7a522ba2a23aa4099ca954bbfe98ace3f875880f4ba098a",
+  "url": "https://en.wikivoyage.org/wiki/Genting_Highlands"
+ },
+ "wikivoyage/george_town_malaysia.json": {
+  "accessed": "2026-09-19",
+  "bytes": 142361,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5351172,
+  "sha256": "0eedea3ff7fca0ee45bc19a7ba0adcd4e75d8d15d0128a43520373caecaa7454",
+  "url": "https://en.wikivoyage.org/wiki/George_Town_(Malaysia)"
+ },
+ "wikivoyage/gopeng.json": {
+  "accessed": "2026-09-19",
+  "bytes": 40,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": null,
+  "sha256": "723dd1a843562e5cb89464f0f1726896df01b268f586e99d54e47f6161667907",
+  "url": "https://en.wikivoyage.org/w/api.php?page=Gopeng"
+ },
+ "wikivoyage/gua_musang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 6582,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 4987374,
+  "sha256": "b6e70e7c5ae2ce8c0c941f11779b58030f2649daa78159fb8317c08237a2cbb8",
+  "url": "https://en.wikivoyage.org/wiki/Gua_Musang"
+ },
+ "wikivoyage/gunung_mulu_national_park.json": {
+  "accessed": "2026-09-19",
+  "bytes": 16572,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5247224,
+  "sha256": "b817d7e29332ae8475f64d60b5474fad490adbe54e45504ebfef44887e393b0b",
+  "url": "https://en.wikivoyage.org/wiki/Gunung_Mulu_National_Park"
+ },
+ "wikivoyage/ipoh.json": {
+  "accessed": "2026-09-19",
+  "bytes": 72486,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352014,
+  "sha256": "496276f3cb77d8cdbe8ab61071503d2ce05bdee51912a19943b4d947ac54fdad",
+  "url": "https://en.wikivoyage.org/wiki/Ipoh"
+ },
+ "wikivoyage/kajang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 9422,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352242,
+  "sha256": "c5e756de32e71578dee09f190ef527de3b51980451621c6f041be05832df403c",
+  "url": "https://en.wikivoyage.org/wiki/Kajang"
+ },
+ "wikivoyage/kangar.json": {
+  "accessed": "2026-09-19",
+  "bytes": 5942,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 4987385,
+  "sha256": "43c5a62a174f5324c7c57d9c4b79d9fb5406965ba3e621f224a5f5b200a13b80",
+  "url": "https://en.wikivoyage.org/wiki/Kangar"
+ },
+ "wikivoyage/kapas.json": {
+  "accessed": "2026-09-19",
+  "bytes": 3426,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 3503627,
+  "sha256": "32d5f88a6278bcc1ae585f35bf7cd657e448f4aa9f369ff001a1f8658935215e",
+  "url": "https://en.wikivoyage.org/wiki/Kapas"
+ },
+ "wikivoyage/kapit.json": {
+  "accessed": "2026-09-19",
+  "bytes": 4542,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5285785,
+  "sha256": "8afa03b488f6e80df4d34a6b1390af7f140a3ec0251387b9132eef68f7f85cc6",
+  "url": "https://en.wikivoyage.org/wiki/Kapit"
+ },
+ "wikivoyage/kenyir_lake.json": {
+  "accessed": "2026-09-19",
+  "bytes": 2036,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 3932966,
+  "sha256": "b95239d32bf8bd9a78440363daa643124123c753e3f7b95bd1dfc52047c97c69",
+  "url": "https://en.wikivoyage.org/wiki/Kenyir_Lake"
+ },
+ "wikivoyage/kinabalu_national_park.json": {
+  "accessed": "2026-09-19",
+  "bytes": 26424,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5312005,
+  "sha256": "d6de1333585ad23004693ba2bf85ec7897cf22446b9ed9b7a11e7de4ab48a26a",
+  "url": "https://en.wikivoyage.org/wiki/Mount_Kinabalu"
+ },
+ "wikivoyage/klang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 22859,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352516,
+  "sha256": "7cb6752d5a7a98f0733fdb9778f1c904293b4edfdbcd2b95e5a4ad5470775aaa",
+  "url": "https://en.wikivoyage.org/wiki/Klang"
+ },
+ "wikivoyage/kota_bharu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 26770,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5288812,
+  "sha256": "39ee2506cb7b4d627b63a75f7a85a6900b000b579e70a73b1e19f37be62c3477",
+  "url": "https://en.wikivoyage.org/wiki/Kota_Bharu"
+ },
+ "wikivoyage/kota_kinabalu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 126177,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5360038,
+  "sha256": "d7505beefbc57b350737bd114c58cfd71579354bb332d37025cc27777fca0bf5",
+  "url": "https://en.wikivoyage.org/wiki/Kota_Kinabalu"
+ },
+ "wikivoyage/kuala_kangsar.json": {
+  "accessed": "2026-09-19",
+  "bytes": 13166,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352626,
+  "sha256": "8b1c2e673b840910abc87f3401f88b5306f2bf56a01e7394f2df10eb52c15010",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Kangsar"
+ },
+ "wikivoyage/kuala_kubu_bharu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 7271,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5160127,
+  "sha256": "194bd6d112ffd9b319511846d90cd736f0384273005fd1d4b700b8f54376ec10",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Kubu_Bharu"
+ },
+ "wikivoyage/kuala_lumpur.json": {
+  "accessed": "2026-09-19",
+  "bytes": 97398,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352627,
+  "sha256": "6aa79c551bc3fade50353e68a7048b5eb66de46eaf244866edf4bc2c688ceae4",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur"
+ },
+ "wikivoyage/kuala_lumpur_bangsar_and_midvalley.json": {
+  "accessed": "2026-09-19",
+  "bytes": 20828,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5360045,
+  "sha256": "fc2f3c2b3b5c8be1b6ec1b973c8327b12a94a520faf047560784b2583ade79a9",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Botanical_Garden"
+ },
+ "wikivoyage/kuala_lumpur_botanical_garden.json": {
+  "accessed": "2026-09-19",
+  "bytes": 20823,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5360045,
+  "sha256": "32200acf2890da4d0fe7c1c2fd901a0c944f919e5ea16c3f509406da1774a388",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Botanical_Garden"
+ },
+ "wikivoyage/kuala_lumpur_brickfields.json": {
+  "accessed": "2026-09-19",
+  "bytes": 29075,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352629,
+  "sha256": "e5d0770ac7354675d24544e8dd9d2f03826ebe1227855a033b16959c58d0b85c",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Brickfields_and_Bangsar"
+ },
+ "wikivoyage/kuala_lumpur_brickfields_and_bangsar.json": {
+  "accessed": "2026-09-19",
+  "bytes": 29087,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352629,
+  "sha256": "b330cd161df2ad75f3077e916442638d25047d7bcb497bbbf8c6e4e2f17c7de5",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Brickfields_and_Bangsar"
+ },
+ "wikivoyage/kuala_lumpur_central.json": {
+  "accessed": "2026-09-19",
+  "bytes": 42665,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352634,
+  "sha256": "9e5fa828791ecc2b80c34391c214bf77ba17e31049cd3a711c7ac06a95599411",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Old_City_Centre"
+ },
+ "wikivoyage/kuala_lumpur_diamond_triangle.json": {
+  "accessed": "2026-09-19",
+  "bytes": 8003,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 4868825,
+  "sha256": "6a470d0868331f4a89de6dc560a85adab90b3c3326594853a54d03e7e8f644cc",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Diamond_Triangle"
+ },
+ "wikivoyage/kuala_lumpur_east.json": {
+  "accessed": "2026-09-19",
+  "bytes": 9399,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352630,
+  "sha256": "3d34d598c49f30d94bd3b1111c74c5faad12327e7808787e8abc8068a2f41c83",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/East"
+ },
+ "wikivoyage/kuala_lumpur_golden_triangle.json": {
+  "accessed": "2026-09-19",
+  "bytes": 62037,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352631,
+  "sha256": "7759d1c173a3f1b84ccf4aaf2a36daead185f9eedf8e5bd4d7ab94781e11550c",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Golden_Triangle"
+ },
+ "wikivoyage/kuala_lumpur_kuala_lumpur_south_of_city_centre.json": {
+  "accessed": "2026-09-19",
+  "bytes": 80,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": null,
+  "sha256": "52ea3c60c19f59c8a99a23274cc400836db5035e9e0489f2ac1e02581c1890b4",
+  "url": "https://en.wikivoyage.org/w/api.php?page=Kuala Lumpur/Kuala Lumpur/South_of_City_Centre"
+ },
+ "wikivoyage/kuala_lumpur_north.json": {
+  "accessed": "2026-09-19",
+  "bytes": 10875,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352632,
+  "sha256": "f2126ad719cf29b2920a80138cb27814b56d5a29eb93aadde5ef883b75e3a070",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/North"
+ },
+ "wikivoyage/kuala_lumpur_north_of_city_centre.json": {
+  "accessed": "2026-09-19",
+  "bytes": 31133,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352633,
+  "sha256": "b4cd91a682f1f52a6b2fcdcc6ccd77326c2da562d0359e537314d49acc528f6d",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/North_of_City_Centre"
+ },
+ "wikivoyage/kuala_lumpur_south.json": {
+  "accessed": "2026-09-19",
+  "bytes": 14437,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352635,
+  "sha256": "a8725b9f0e3988b7c7c90e22b383cfcd7812cc07cbabd53836961931006643b3",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/South"
+ },
+ "wikivoyage/kuala_lumpur_south_of_city_centre.json": {
+  "accessed": "2026-09-19",
+  "bytes": 29084,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352629,
+  "sha256": "838530fa18da1c371186f023c1ba7ba828257bb6a1bc7bd3c5dfaf602cb2ccdd",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/Brickfields_and_Bangsar"
+ },
+ "wikivoyage/kuala_lumpur_west.json": {
+  "accessed": "2026-09-19",
+  "bytes": 14996,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352636,
+  "sha256": "72ee172d1618152b257eb3eb3bf81205d446155decdd02d0d0fd7e19b09cb187",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Lumpur/West"
+ },
+ "wikivoyage/kuala_perlis.json": {
+  "accessed": "2026-09-19",
+  "bytes": 4679,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5241424,
+  "sha256": "451f165fe4d0de2872528670125104bed9cb7385291fa5eb73af7e6a36a21f7d",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Perlis"
+ },
+ "wikivoyage/kuala_pilah.json": {
+  "accessed": "2026-09-19",
+  "bytes": 45,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": null,
+  "sha256": "8085a922aed0c66ae40f00e41f113aae91bdc4848eb0275491cdcff54eda9ad0",
+  "url": "https://en.wikivoyage.org/w/api.php?page=Kuala Pilah"
+ },
+ "wikivoyage/kuala_selangor.json": {
+  "accessed": "2026-09-19",
+  "bytes": 11936,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5286201,
+  "sha256": "6e6666757e93ad3fcd05f38da7439b9c4badb9e2efda5bd1f8161323a7173060",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Selangor"
+ },
+ "wikivoyage/kuala_terengganu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 15038,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5236953,
+  "sha256": "6d11c287b9281d587408ccac140b7afa40f0761c0ff7516dc4c5c5e045da8b3d",
+  "url": "https://en.wikivoyage.org/wiki/Kuala_Terengganu"
+ },
+ "wikivoyage/kuantan.json": {
+  "accessed": "2026-09-19",
+  "bytes": 18363,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352637,
+  "sha256": "33dcfe9c2b5593979b2f4dc23c23925a9c064e4d532bf29a1c0ac26e9f8f83f0",
+  "url": "https://en.wikivoyage.org/wiki/Kuantan"
+ },
+ "wikivoyage/kuching.json": {
+  "accessed": "2026-09-19",
+  "bytes": 102459,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352638,
+  "sha256": "178b87fc143799465bd18455029ee772c191d84b6e61afe1164ffddbe2f4abf0",
+  "url": "https://en.wikivoyage.org/wiki/Kuching"
+ },
+ "wikivoyage/kudat.json": {
+  "accessed": "2026-09-19",
+  "bytes": 7012,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5310399,
+  "sha256": "47f91e5aff8337ddbcc4995cdff63ee4272559b9d4b217215f15525d67e8b0fb",
+  "url": "https://en.wikivoyage.org/wiki/Kudat"
+ },
+ "wikivoyage/kulim.json": {
+  "accessed": "2026-09-19",
+  "bytes": 12745,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5352646,
+  "sha256": "f09e9227ee4e858d288a7ccd55283f83d2485cfd8aa9c108dbdde78b5097e0e9",
+  "url": "https://en.wikivoyage.org/wiki/Kulim"
+ },
+ "wikivoyage/kundasang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 6851,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5314091,
+  "sha256": "2abb7e535aee9dc52729d057b9a3ac0636092efd38b6ba8aecc1e6ff46a69a30",
+  "url": "https://en.wikivoyage.org/wiki/Kundasang"
+ },
+ "wikivoyage/labuan.json": {
+  "accessed": "2026-09-19",
+  "bytes": 32841,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5315576,
+  "sha256": "328d45909133b4cfb82ceb354ee8682915a6f96c4ad79c05019606884ea5b9bc",
+  "url": "https://en.wikivoyage.org/wiki/Labuan"
+ },
+ "wikivoyage/lumut.json": {
+  "accessed": "2026-09-19",
+  "bytes": 10198,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5353247,
+  "sha256": "6827c74613f3f6ed671b6962a35cd192c79b8e7ce403d8d73076c279f83e0ab4",
+  "url": "https://en.wikivoyage.org/wiki/Lumut"
+ },
+ "wikivoyage/malacca.json": {
+  "accessed": "2026-09-19",
+  "bytes": 91172,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5360174,
+  "sha256": "df31633987d6a2c707818c2cc3619eaf58eeeade7ed3e38468abc66c0204dbd7",
+  "url": "https://en.wikivoyage.org/wiki/Malacca"
+ },
+ "wikivoyage/marang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 1254,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 4298734,
+  "sha256": "0ca6948969eee4e2a2e32bd39181ce79380e4edc32b8d05a1ffa484e4152edbd",
+  "url": "https://en.wikivoyage.org/wiki/Marang"
+ },
+ "wikivoyage/miri.json": {
+  "accessed": "2026-09-19",
+  "bytes": 23297,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5353785,
+  "sha256": "fc72fe15f9eae2c831249be1d1ff82823a46dd2734240ca6133b63197eea3c23",
+  "url": "https://en.wikivoyage.org/wiki/Miri"
+ },
+ "wikivoyage/padang_besar_malaysia.json": {
+  "accessed": "2026-09-19",
+  "bytes": 7175,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5309841,
+  "sha256": "3ed48f3d4af550eb0c2382290a5b6a662992cfc52d530432f686871597859022",
+  "url": "https://en.wikivoyage.org/wiki/Padang_Besar_(Malaysia)"
+ },
+ "wikivoyage/pangkor.json": {
+  "accessed": "2026-09-19",
+  "bytes": 24822,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5243776,
+  "sha256": "a81b5ead5084959b0e454ae899577aeb850b0c1c1317e34254b86f0f6c40edb1",
+  "url": "https://en.wikivoyage.org/wiki/Pangkor"
+ },
+ "wikivoyage/perhentian_islands.json": {
+  "accessed": "2026-09-19",
+  "bytes": 57721,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5338104,
+  "sha256": "ba0f5335dce0056b4e6667328f5944428cb8a63f785b634a1da6de428513cedc",
+  "url": "https://en.wikivoyage.org/wiki/Perhentian_Islands"
+ },
+ "wikivoyage/petaling_jaya.json": {
+  "accessed": "2026-09-19",
+  "bytes": 42479,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5354985,
+  "sha256": "78ba5df5b725f89e20f651ba966d1349fb8dfedfd029f5c71c9b0f9d6f4ffddc",
+  "url": "https://en.wikivoyage.org/wiki/Petaling_Jaya"
+ },
+ "wikivoyage/port_dickson.json": {
+  "accessed": "2026-09-19",
+  "bytes": 18183,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5242070,
+  "sha256": "2c42af28f6e65864ed4e9ad5a66c75405109743d6a08e4359367635b4c88b09c",
+  "url": "https://en.wikivoyage.org/wiki/Port_Dickson"
+ },
+ "wikivoyage/putrajaya.json": {
+  "accessed": "2026-09-19",
+  "bytes": 21189,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5355393,
+  "sha256": "b0c09673b37bc548207915e940f7778e6886da98944078b5834cebc718e286bd",
+  "url": "https://en.wikivoyage.org/wiki/Putrajaya"
+ },
+ "wikivoyage/ranau.json": {
+  "accessed": "2026-09-19",
+  "bytes": 4564,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5295562,
+  "sha256": "06c5fac565d690af1abc1ba8c8baf6ccb85da6d2f52ae95905a84e7eb8413368",
+  "url": "https://en.wikivoyage.org/wiki/Ranau"
+ },
+ "wikivoyage/raub.json": {
+  "accessed": "2026-09-19",
+  "bytes": 7373,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5277462,
+  "sha256": "0f2efebeff267506063d0db14a1148e7c030a367fc9bfc94275856f77114907e",
+  "url": "https://en.wikivoyage.org/wiki/Raub"
+ },
+ "wikivoyage/redang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 17287,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5338101,
+  "sha256": "7b4736e9d3f1fd8360368148035b4f3a4b25c2290641e8f2879353ad1b8a6713",
+  "url": "https://en.wikivoyage.org/wiki/Redang"
+ },
+ "wikivoyage/sandakan.json": {
+  "accessed": "2026-09-19",
+  "bytes": 21052,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5243675,
+  "sha256": "3b3f1e66cdc001947c07ab6b78bd0d6067df7b2eb4b708a532a1c57056472ca4",
+  "url": "https://en.wikivoyage.org/wiki/Sandakan"
+ },
+ "wikivoyage/sekinchan.json": {
+  "accessed": "2026-09-19",
+  "bytes": 43,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": null,
+  "sha256": "e17de6327bdc77b73b71a812ea94ee4054b0551e9b66d83dab52e4a162d00344",
+  "url": "https://en.wikivoyage.org/w/api.php?page=Sekinchan"
+ },
+ "wikivoyage/semporna.json": {
+  "accessed": "2026-09-19",
+  "bytes": 14935,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5339370,
+  "sha256": "cb65a6f627972c2eda7139f51ca5f532a0d2998403b9351f419b184830539b42",
+  "url": "https://en.wikivoyage.org/wiki/Semporna"
+ },
+ "wikivoyage/sepang.json": {
+  "accessed": "2026-09-19",
+  "bytes": 8835,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5242025,
+  "sha256": "9bc49a2f9e7b80dbb9aae8713a9957e7bb53a58c9766a418baa3b4f4e3386b11",
+  "url": "https://en.wikivoyage.org/wiki/Sepang"
+ },
+ "wikivoyage/seremban.json": {
+  "accessed": "2026-09-19",
+  "bytes": 14246,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5356296,
+  "sha256": "205fd569c8752439c0f03b4a5e2070b143d9e9e4e1d7ccd458fe632e244153af",
+  "url": "https://en.wikivoyage.org/wiki/Seremban"
+ },
+ "wikivoyage/shah_alam.json": {
+  "accessed": "2026-09-19",
+  "bytes": 20931,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5360701,
+  "sha256": "92ed5749a7f0d10c91f810cf2489c1b1b5dd5c38b69f7d1291beecac5c11c183",
+  "url": "https://en.wikivoyage.org/wiki/Shah_Alam"
+ },
+ "wikivoyage/sibu.json": {
+  "accessed": "2026-09-19",
+  "bytes": 20401,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5356408,
+  "sha256": "9b7f895de3d1d20580da985b8f7dd86afd5f9a49cad03c5c18bfd70a9a20af73",
+  "url": "https://en.wikivoyage.org/wiki/Sibu"
+ },
+ "wikivoyage/sri_aman.json": {
+  "accessed": "2026-09-19",
+  "bytes": 42,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": null,
+  "sha256": "1ec5320f0cb1320a4914c3381b36957d3e6564fad30fbd10dffc2aecb8baf45d",
+  "url": "https://en.wikivoyage.org/w/api.php?page=Sri Aman"
+ },
+ "wikivoyage/subang_jaya.json": {
+  "accessed": "2026-09-19",
+  "bytes": 44806,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5362477,
+  "sha256": "26adfbaf395eb1a3a9a21a8755891aaae6fea9420b0442209d370cce74f4824d",
+  "url": "https://en.wikivoyage.org/wiki/Subang_Jaya"
+ },
+ "wikivoyage/taiping.json": {
+  "accessed": "2026-09-19",
+  "bytes": 13593,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5244052,
+  "sha256": "020d698b69a5972dc854f4a2a0a56d406d429aee2483d6d156f15177bcd674e3",
+  "url": "https://en.wikivoyage.org/wiki/Taiping"
+ },
+ "wikivoyage/taman_negara.json": {
+  "accessed": "2026-09-19",
+  "bytes": 20892,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5272506,
+  "sha256": "2f9431da799d2859dae55abab8573d0db8fa9607febce42304cd2d01959bde7c",
+  "url": "https://en.wikivoyage.org/wiki/Taman_Negara"
+ },
+ "wikivoyage/tawau.json": {
+  "accessed": "2026-09-19",
+  "bytes": 11151,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5243812,
+  "sha256": "1689f24e5cee7898b861b7790bacd3924c54052e69358d63ee5b9ebf62c74e43",
+  "url": "https://en.wikivoyage.org/wiki/Tawau"
+ },
+ "wikivoyage/teluk_intan.json": {
+  "accessed": "2026-09-19",
+  "bytes": 7778,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5281318,
+  "sha256": "8a36fc9f6671b9aa28a5d6e626462310a4669ba89eea5db7c1a29a5f755ddd57",
+  "url": "https://en.wikivoyage.org/wiki/Teluk_Intan"
+ },
+ "wikivoyage/tioman.json": {
+  "accessed": "2026-09-19",
+  "bytes": 57156,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5337986,
+  "sha256": "14c7d4a9c68d9aa8be3d7c74bd28325f51d4ca4454884eabbecb798acae0baec",
+  "url": "https://en.wikivoyage.org/wiki/Tioman"
+ },
+ "wikivoyage/tumpat.json": {
+  "accessed": "2026-09-19",
+  "bytes": 26766,
+  "license": "CC BY-SA 4.0 (Wikivoyage contributors)",
+  "revid": 5288812,
+  "sha256": "d5851bab585e2ef025b67f92d66b4cac938f92001a62ad436116c4b279f50a4c",
+  "url": "https://en.wikivoyage.org/wiki/Kota_Bharu"
+ }
 }

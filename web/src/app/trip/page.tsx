@@ -1,26 +1,28 @@
 "use client";
 
 /**
- * Traveller app: a conversation, not a dashboard. One input, plain answers, destination cards.
- * A language model works out what the traveller means; every fact shown comes from the data.
+ * Traveller app: a local friend, not a dashboard. Name a town and it tells you what the place is famous for, when to
+ * go, and plans your days from breakfast to supper. A language model only works out what the traveller means when they
+ * describe a feeling ("quiet beach, good seafood"); every place, description and figure shown comes from the data.
  */
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, RotateCcw } from "lucide-react";
-import { DestinationCard, StateCard } from "@/components/trip/cards";
+import { DestinationCard, GuideCard, PlanCard, TownsCard } from "@/components/trip/cards";
 import { FlipFadeText } from "@/components/ui/flip-fade-text";
 import { GenerateButton } from "@/components/ui/generate-button";
-import { EMPTY_PREFS, type Reply, type Understanding, langOf, respond, understandLocally } from "@/lib/chat";
+import { EMPTY_PREFS, type Reply, type Understanding, guideReply, langOf, planReply, respond, understandLocally } from "@/lib/chat";
 import { JR } from "@/lib/jomrasa";
 import { EXAMPLES, type Prefs } from "@/lib/planner";
 import { useStore } from "@/lib/store";
+import { type GDest, type Guide, findDestination, parseDays, wantsPlan } from "@/lib/trip";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 type Via = "ai" | "example" | "keywords";
 type Msg = { id: number; role: "user"; text: string } | { id: number; role: "assistant"; reply: Reply; via: Via };
-const STARTERS = [EXAMPLES[0].text, EXAMPLES[1].text, EXAMPLES[2].text, "Tell me about Terengganu", EXAMPLES[3].text];
+const STARTERS = ["Plan 2 days in Ipoh", "Tell me about Klang", "When should I go to Perhentian?", EXAMPLES[0].text, EXAMPLES[1].text];
 
 export default function Trip() {
   const { rows, gap } = useStore();
@@ -28,11 +30,15 @@ export default function Trip() {
   const [prefs, setPrefs] = useState<Prefs>(EMPTY_PREFS);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [guide, setGuide] = useState<Guide | null>(null);
+  const lastDest = useRef<GDest | null>(null);
   const end = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const started = msgs.length > 0;
 
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs, busy]);
+  // the place guide is only needed here, so it is fetched here rather than shipped with every page
+  useEffect(() => { fetch("/data/guide.json").then((r) => r.json()).then(setGuide).catch(() => setGuide({ attribution: "", destinations: [] })); }, []);
 
   async function send(raw: string) {
     const t = raw.trim();
@@ -40,39 +46,54 @@ export default function Trip() {
     setText("");
     setMsgs((m) => [...m, { id: Date.now(), role: "user", text: t }]);
     setBusy(true);
-    let u: Understanding, via: Via = "keywords";
-    const example = EXAMPLES.find((e) => e.text === t);
-    if (example) {
-      u = { intent: "recommend", state: null, topic: null, prefs: example.prefs };
-      via = "example";          // pre-computed: instant, works offline
+    // naming a town needs no language model: we either introduce it or plan it
+    const g = guide ?? { attribution: "", destinations: [] };
+    const days = parseDays(t), named = findDestination(t, g);
+    const dest = named ?? (days || /^(make it|when should i go|bila|几时)/i.test(t) ? lastDest.current : null);
+    let reply: Reply, via: Via = "keywords";
+    if (dest && (days || wantsPlan(t)) && !/^when\b|\bwhen (should|to)\b|bila/i.test(t)) {
+      reply = planReply(dest, days ?? 2);
+      via = "example";
+    } else if (dest) {
+      reply = guideReply(dest, rows, langOf(t));
+      via = "example";
     } else {
-      try {
-        const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: t.slice(0, 400), prefs }) });
-        if (!r.ok) throw new Error();
-        u = (await r.json()) as Understanding;
-        if (u.intent === "recommend" && !Object.keys(u.prefs.topics).length && !u.prefs.budget && !u.prefs.region) throw new Error();
-        via = "ai";
-      } catch {
-        u = understandLocally(t, prefs);                                                      // keyword rules: no network needed
+      let u: Understanding;
+      const example = EXAMPLES.find((e) => e.text === t);
+      if (example) {
+        u = { intent: "recommend", state: null, topic: null, prefs: example.prefs };
+        via = "example";          // pre-computed: instant, works offline
+      } else {
+        try {
+          const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: t.slice(0, 400), prefs }) });
+          if (!r.ok) throw new Error();
+          u = (await r.json()) as Understanding;
+          if (u.intent === "recommend" && !Object.keys(u.prefs.topics).length && !u.prefs.budget && !u.prefs.region) throw new Error();
+          via = "ai";
+        } catch {
+          u = understandLocally(t, prefs);                                                      // keyword rules: no network needed
+        }
       }
+      if (u.intent === "recommend") setPrefs(u.prefs);
+      reply = respond(u, rows, gap, langOf(t), t, g);
     }
-    if (u.intent === "recommend") setPrefs(u.prefs);
-    const reply = respond(u, rows, gap, langOf(t), t);
+    if (reply.kind === "guide") lastDest.current = reply.dest;
+    if (reply.kind === "plan") lastDest.current = reply.plan.dest;
     setMsgs((m) => [...m, { id: Date.now() + 1, role: "assistant", reply, via }]);
     setBusy(false);
     input.current?.focus();
   }
 
-  const reset = () => { setMsgs([]); setPrefs(EMPTY_PREFS); setText(""); };
+  const reset = () => { setMsgs([]); setPrefs(EMPTY_PREFS); setText(""); lastDest.current = null; };
 
   const composer = (
     <form onSubmit={(e) => { e.preventDefault(); send(text); }}
       className="flex items-end gap-2 rounded-[28px] border border-border bg-card p-2 pl-5 shadow-[0_8px_30px_rgba(28,32,36,0.08)] transition-shadow focus-within:shadow-[0_8px_36px_rgba(62,99,221,0.18)]">
       <textarea ref={input} value={text} onChange={(e) => setText(e.target.value)} rows={1} maxLength={400} autoFocus
-        placeholder={started ? "Refine it, or ask about a place…" : "Quiet beach, good seafood, not too expensive…"}
+        placeholder={started ? "Another town, more days, or what you feel like…" : "Plan 2 days in Ipoh…  or  quiet beach, good seafood…"}
         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }}
         className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent py-3 text-[15px] outline-none placeholder:text-muted-foreground/70" />
-      <GenerateButton type="submit" label={started ? "Send" : "Find my trip"} activeLabel="Thinking" isGenerating={busy} disabled={busy || !text.trim()} className="shrink-0 disabled:opacity-60" />
+      <GenerateButton type="submit" label={started ? "Send" : "Plan my trip"} activeLabel="Thinking" isGenerating={busy} disabled={busy || !text.trim()} className="shrink-0 disabled:opacity-60" />
     </form>
   );
 
@@ -102,10 +123,10 @@ export default function Trip() {
       {!started ? (
         <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 pb-24">
           <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }} className="text-center text-4xl font-semibold tracking-tight md:text-5xl">
-            Where should you go next?
+            Your local friend for Malaysia.
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.6, ease: EASE }} className="mx-auto mt-3 max-w-md text-center text-[15px] leading-relaxed text-muted-foreground">
-            Tell me what you are after. I will find the corners of Malaysia that fit - and are not packed with everyone else.
+            Name a town and I will tell you what it is famous for, when to go, and plan your days from breakfast to supper. Or tell me what you feel like, and I will point you somewhere that is not overrun.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, duration: 0.6, ease: EASE }} className="mt-8">{composer}</motion.div>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
@@ -116,7 +137,7 @@ export default function Trip() {
               </motion.button>
             ))}
           </div>
-          <p className="mt-8 text-center text-[11px] text-muted-foreground/80">Malay, English or 中文 · built on official tourism statistics and {JR.meta.items_travel.toLocaleString("en-MY")} real traveller accounts</p>
+          <p className="mt-8 text-center text-[11px] text-muted-foreground/80">Real places and eateries described by travellers (Wikivoyage) · ten years of rainfall · official tourism statistics · {JR.meta.items_travel.toLocaleString("en-MY")} traveller accounts</p>
         </main>
       ) : (
         <>
@@ -132,7 +153,9 @@ export default function Trip() {
                   {m.reply.kind === "recommend" && (
                     <div className="mt-4 grid gap-3 md:grid-cols-3">{m.reply.recs.map((r, i) => <DestinationCard key={r.code} rec={r} rank={i} onAsk={send} />)}</div>
                   )}
-                  {m.reply.kind === "state" && <div className="mt-4"><StateCard brief={m.reply.brief} /></div>}
+                  {m.reply.kind === "state" && <div className="mt-4"><TownsCard towns={m.reply.towns} onAsk={send} /></div>}
+                  {m.reply.kind === "guide" && <div className="mt-4"><GuideCard dest={m.reply.dest} brief={m.reply.brief} onAsk={send} /></div>}
+                  {m.reply.kind === "plan" && <div className="mt-4"><PlanCard plan={m.reply.plan} /></div>}
                   {m.id === msgs[msgs.length - 1].id && !busy && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-4 flex flex-wrap gap-2">
                       {m.reply.followUps.map((f) => (

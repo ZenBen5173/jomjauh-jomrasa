@@ -10,17 +10,21 @@ import { QUARTERLY, STATE_LABEL, STATE_NAME } from "./data";
 import { JR, TOPIC_LABEL, type JrPlace, type JrQuote, type JrTopic } from "./jomrasa";
 import type { GapRow, Row } from "./metrics";
 import { type Prefs, type Recommendation, parseLocal, recommend } from "./planner";
+import { type GDest, type Guide, type TripPlan, planTrip } from "./trip";
 
 export type Intent = "recommend" | "about_state" | "other";
 export interface Understanding { intent: Intent; state: string | null; topic: string | null; prefs: Prefs }
 
 export interface StateBrief {
-  code: string; score: number | null; spend: number; quietQuarter: number; quietOccupancy: number;
+  code: string; score: number | null; spend: number; nights: number; quietQuarter: number; quietOccupancy: number;
   loved: JrTopic[]; gripes: JrTopic[]; focus: JrTopic | null; places: JrPlace[]; praise: JrQuote | null; complaint: JrQuote | null;
 }
+export type Pick = Recommendation & { towns: GDest[] };
 export type Reply =
-  | { kind: "recommend"; text: string; recs: Recommendation[]; prefs: Prefs; followUps: string[] }
-  | { kind: "state"; text: string; brief: StateBrief; followUps: string[] }
+  | { kind: "recommend"; text: string; recs: Pick[]; prefs: Prefs; followUps: string[] }
+  | { kind: "state"; text: string; code: string; towns: GDest[]; brief: StateBrief; followUps: string[] }   // a whole state: which town to base yourself in
+  | { kind: "guide"; text: string; dest: GDest; brief: StateBrief; followUps: string[] }                    // one town, the way a local would introduce it
+  | { kind: "plan"; text: string; plan: TripPlan; followUps: string[] }                                     // day-by-day route
   | { kind: "text"; text: string; followUps: string[] };
 
 export const EMPTY_PREFS: Prefs = { topics: {}, emotions: [], budget: null, quiet: 0.6, region: null, source: "keywords" };
@@ -112,7 +116,7 @@ export function brief(code: string, rows: Row[], topic: string | null, lang: str
   const all = JR.quotes.filter((x) => x.code === code).sort((a, b) => readable(a) - readable(b));
   const quotes = all.filter((x) => !topic || x.topics.includes(topic));
   return {
-    code, score: JR.states.find((s) => s.code === code)?.experience_score ?? null, spend: r.spend_per_visitor_rm as number,
+    code, score: JR.states.find((s) => s.code === code)?.experience_score ?? null, spend: r.spend_per_visitor_rm as number, nights: (r.avg_length_of_stay as number) ?? 2,
     quietQuarter: q.k, quietOccupancy: q.mean, loved: byGood.slice(0, 3), gripes: byGood.slice(-2).reverse().filter((t) => t.sentiment < 80),
     focus: topic ? JR.topics.find((t) => t.code === code && t.topic === topic) ?? null : null,
     places: JR.places.filter((p) => p.code === code && (!topic || p.tags.includes(topic))).sort((a, b) => b.mentions - a.mentions).slice(0, 6),
@@ -121,36 +125,58 @@ export function brief(code: string, rows: Row[], topic: string | null, lang: str
   };
 }
 
-/** Turn an understanding into a reply. Every number comes from the data passed in. */
-export function respond(u: Understanding, rows: Row[], gap: GapRow[], lang: string = "en", asked: string = ""): Reply {
+/** The towns we can guide someone around in a state, best-covered first. */
+export const townsIn = (code: string, guide: Guide | null) => (guide?.destinations ?? []).filter((d) => d.code === code).sort((a, b) => b.places.length - a.places.length);
+
+/** One town, introduced the way a local would: what it is, what it is famous for, when to come. */
+export function guideReply(dest: GDest, rows: Row[], lang: string = "en"): Reply {
+  return {
+    kind: "guide", dest, brief: brief(dest.code, rows, null, lang),
+    text: dest.intro || `${dest.name} is in ${STATE_NAME[dest.code].replace("W.P. ", "")}. Here is what travellers who know it say.`,
+    followUps: [`Plan 2 days in ${dest.name}`, `Plan a day trip to ${dest.name}`, "Somewhere quieter like this"],
+  };
+}
+
+/** A day-by-day route. */
+export function planReply(dest: GDest, days: number): Reply {
+  const plan = planTrip(dest, days);
+  const n = plan.days.length;
+  const text = `Here's ${n === 1 ? "a day" : `${n} days`} in ${dest.name}. I put places that are close together on the same day, so you spend your time eating and looking around, not sitting in the car.${plan.note ? ` ${plan.note}` : ""}`;
+  return { kind: "plan", text, plan, followUps: [n < 3 ? `Make it ${n + 1} days` : "Make it 2 days", `When should I go to ${dest.name}?`, `Tell me about ${dest.name}`] };
+}
+
+/** Turn an understanding into a reply. Every fact comes from the data passed in. */
+export function respond(u: Understanding, rows: Row[], gap: GapRow[], lang: string = "en", asked: string = "", guide: Guide | null = null): Reply {
   if (u.intent === "about_state" && u.state) {
     const b = brief(u.state, rows, u.topic, lang);
     const name = STATE_NAME[u.state].replace("W.P. ", "");
+    const towns = townsIn(u.state, guide).slice(0, 6);
     const place = namedPlace(asked, u.state);
-    const overview = `${name}: travellers love its ${list(b.loved.slice(0, 2).map((t) => TOPIC_LABEL[t.topic].toLowerCase()))}` +
-        (b.gripes.length ? `; the most common gripe is ${TOPIC_LABEL[b.gripes[0].topic].toLowerCase()}.` : ".") +
-        ` A typical visitor spends about RM ${Math.round(b.spend)}, and it is quietest in Q${b.quietQuarter}.`;
-    const text = (place ? `${place} is in ${name}, so this covers the whole state. ` : "")
-      + (b.focus ? `On ${TOPIC_LABEL[b.focus.topic].toLowerCase()}, travellers rate it ${b.focus.sentiment.toFixed(0)}/100 across ${b.focus.n} mentions. ` : "") + overview;
-    return { kind: "state", text, brief: b, followUps: [`What about food in ${name}?`, `Somewhere like ${name} but quieter`, "Plan something cheaper"] };
+    if (towns.length === 1) return guideReply(towns[0], rows, lang);
+    const text = (place ? `${place} is in ${name}. I don't have a street-level guide for it yet, so here is the state. ` : "")
+      + `${name}: people who go love the ${list(b.loved.slice(0, 2).map((t) => TOPIC_LABEL[t.topic].toLowerCase()))}`
+      + (b.gripes.length ? `, and grumble most about ${TOPIC_LABEL[b.gripes[0].topic].toLowerCase()}.` : ".")
+      + (towns.length ? " Pick a town and I'll show you around." : " I'll be honest: travellers haven't written up its towns in enough detail for me to plan your days there yet.");
+    return { kind: "state", text, code: u.state, towns, brief: b, followUps: towns.slice(0, 2).map((t) => `Plan 2 days in ${t.name}`).concat("Somewhere quieter like this") };
   }
   if (u.intent === "recommend") {
     const readable = (x: JrQuote) => readability(x.language, lang);
-    const recs = recommend(u.prefs, rows, gap, STATE_LABEL, TOPIC_LABEL).slice(0, 3)
-      .map((r) => ({ ...r, quotes: [...r.quotes].sort((a, b) => readable(a) - readable(b) || a.text.length - b.text.length) }));
+    const recs: Pick[] = recommend(u.prefs, rows, gap, STATE_LABEL, TOPIC_LABEL).slice(0, 3)
+      .map((r) => ({ ...r, towns: townsIn(r.code, guide).slice(0, 3), quotes: [...r.quotes].sort((a, b) => readable(a) - readable(b) || a.text.length - b.text.length) }));
     const names = recs.map((r) => STATE_NAME[r.code].replace("W.P. ", ""));
-    const text = `For ${describe(u.prefs)}, ${names[0]} fits best. ${names[1]} and ${names[2]} are close behind.`;
+    const text = `For ${describe(u.prefs)}, I'd send you to ${names[0]}. ${names[1]} and ${names[2]} are close behind.`;
+    const first = recs[0].towns[0];
     const followUps = [
+      first ? `Plan 2 days in ${first.name}` : `Tell me about ${names[0]}`,
       u.prefs.budget !== "low" ? "Make it cheaper" : "Budget is flexible",
       u.prefs.region !== "Borneo" ? "Only in Borneo" : "Anywhere in Malaysia",
       u.prefs.quiet < 0.8 ? "Fewer crowds please" : "More about food",
-      `Tell me about ${names[0]}`,
     ];
     return { kind: "recommend", text, recs, prefs: u.prefs, followUps };
   }
   return {
     kind: "text",
-    text: "I help you pick where to go in Malaysia, leaning toward places that are not overrun. Tell me what you are after - scenery, food, budget, how much you mind crowds - or ask me about a state.",
-    followUps: ["Quiet beach, good seafood, not expensive", "Tell me about Terengganu", "Adventure trip in Borneo"],
+    text: "I'm your local friend for travelling Malaysia. Name a town and I'll tell you what it's famous for, when to go, and plan your days - breakfast to supper. Or tell me what you feel like and I'll suggest somewhere that isn't overrun.",
+    followUps: ["Plan 2 days in Ipoh", "Tell me about Klang", "Quiet beach, good seafood, not expensive"],
   };
 }

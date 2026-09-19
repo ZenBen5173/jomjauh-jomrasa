@@ -283,10 +283,10 @@ Analysis panel: one row per state per year with every derived measure used by th
 | `osm_heritage` | int64 | 20 |
 | `rail_stations_n` | int64 | 13 |
 | `airports_100km` | int64 | 1 |
-| `experience_score` | float64 | 82.04 |
-| `access_sentiment` | float64 | 75.78 |
-| `amenity_sentiment` | float64 | 89.92 |
-| `mentions_n` | int64 | 465 |
+| `experience_score` | float64 | 82.01 |
+| `access_sentiment` | float64 | 75.83 |
+| `amenity_sentiment` | float64 | 89.89 |
+| `mentions_n` | int64 | 461 |
 | `visitor_share_pct` | float64 | 5.544 |
 | `visitors_per_resident` | float64 | 0.9098 |
 | `visitors_per_km2` | float64 | 190.8 |
@@ -301,7 +301,7 @@ Analysis panel: one row per state per year with every derived measure used by th
 De-identified public travel text: passage / comment, state, URL, source type, date, language hint. No usernames.
 
 - **Source:** Exa API, YouTube Data API
-- **Years:** -  ·  **Rows:** 16,507  ·  **Accessed:** derived
+- **Years:** -  ·  **Rows:** 16,506  ·  **Accessed:** derived
 
 | column | type | example |
 |---|---|---|
@@ -323,33 +323,33 @@ Experience Score (raw, shrunk, interval), sample size, emotion mix, access / ame
 | column | type | example |
 |---|---|---|
 | `code` | str | JHR |
-| `mentions_n` | int64 | 465 |
-| `overall_sentiment_raw` | float64 | 72.37 |
-| `overall_sentiment` | float64 | 72.65 |
-| `overall_lo` | float64 | 71.44 |
+| `mentions_n` | int64 | 461 |
+| `overall_sentiment_raw` | float64 | 72.34 |
+| `overall_sentiment` | float64 | 72.64 |
+| `overall_lo` | float64 | 71.42 |
 | `overall_hi` | float64 | 73.86 |
-| `share_positive` | float64 | 0.8538 |
-| `share_negative` | float64 | 0.05376 |
-| `emo_joy` | float64 | 0.5183 |
-| `emo_calm` | float64 | 0.1484 |
-| `emo_surprise` | float64 | 0.04946 |
-| `emo_trust` | float64 | 0.09247 |
-| `emo_disappointment` | float64 | 0.03226 |
-| `emo_frustration` | float64 | 0.02581 |
-| `emo_fear` | float64 | 0.006452 |
-| `emo_neutral` | float64 | 0.1269 |
+| `share_positive` | float64 | 0.8525 |
+| `share_negative` | float64 | 0.05423 |
+| `emo_joy` | float64 | 0.5184 |
+| `emo_calm` | float64 | 0.1475 |
+| `emo_surprise` | float64 | 0.04772 |
+| `emo_trust` | float64 | 0.09328 |
+| `emo_disappointment` | float64 | 0.03254 |
+| `emo_frustration` | float64 | 0.02603 |
+| `emo_fear` | float64 | 0.006508 |
+| `emo_neutral` | float64 | 0.128 |
 | `lang_ms` | int64 | 108 |
-| `lang_en` | int64 | 282 |
+| `lang_en` | int64 | 278 |
 | `lang_zh` | int64 | 42 |
 | `lang_mixed` | int64 | 33 |
 | `prior_k` | float64 | 200 |
-| `national_mean` | float64 | 82.23 |
-| `experience_score` | float64 | 82.04 |
-| `experience_raw` | float64 | 82.37 |
-| `experience_lo` | float64 | 80.22 |
-| `experience_hi` | float64 | 83.85 |
-| `access_sentiment` | float64 | 75.78 |
-| `amenity_sentiment` | float64 | 89.92 |
+| `national_mean` | float64 | 82.22 |
+| `experience_score` | float64 | 82.01 |
+| `experience_raw` | float64 | 82.24 |
+| `experience_lo` | float64 | 80.19 |
+| `experience_hi` | float64 | 83.82 |
+| `access_sentiment` | float64 | 75.83 |
+| `amenity_sentiment` | float64 | 89.89 |
 
 ## `jomrasa_topics`
 
@@ -364,8 +364,8 @@ Topic sentiment per state with sample size (empirical-Bayes shrunk)
 | `topic` | str | access_transport |
 | `n` | int64 | 86 |
 | `sentiment_raw` | float64 | 77.91 |
-| `sentiment` | float64 | 75.78 |
-| `share_of_mentions` | float64 | 0.1849 |
+| `sentiment` | float64 | 75.83 |
+| `share_of_mentions` | float64 | 0.1866 |
 
 ## `jomrasa_quotes`
 
@@ -386,24 +386,68 @@ Representative short quotes with source links
 | `place` | str | pulau |
 | `topics` | object | ['crowding' 'cleanliness' 'scenery_nature' 'culture_heritage |
 
+## `guide_places_raw`
+
+Traveller-guide listings: see / do / eat / drink / buy, with description, opening hours, address and coordinates where given
+
+- **Source:** English Wikivoyage destination pages, CC BY-SA 4.0 (pipeline/guide/collect.py)
+- **Years:** -  ·  **Rows:** 1,654  ·  **Accessed:** derived
+
+| column | type | example |
+|---|---|---|
+| `code` | str | JHR |
+| `destination` | str | Johor Bahru |
+| `page` | str | Johor Bahru |
+| `url` | str | https://en.wikivoyage.org/wiki/Johor_Bahru |
+| `revid` | int64 | 5359972 |
+| `order` | int64 | 29 |
+| `kind` | str | see |
+| `name` | str | Chinatown |
+| `alt` | str |  |
+| `address` | str | Jalan Tan Hiok Nee |
+| `directions` | str | walk from JB Sentral bus terminal or train station |
+| `hours` | str |  |
+| `lat` | float64 | 1.457 |
+| `lon` | float64 | 103.8 |
+| `content` | str | This historical Chinese community area is located mostly alo |
+
+## `guide_destinations_raw`
+
+Traveller-guide towns: state, source page and revision id, opening paragraph, food notes
+
+- **Source:** English Wikivoyage, CC BY-SA 4.0
+- **Years:** -  ·  **Rows:** 72  ·  **Accessed:** derived
+
+| column | type | example |
+|---|---|---|
+| `code` | str | JHR |
+| `destination` | str | Johor Bahru |
+| `url` | str | https://en.wikivoyage.org/wiki/Johor_Bahru |
+| `revid` | int64 | 5359972 |
+| `intro` | str | Johor Bahru (Jawi: جوهر بهرو, Chinese: 新山) (also Johor Baru  |
+| `eat_notes` | str | Johor Bahru offers local delicacies of Malaysia to Western a |
+| `understand` | str | Johor Bahru is the second largest city in Malaysia and a fas |
+| `pages` | int64 | 1 |
+| `listings` | int64 | 172 |
+
 ## `jomrasa_places`
 
 Place catalogue: place, state, coordinates (Nominatim), tags, sentiment, quote
 
 - **Source:** JomRasa + OpenStreetMap Nominatim
-- **Years:** -  ·  **Rows:** 630  ·  **Accessed:** derived
+- **Years:** -  ·  **Rows:** 622  ·  **Accessed:** derived
 
 | column | type | example |
 |---|---|---|
-| `code` | str | LBN |
-| `place` | str | Labuan |
-| `place_key` | str | labuan |
-| `mentions` | int64 | 137 |
-| `sentiment` | float64 | 70.72 |
-| `tags` | object | ['food' 'activities' 'scenery_nature' 'culture_heritage'  'a |
-| `praised_for` | object | ['food' 'scenery_nature' 'activities'] |
-| `emotions` | object | ['joy' 'calm'] |
-| `quote` | str | Kalau orang lain mungkin memilih ke Kota Kinabalu Sandakan K |
-| `quote_url` | str | https://jadual-pelancongan.blogspot.com/2022/02/pelancongan- |
-| `lat` | float64 | 5.302 |
-| `lon` | float64 | 115.3 |
+| `code` | str | PRK |
+| `place` | str | Ipoh |
+| `place_key` | str | ipoh |
+| `mentions` | int64 | 83 |
+| `sentiment` | float64 | 73.77 |
+| `tags` | object | ['food' 'culture_heritage' 'activities' 'access_transport'   |
+| `praised_for` | object | ['food' 'culture_heritage' 'activities'] |
+| `emotions` | object | ['joy' 'trust'] |
+| `quote` | str | Mantap sahabat.. lepas ni jelajah lagi bandar2 di semenanjun |
+| `quote_url` | str | https://www.youtube.com/watch?v=m_e5nJqIBC4 |
+| `lat` | float64 | 4.599 |
+| `lon` | float64 | 101.1 |
