@@ -180,6 +180,25 @@ const SIGHTS_PER_DAY = 4;
 
 type Seq = { place: GPlace; meal: Meal | null; note?: string }[];
 
+/**
+ * Hard limits a traveller sets. A small language model forgets these, so they are enforced in code: a place that
+ * conflicts is removed before the model sees the list, and again from whatever it sends back.
+ */
+const NO_PORK = /\b(no pork|without pork|don'?t eat pork|halal|muslim|tak makan babi|tanpa babi)\b|不吃猪|清真/i;
+const WITH_KIDS = /\b(kids?|child|children|toddler|baby|family|anak)\b|小孩|孩子/i;
+const PORK = /\b(pork|bak kut teh|char siu|char siew|siew yoke|siu yuk|roast(ed)? meat|lard|bacon|ham|dim sum|wantan|wonton|lap cheong|non-halal)\b/i;
+const BOOZE = /\b(bar|pub|beer|cocktails?|wine|whisky|liquor|nightclub|club|gastrobar|brewery)\b/i;
+export function conflicts(place: GPlace, wishes: string): boolean {
+  const about = `${place.name} ${place.famous.join(" ")} ${place.text}`;
+  if (NO_PORK.test(wishes) && (PORK.test(about) || BOOZE.test(about) || place.kind === "drink")) return true;
+  if (WITH_KIDS.test(wishes) && (place.kind === "drink" || BOOZE.test(about))) return true;
+  return false;
+}
+/** What we can honestly promise about a wish - said out loud, because filtering by keywords is not a certificate. */
+export function wishCaveats(wishes: string): string[] {
+  return NO_PORK.test(wishes) ? ["I left out every place known for pork or alcohol, but I can't see a kitchen's halal certificate from here - look for the halal logo at the door."] : [];
+}
+
 /** Put clock times and travel legs on an ordered list of stops. Meals wait for mealtime; sights just follow on. */
 export function timeline(seq: Seq, day: number, theme?: string, town = ""): DayPlan {
   let at = seq[0]?.meal === "breakfast" ? SLOT_START.breakfast : 9 * 60, total = 0;
@@ -220,12 +239,12 @@ export function pickStay(dest: GDest, days: DayPlan[], preferId?: string, why?: 
 export const maxDays = (dest: GDest) => Math.max(1, Math.min(5, Math.floor(dest.places.filter((p) => (p.kind === "see" || p.kind === "do") && km(dest, p) <= 25).length / 2)));
 
 /** The rule-based plan: used when the language model is unreachable, and as its safety net. */
-export function planTrip(dest: GDest, asked: number): TripPlan {
+export function planTrip(dest: GDest, asked: number, wishes = ""): TripPlan {
   const worth = (p: GPlace) => worthIt(dest, p);
-  const all = dest.places.filter((p) => p.kind === "see" || p.kind === "do");
+  const all = dest.places.filter((p) => (p.kind === "see" || p.kind === "do") && !conflicts(p, wishes));
   const nearby = all.filter((p) => km(dest, p) <= 25);
   const sights = (nearby.length >= 4 ? nearby : all).sort((a, b) => worth(b) - worth(a));
-  const eats = dest.places.filter((p) => p.kind === "eat" || p.kind === "drink");
+  const eats = dest.places.filter((p) => (p.kind === "eat" || p.kind === "drink") && !conflicts(p, wishes));
   const possible = Math.max(1, Math.min(asked, Math.floor(sights.length / 2) || 1));
   const chosen = sights.slice(0, possible * SIGHTS_PER_DAY);
   const used = new Set<string>();
@@ -258,12 +277,13 @@ export function planTrip(dest: GDest, asked: number): TripPlan {
   });
 
   const note = days.length < asked ? `There is about ${days.length === 1 ? "one good day" : `${days.length} good days`} of things to see here, so I kept it to that rather than padding it out.` : null;
-  return { dest, days, asked, note, stay: pickStay(dest, days), tips: [], by: "rules" };
+  return { dest, days, asked, note, stay: pickStay(dest, days), tips: wishCaveats(wishes), by: "rules" };
 }
 
 /** Turn the language model's choice of ids into a plan. Anything it did not get from our list is dropped, so it cannot add a place that does not exist. */
-export function fromAi(dest: GDest, ai: AiPlan, asked: number): TripPlan | null {
-  const byId = new Map(dest.places.map((pl) => [pl.id, pl]));
+export function fromAi(dest: GDest, ai: AiPlan, asked: number, wishes = ""): TripPlan | null {
+  const byId = new Map(dest.places.filter((pl) => !conflicts(pl, wishes)).map((pl) => [pl.id, pl]));
+  const eats = [...byId.values()].filter((pl) => pl.kind === "eat" || pl.kind === "drink");
   const seen = new Set<string>();
   const order: Meal[] = ["breakfast", "lunch", "dinner", "supper"];
   const days = ai.days.slice(0, Math.max(1, asked)).map((d, i) => {
@@ -278,11 +298,29 @@ export function fromAi(dest: GDest, ai: AiPlan, asked: number): TripPlan | null 
     // meals must run in order through the day; a meal that would go backwards in time is shown as a snack stop instead
     let last = -1;
     for (const x of seq) if (x.meal) { const k = order.indexOf(x.meal); if (k <= last) x.meal = null; else last = k; }
+    if (seq.length < 2) return null;                      // the model gave us nothing real to work with
+    // a day out needs feeding: if the model forgot a main meal, add the nearest suitable eatery at the right point in the day
+    const fill = (meal: Meal, at: number) => {
+      if (seq.some((x) => x.meal === meal)) return;
+      const near = seq[Math.max(0, Math.min(seq.length - 1, at - 1))]?.place ?? dest;
+      const pool = eats.filter((e) => !seen.has(e.id) && e.slots.includes(meal) && km(near, e) < 20);
+      if (!pool.length) return;
+      const cost = (e: GPlace) => km(near, e) - e.weight / 400 - Math.min(e.famous.length, 2) * 2.5;
+      const best = pool.reduce((b, e) => (cost(e) < cost(b) ? e : b));
+      seen.add(best.id);
+      seq.splice(at, 0, { place: best, meal });
+    };
+    const sightsBefore = (n: number) => { let c = 0, i = 0; for (; i < seq.length && c < n; i++) if (!seq[i].meal) c++; return i; };
+    const nSights = seq.filter((x) => !x.meal).length;
+    fill("breakfast", 0);
+    const firstLater = () => { const i = seq.findIndex((x) => x.meal === "dinner" || x.meal === "supper"); return i < 0 ? seq.length : i; };
+    fill("lunch", Math.min(firstLater(), Math.max(sightsBefore(Math.ceil(nSights / 2)), seq.findIndex((x) => x.meal === "breakfast") + 1)));
+    fill("dinner", (() => { const sup = seq.findIndex((x) => x.meal === "supper"); return sup >= 0 ? sup : seq.length; })());
     return seq.length >= 2 ? timeline(seq, i + 1, d.theme?.trim().slice(0, 60), dest.name) : null;
   }).filter((d): d is DayPlan => d !== null).map((d, i) => ({ ...d, day: i + 1 }));
   if (!days.length) return null;
   const note = days.length < asked ? `I kept it to ${days.length === 1 ? "one day" : `${days.length} days`}: that is what there is to do here without padding it out.` : null;
-  return { dest, days, asked, note, stay: pickStay(dest, days, ai.stay?.id, ai.stay?.why?.trim().slice(0, 240)), tips: (ai.tips ?? []).map((t) => t.trim().slice(0, 200)).filter(Boolean).slice(0, 4), by: "ai" };
+  return { dest, days, asked, note, stay: pickStay(dest, days, ai.stay?.id, ai.stay?.why?.trim().slice(0, 240)), tips: [...wishCaveats(wishes), ...(ai.tips ?? []).map((t) => t.trim().slice(0, 200)).filter(Boolean)].slice(0, 4), by: "ai" };
 }
 
 export const clock = (mins: number) => {

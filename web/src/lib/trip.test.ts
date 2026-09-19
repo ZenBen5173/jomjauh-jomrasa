@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { type AiPlan, type GDest, type GPlace, type GStay, type Guide, clock, findDestination, fromAi, km, maxDays, monthRanges, parseDays, pickStay, planTrip, wantsPlan, whenToGo } from "./trip";
+import { type AiPlan, type GDest, type GPlace, type GStay, type Guide, clock, conflicts, findDestination, fromAi, km, maxDays, monthRanges, parseDays, pickStay, planTrip, wantsPlan, whenToGo } from "./trip";
 
 // a small made-up town for testing the geometry only (the app itself never uses made-up places)
 const place = (id: string, kind: GPlace["kind"], lat: number, lon: number, slots: GPlace["slots"] = [], weight = 300): GPlace =>
@@ -111,21 +111,55 @@ describe("what the language model may and may not do", () => {
   it("keeps only places from our list - an invented place is dropped", () => {
     const plan = fromAi(dest, ai([["kopitiam", "breakfast"], ["west0", "none"], ["Hallucinated Cafe", "lunch"], ["west1", "none"], ["noodles", "lunch"]]), 1)!;
     expect(plan.by).toBe("ai");
-    expect(plan.days[0].stops.map((x) => x.place.id)).toEqual(["kopitiam", "west0", "west1", "noodles"]);
+    expect(plan.days[0].stops.map((x) => x.place.id).filter((id) => ["kopitiam", "west0", "west1", "noodles", "Hallucinated Cafe"].includes(id))).toEqual(["kopitiam", "west0", "west1", "noodles"]);
     expect(plan.days[0].stops[1].note).toBe("note for west0");
     expect(plan.tips).toEqual(["Bring an umbrella"]);
   });
   it("never serves a meal at a sight, the same place twice, or dinner before lunch", () => {
     const plan = fromAi(dest, ai([["west0", "breakfast"], ["grill", "dinner"], ["grill", "dinner"], ["noodles", "lunch"], ["west1", "none"]]), 1)!;
     const stops = plan.days[0].stops;
-    expect(stops.map((x) => x.place.id)).toEqual(["west0", "grill", "noodles", "west1"]);
-    expect(stops[0].meal).toBeNull();                       // a sight is not breakfast
-    expect(stops[1].meal).toBe("dinner");
-    expect(stops[2].meal).toBeNull();                       // lunch after dinner is shown as a plain stop, not a meal out of order
+    const at = (id: string) => stops.find((x) => x.place.id === id)!;
+    expect(stops.filter((x) => x.place.id === "grill")).toHaveLength(1);
+    expect(at("west0").meal).toBeNull();                    // a sight is not breakfast
+    expect(at("grill").meal).toBe("dinner");
+    expect(at("noodles").meal).toBeNull();                  // lunch after dinner is shown as a plain stop, not a meal out of order
+    const meals = stops.filter((x) => x.meal).map((x) => x.meal);
+    expect(meals).toEqual(["breakfast", "lunch", "dinner", "supper"].filter((m) => meals.includes(m as never)));
     stops.forEach((x, i) => { if (i) expect(x.at).toBeGreaterThanOrEqual(stops[i - 1].at + stops[i - 1].mins); });
   });
   it("gives nothing back when the model returned nothing usable, so the rule-based plan takes over", () => {
     expect(fromAi(dest, ai([["ghost", "none"], ["phantom", "lunch"]]), 1)).toBeNull();
+  });
+});
+
+describe("limits the traveller sets are enforced in code, not left to the model", () => {
+  const bkt = { ...place("bkt", "eat", 4.601, 101.051, ["breakfast", "lunch"]), name: "Ah Seng Bak Kut Teh", famous: ["bak kut teh"] };
+  const porkSatay = { ...place("porksatay", "eat", 4.602, 101.051, ["lunch", "dinner"]), text: "Famous for its pork satay and kai see hor fun." };
+  const bar = { ...place("bar", "drink", 4.603, 101.051, ["dinner", "supper"]), text: "Craft beer and cocktails." };
+  const nasi = { ...place("nasi", "eat", 4.604, 101.051, ["breakfast", "lunch", "dinner"]), text: "Nasi kandar, open all day.", famous: ["nasi kandar"] };
+  const dest = town([...WEST, bkt, porkSatay, bar, nasi]);
+  it("knows what breaks a wish", () => {
+    expect(conflicts(bkt, "no pork please")).toBe(true);
+    expect(conflicts(porkSatay, "halal only")).toBe(true);
+    expect(conflicts(bar, "we have kids with us")).toBe(true);
+    expect(conflicts(nasi, "no pork, with kids")).toBe(false);
+    expect(conflicts(bkt, "")).toBe(false);
+  });
+  it("drops a conflicting place even if the model picks it, feeds the traveller anyway, and says what it cannot promise", () => {
+    const ai: AiPlan = { days: [{ theme: "t", stops: [{ id: "bkt", meal: "breakfast", note: "" }, { id: "west0", meal: "none", note: "" }, { id: "porksatay", meal: "lunch", note: "" }, { id: "west1", meal: "none", note: "" }, { id: "bar", meal: "dinner", note: "" }] }], stay: { id: "", why: "" }, tips: [] };
+    const plan = fromAi(dest, ai, 1, "No pork, please")!;
+    const ids = plan.days[0].stops.map((x) => x.place.id);
+    expect(ids).not.toContain("bkt"); expect(ids).not.toContain("porksatay"); expect(ids).not.toContain("bar");
+    expect(ids).toContain("nasi");                                   // the forgotten meal is filled from what is allowed
+    expect(plan.tips[0]).toContain("halal logo");
+    const rules = planTrip(dest, 1, "No pork, please");
+    expect(rules.days[0].stops.map((x) => x.place.id)).not.toContain("bkt");
+  });
+  it("adds lunch and dinner when the model forgets them", () => {
+    const d = town([...WEST, ...EATS]);
+    const ai: AiPlan = { days: [{ theme: "t", stops: [{ id: "kopitiam", meal: "breakfast", note: "" }, ...WEST.map((w) => ({ id: w.id, meal: "none" as const, note: "" }))] }], stay: { id: "", why: "" }, tips: [] };
+    const meals = fromAi(d, ai, 1)!.days[0].stops.filter((x) => x.meal).map((x) => x.meal);
+    expect(meals).toEqual(["breakfast", "lunch", "dinner"]);
   });
 });
 

@@ -138,8 +138,8 @@ export function guideReply(dest: GDest, rows: Row[], lang: string = "en"): Reply
 }
 
 /** A day-by-day route. `plan` is the language model's (already checked against our places); without it, the rule-based one. */
-export function planReply(dest: GDest, days: number, guide: Guide | null = null, plan: TripPlan | null = null): Reply {
-  const p = plan ?? planTrip(dest, days);
+export function planReply(dest: GDest, days: number, guide: Guide | null = null, plan: TripPlan | null = null, wishes = ""): Reply {
+  const p = plan ?? planTrip(dest, days, wishes);
   const n = p.days.length;
   const text = `Here's ${n === 1 ? "a day" : `${n} days`} in ${dest.name}.${p.by === "ai" ? "" : " I put places that are close together on the same day, so you spend your time eating and looking around, not sitting in the car."}${p.note ? ` ${p.note}` : ""}${p.stay ? "" : " I don't know a place to sleep here that I'd vouch for, so that part is on you."}`;
   // only offer what the town can actually deliver; otherwise point to the nearest other town worth a day

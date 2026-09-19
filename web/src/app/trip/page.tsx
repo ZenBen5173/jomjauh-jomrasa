@@ -61,9 +61,9 @@ export default function Trip() {
       let plan = null;
       try {
         const r = await fetch("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ dest: dest.id, days: trip.current.days, wishes: trip.current.wishes.join("; ") }) });
-        if (r.ok) plan = fromAi(dest, (await r.json()) as AiPlan, trip.current.days);
+        if (r.ok) plan = fromAi(dest, (await r.json()) as AiPlan, trip.current.days, trip.current.wishes.join("; "));
       } catch { /* fall through to the rule-based plan */ }
-      reply = planReply(dest, trip.current.days, g, plan);
+      reply = planReply(dest, trip.current.days, g, plan, trip.current.wishes.join("; "));
       via = plan ? "ai" : "keywords";
     } else if (dest) {
       reply = guideReply(dest, rows, langOf(t));
