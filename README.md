@@ -50,6 +50,13 @@ python -m pipeline.guide.collect          # Wikivoyage destination pages -> see 
 python -m pipeline.guide.build            # locate, assign meals, rainfall 2015-2024, best months -> web/public/data/guide.json
 ```
 
+Submission package (Dashboard.pdf, interactive Dashboard.xlsx, Data/, Source/, README.txt in one ZIP):
+
+```bash
+python -m pipeline.make_excel_dashboard   # offline Excel companion: state / year picker and a what-if simulator on live formulas
+python -m pipeline.make_submission        # needs screenshots in submission/shots/; writes submission/AnakSunway_Datathon2026_Dashboard.zip
+```
+
 ## Run the dashboard
 
 ```bash
