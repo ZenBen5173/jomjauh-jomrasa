@@ -110,7 +110,7 @@ def look(col: dict[str, str], field: str, key: str) -> str:
 def sheet_dashboard(wb: Workbook, col: dict[str, str], labels: list[str], gini: dict[str, float]) -> None:
     ws = wb.create_sheet("Dashboard")
     ws.sheet_view.showGridLines = False
-    for c, w in zip("ABCDEFGHIJKLMN", [2, 22, 16, 3, 22, 16, 3, 5, 18, 12, 3, 14, 12, 12]):
+    for c, w in zip("ABCDEFGHIJKLMN", [2, 22, 16, 3, 22, 16, 3, 5, 18, 12, 3, 14, 12, 18]):
         ws.column_dimensions[c].width = w
     put(ws, "B1", "JomJauh - Where should the next visitor go?", size=18, bold=True)
     put(ws, "B2", f"Offline Excel companion of {URL}. Change the two yellow cells; everything else recalculates.", color=MUTED)
@@ -181,12 +181,13 @@ def sheet_dashboard(wb: Workbook, col: dict[str, str], labels: list[str], gini: 
     chart = BarChart(); chart.type = "bar"; chart.style = 10; chart.title = "Opportunity by state (positive = under-visited)"; chart.legend = None; chart.height, chart.width = 9.5, 15
     chart.add_data(Reference(ws, min_col=10, min_row=7, max_row=23), titles_from_data=True); chart.set_categories(Reference(ws, min_col=9, min_row=8, max_row=23))
     chart.y_axis.scaling.orientation = "minMax"; chart.x_axis.scaling.orientation = "maxMin"; chart.series[0].graphicalProperties.solidFill = BLUE
+    chart.series[0].invertIfNegative = False; chart.x_axis.delete = False; chart.y_axis.delete = False; chart.x_axis.tickLblPos = "low"; chart.gapWidth = 60
     ws.add_chart(chart, "H25")
 
     tr = wb["Trend"]
     line = LineChart(); line.title = "How lopsided tourism has been (Gini)"; line.legend = None; line.height, line.width = 7.5, 15; line.style = 12
     line.add_data(Reference(tr, min_col=2, min_row=1, max_row=len(gini) + 1), titles_from_data=True); line.set_categories(Reference(tr, min_col=1, min_row=2, max_row=len(gini) + 1))
-    line.series[0].graphicalProperties.line.solidFill = RED; line.y_axis.number_format = "0.00"
+    line.series[0].graphicalProperties.line.solidFill = RED; line.y_axis.number_format = "0.00"; line.x_axis.delete = False; line.y_axis.delete = False; line.series[0].smooth = False
     ws.add_chart(line, "B36")
 
 
