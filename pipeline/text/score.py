@@ -48,6 +48,21 @@ def shrink(xbar: float, n: int, mu: float, k: float) -> float:
 
 
 # ---------------------------------------------------------------- build
+def _state_names() -> dict[str, list[str]]:
+    names = {r.code: [r.state.lower().replace("w.p. ", ""), r.label.lower()] for r in STATES.itertuples()}
+    names["PNG"].append("penang")
+    names["MLK"].append("malacca")
+    return names
+
+
+def elsewhere(code: str, place) -> bool:
+    """True when the place the model found names a DIFFERENT state and not the one the text was collected for:
+    a search for Sabah that returns a post about Kuala Lumpur must not count towards Sabah's score."""
+    p = place.lower() if isinstance(place, str) else ""
+    hits = {c for c, ns in _state_names().items() if any(re.search(r"\b" + re.escape(n) + r"\b", p) for n in ns)}
+    return bool(hits) and code not in hits
+
+
 def tagged() -> pd.DataFrame:
     items = pd.read_parquet(CLEAN / "text_items.parquet")
     tags = pd.DataFrame(load_cache().values()).rename(columns={"id": "item_id"})
@@ -58,6 +73,9 @@ def tagged() -> pd.DataFrame:
     if ver:
         df["tagger_travel"] = df["is_travel_experience"]
         df["is_travel_experience"] = df["is_travel_experience"] & df["item_id"].map(ver).fillna(False).astype(bool)
+    df["both_passes"] = df["is_travel_experience"]
+    df["elsewhere"] = [elsewhere(c, p) for c, p in zip(df["code"], df["place"])]
+    df["is_travel_experience"] = df["is_travel_experience"] & ~df["elsewhere"]
     return df
 
 

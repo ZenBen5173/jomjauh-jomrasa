@@ -49,13 +49,43 @@
    }
   ],
   "osm": {
-   "raw": 7336,
-   "kept": 7215
+   "raw": 22872,
+   "kept": 22743
   },
   "reconcile": {
    "year": 2025,
    "states_sum_k": 290064.7,
    "national_k": 290064.7
+  }
+ },
+ "quality": {
+  "ranges": {
+   "checked": 2426,
+   "problems": 0,
+   "examples": []
+  },
+  "completeness": {
+   "checked": 224,
+   "problems": 0,
+   "examples": []
+  },
+  "reconcile": {
+   "checked": 46,
+   "problems": 0,
+   "examples": []
+  },
+  "outliers": {
+   "checked": 128,
+   "flagged": 14,
+   "explained": 14,
+   "problems": 0,
+   "years": [
+    2022
+   ]
+  },
+  "editions": {
+   "checked": 112,
+   "differ": 0
   }
  },
  "text": {
@@ -79,53 +109,65 @@
     "n": 18420
    },
    {
-    "label": "After removing duplicates",
+    "label": "After removing exact duplicates",
     "n": 16506,
     "removed": 1914,
-    "why": "duplicates"
+    "why": "exact duplicates"
+   },
+   {
+    "label": "After removing near-duplicates",
+    "n": 16475,
+    "removed": 31,
+    "why": "near-duplicates"
    },
    {
     "label": "Tagged by the AI",
-    "n": 16473,
+    "n": 16442,
     "removed": 33,
     "why": "could not be tagged"
    },
    {
     "label": "AI says: a real trip",
-    "n": 13504,
-    "removed": 2969,
+    "n": 13486,
+    "removed": 2956,
     "why": "not a trip (ads, news, chatter)"
    },
    {
     "label": "Yes on the second ask too",
-    "n": 7629,
-    "removed": 5875,
+    "n": 7625,
+    "removed": 5861,
     "why": "failed the second ask"
+   },
+   {
+    "label": "About the right state",
+    "n": 7561,
+    "removed": 64,
+    "why": "about a different state"
    }
   ],
   "by_state": {
-   "SWK": 573,
-   "PRK": 572,
-   "KUL": 570,
-   "SBH": 551,
-   "PNG": 537,
-   "PHG": 519,
-   "MLK": 510,
-   "TRG": 507,
-   "SGR": 506,
-   "JHR": 461,
-   "NSN": 413,
-   "KDH": 397,
-   "PJY": 396,
-   "KTN": 387,
+   "SWK": 568,
+   "PRK": 567,
+   "KUL": 561,
+   "SBH": 550,
+   "PNG": 536,
+   "PHG": 512,
+   "MLK": 507,
+   "TRG": 502,
+   "SGR": 499,
+   "JHR": 458,
+   "NSN": 410,
+   "PJY": 394,
+   "KDH": 389,
    "PLS": 384,
-   "LBN": 346
+   "KTN": 380,
+   "LBN": 344
   },
   "by_language": {
-   "en": 3932,
-   "ms": 2035,
-   "zh": 1125,
-   "mixed": 536,
+   "en": 3897,
+   "ms": 2015,
+   "zh": 1117,
+   "mixed": 531,
    "other": 1
   }
  },

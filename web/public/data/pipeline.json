@@ -14,7 +14,7 @@
  },
  "tables": {
   "count": 21,
-  "rows": 29701,
+  "rows": 45198,
   "panel_rows": 80,
   "panel_columns": 53,
   "list": [
@@ -75,7 +75,7 @@
    },
    {
     "name": "osm_points",
-    "rows": 7215,
+    "rows": 22743,
     "columns": 8
    },
    {
@@ -110,7 +110,7 @@
    },
    {
     "name": "text_items",
-    "rows": 16506,
+    "rows": 16475,
     "columns": 7
    },
    {
@@ -127,17 +127,17 @@
  },
  "text": {
   "model": "google/gemini-2.5-flash-lite",
-  "collected": 16506,
+  "collected": 16475,
   "tagged": 16502,
-  "kept": 7629,
+  "kept": 7561,
   "by_source": {
-   "web": 12569,
-   "youtube_comment": 3937
+   "web": 12541,
+   "youtube_comment": 3934
   },
   "languages": {
-   "en": 9742,
-   "ms": 4538,
-   "zh": 2226
+   "en": 9726,
+   "ms": 4530,
+   "zh": 2219
   },
   "topics": 11,
   "emotions": 8,
@@ -164,29 +164,29 @@
  },
  "robustness": {
   "draws": 1000,
-  "spearman_median": 0.938,
+  "spearman_median": 0.935,
   "spearman_p05": 0.77,
-  "leave_one_out_min": 0.932,
+  "leave_one_out_min": 0.926,
   "top5": [
    {
-    "code": "JHR",
-    "share": 0.977
-   },
-   {
     "code": "LBN",
-    "share": 0.97
+    "share": 0.974
    },
    {
-    "code": "SBH",
-    "share": 0.758
+    "code": "JHR",
+    "share": 0.973
    },
    {
     "code": "SWK",
-    "share": 0.747
+    "share": 0.766
+   },
+   {
+    "code": "SBH",
+    "share": 0.756
    },
    {
     "code": "TRG",
-    "share": 0.634
+    "share": 0.686
    }
   ]
  },
@@ -199,7 +199,7 @@
   "states": 15
  },
  "tests": {
-  "python": 50,
+  "python": 53,
   "web": 57
  }
 }

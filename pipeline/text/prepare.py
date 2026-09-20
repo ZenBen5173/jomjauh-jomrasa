@@ -68,6 +68,32 @@ def _norm_key(text: str) -> str:
     return hashlib.sha1(re.sub(r"\W+", "", text.lower())[:300].encode()).hexdigest()
 
 
+NEAR_DUPLICATE = 0.7   # share of 5-word runs two texts must have in common to count as the same text
+
+
+def _runs(text: str, k: int = 5) -> set[str]:
+    w = re.findall(r"\w+", text.lower())
+    return {" ".join(w[i:i + k]) for i in range(max(len(w) - k + 1, 1))}
+
+
+def near_duplicates(texts: list[str]) -> set[int]:
+    """Positions of texts that repeat an EARLIER one almost word for word (a blog copied to a second site,
+    a comment posted twice with one word changed). Exact repeats are caught before this by _norm_key.
+    Two texts are compared only if they share a 5-word run; they match when the Jaccard overlap of
+    their runs is at least NEAR_DUPLICATE. The first copy is kept."""
+    runs = [_runs(t) for t in texts]
+    seen: dict[str, list[int]] = {}
+    drop: set[int] = set()
+    for i, rs in enumerate(runs):
+        rivals = {j for r in sorted(rs)[:40] for j in seen.get(r, ())}
+        if any(j not in drop and len(rs & runs[j]) / len(rs | runs[j]) >= NEAR_DUPLICATE for j in rivals):
+            drop.add(i)
+            continue
+        for r in sorted(rs)[:40]:
+            seen.setdefault(r, []).append(i)
+    return drop
+
+
 def build(max_passages_per_page: int = 6) -> pd.DataFrame:
     rows = []
     for f in sorted((RAW / "exa").glob("*.json")):
@@ -91,6 +117,7 @@ def build(max_passages_per_page: int = 6) -> pd.DataFrame:
     df = pd.DataFrame(rows, columns=["text", "code", "url", "source_type", "date"])
     df["_k"] = df["text"].map(_norm_key)
     df = df.drop_duplicates("_k").drop(columns="_k").reset_index(drop=True)
+    df = df.drop(index=sorted(near_duplicates(df["text"].tolist()))).reset_index(drop=True)
     df["lang_hint"] = df["text"].map(lang_hint)
     df.insert(0, "item_id", df["text"].map(lambda t: hashlib.sha1(t.encode()).hexdigest()[:12]))
     return df

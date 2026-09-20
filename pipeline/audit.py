@@ -128,11 +128,14 @@ def text() -> dict:
             else:
                 c["comments_short"] += 1
     before = len(rows)
-    after = len({TP._norm_key(t) for t in rows})
+    unique = list({TP._norm_key(t): t for t in reversed(rows)}.values())[::-1]   # first copy of each text, in order
+    after = len(unique)
+    near = len(TP.near_duplicates(unique))
 
     from pipeline.text.score import tagged
     tg = tagged()
-    first = int(tg["tagger_travel"].sum()) if "tagger_travel" in tg else int(tg.is_travel_experience.sum())
+    first = int(tg["tagger_travel"].sum())
+    both = int(tg["both_passes"].sum())
     kept = tg[tg.is_travel_experience]
     return {
         "searches": c["searches"], "pages": c["pages"], "pages_blocked": c["pages_blocked"], "comments": c["comments"],
@@ -141,10 +144,12 @@ def text() -> dict:
         "scrubbed": {"links": c["links"], "emails": c["emails"], "usernames": c["usernames"], "phones": c["phones"]},
         "funnel": [
             {"label": "Passages and comments", "n": before},
-            {"label": "After removing duplicates", "n": after, "removed": before - after, "why": "duplicates"},
-            {"label": "Tagged by the AI", "n": int(len(tg)), "removed": after - int(len(tg)), "why": "could not be tagged"},
+            {"label": "After removing exact duplicates", "n": after, "removed": before - after, "why": "exact duplicates"},
+            {"label": "After removing near-duplicates", "n": after - near, "removed": near, "why": "near-duplicates"},
+            {"label": "Tagged by the AI", "n": int(len(tg)), "removed": after - near - int(len(tg)), "why": "could not be tagged"},
             {"label": "AI says: a real trip", "n": first, "removed": int(len(tg)) - first, "why": "not a trip (ads, news, chatter)"},
-            {"label": "Yes on the second ask too", "n": int(len(kept)), "removed": first - int(len(kept)), "why": "failed the second ask"},
+            {"label": "Yes on the second ask too", "n": both, "removed": first - both, "why": "failed the second ask"},
+            {"label": "About the right state", "n": int(len(kept)), "removed": both - int(len(kept)), "why": "about a different state"},
         ],
         "by_state": {k: int(n) for k, n in kept.code.value_counts().items()},
         "by_language": {k: int(n) for k, n in kept.language.value_counts().items()},
@@ -182,7 +187,8 @@ def guide() -> dict:
 
 
 def main() -> None:
-    out = {"structured": structured(), "text": text(), "panel": panel(), "guide": guide(),
+    from pipeline import quality
+    out = {"structured": structured(), "quality": quality.run(), "text": text(), "panel": panel(), "guide": guide(),
            "published_files": len([f for f in WEB.glob("*.json") if f.name != "pipeline_audit.json"])}
     (WEB / "pipeline_audit.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf8")
     s, t = out["structured"], out["text"]

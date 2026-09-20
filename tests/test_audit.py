@@ -14,7 +14,7 @@ def test_funnel_only_shrinks_and_ends_at_the_posts_we_score():
     assert ns == sorted(ns, reverse=True)
     for prev, step in zip(AUDIT["text"]["funnel"], AUDIT["text"]["funnel"][1:]):
         assert prev["n"] - step["n"] == step["removed"]
-    assert AUDIT["text"]["funnel"][1]["n"] == len(pd.read_parquet(CLEAN / "text_items.parquet"))
+    assert AUDIT["text"]["funnel"][2]["n"] == len(pd.read_parquet(CLEAN / "text_items.parquet"))   # after exact and near-duplicates
 
 
 def test_duplicates_and_filters_match_the_clean_tables():
@@ -34,3 +34,10 @@ def test_cell_map_covers_every_cell_of_the_panel():
     assert len(p["map"]) == p["rows"] and all(len(r["cells"]) == p["value_columns"] for r in p["map"])
     assert sum(r["cells"].count("e") for r in p["map"]) == p["empty"]
     assert sum(r["cells"].count("c") for r in p["map"]) == p["carried"]
+
+
+def test_quality_methods_found_no_problems():
+    q = AUDIT["quality"]
+    assert all(q[k]["problems"] == 0 for k in ("ranges", "completeness", "reconcile", "outliers"))
+    assert q["outliers"]["flagged"] == q["outliers"]["explained"]          # every flagged jump is a pandemic year
+    assert q["ranges"]["checked"] > 2000 and q["reconcile"]["checked"] > 40
