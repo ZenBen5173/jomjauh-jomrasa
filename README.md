@@ -73,7 +73,6 @@ npm test                                  # TypeScript metrics must reproduce th
   Only derived, aggregated tables and short attributed quotes are published. Re-create it with the JomRasa commands above.
 - Place descriptions in the traveller guide are from English Wikivoyage (CC BY-SA 4.0), trimmed and otherwise unchanged, and are published under the same licence;
   rainfall is from the Open-Meteo archive (ERA5, CC BY 4.0); missing coordinates are from OpenStreetMap (ODbL).
-- JomRasa validation figures are agreement with blind reference labels from a stronger model, not human-labelled accuracy (see `docs/validation_*.`).
 
 Live dashboard: https://jomjauh.vercel.app · Team ANAK SUNWAY · DOSM Datathon 2026
 
