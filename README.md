@@ -28,6 +28,7 @@ python -m pipeline.build_panel            # one row per state per year
 python -m pytest tests -q                 # data checks + metric tests
 python -m pipeline.export_web             # JSON for the dashboard + Python reference results
 python -m pipeline.data_dictionary
+python -m pipeline.audit                  # replays the cleaning with counters: duplicates removed, rows filtered, posts dropped -> pipeline_audit.json
 python -m pipeline.export_pipeline        # counts for the website's Pipeline page (run last: it reads the other outputs and the test reports)
 ```
 

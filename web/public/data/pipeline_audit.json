@@ -1,0 +1,634 @@
+{
+ "structured": {
+  "cells": {
+   "read": 3671,
+   "text_to_number": 0,
+   "dash_to_empty": 26,
+   "already_number": 3645
+  },
+  "spellings": {
+   "variants": 21,
+   "codes": 16,
+   "examples": [
+    "Penang",
+    "Pulau Pinang"
+   ]
+  },
+  "duplicates": [
+   {
+    "key": [
+     "code",
+     "year"
+    ],
+    "before": 256,
+    "after": 144,
+    "removed": 112
+   }
+  ],
+  "duplicates_removed": 112,
+  "filters": [
+   {
+    "label": "Population",
+    "raw": 270063,
+    "kept": 192
+   },
+   {
+    "label": "Income, poverty, amenities, GDP",
+    "raw": 3480,
+    "kept": 157
+   },
+   {
+    "label": "Hotels, full year",
+    "raw": 1317,
+    "kept": 153
+   },
+   {
+    "label": "Hotels, by quarter",
+    "raw": 1155,
+    "kept": 561
+   }
+  ],
+  "osm": {
+   "raw": 7336,
+   "kept": 7215
+  },
+  "reconcile": {
+   "year": 2025,
+   "states_sum_k": 290064.7,
+   "national_k": 290064.7
+  }
+ },
+ "text": {
+  "searches": 295,
+  "pages": 2950,
+  "pages_blocked": 19,
+  "comments": 9229,
+  "paragraphs": 150175,
+  "paragraphs_junk": 89146,
+  "passages_over_cap": 5259,
+  "comments_short": 5146,
+  "scrubbed": {
+   "links": 1394,
+   "emails": 317,
+   "usernames": 877,
+   "phones": 832
+  },
+  "funnel": [
+   {
+    "label": "Passages and comments",
+    "n": 18420
+   },
+   {
+    "label": "After removing duplicates",
+    "n": 16506,
+    "removed": 1914,
+    "why": "duplicates"
+   },
+   {
+    "label": "Tagged by the AI",
+    "n": 16473,
+    "removed": 33,
+    "why": "could not be tagged"
+   },
+   {
+    "label": "AI says: a real trip",
+    "n": 13504,
+    "removed": 2969,
+    "why": "not a trip (ads, news, chatter)"
+   },
+   {
+    "label": "Yes on the second ask too",
+    "n": 7629,
+    "removed": 5875,
+    "why": "failed the second ask"
+   }
+  ],
+  "by_state": {
+   "SWK": 573,
+   "PRK": 572,
+   "KUL": 570,
+   "SBH": 551,
+   "PNG": 537,
+   "PHG": 519,
+   "MLK": 510,
+   "TRG": 507,
+   "SGR": 506,
+   "JHR": 461,
+   "NSN": 413,
+   "KDH": 397,
+   "PJY": 396,
+   "KTN": 387,
+   "PLS": 384,
+   "LBN": 346
+  },
+  "by_language": {
+   "en": 3932,
+   "ms": 2035,
+   "zh": 1125,
+   "mixed": 536,
+   "other": 1
+  }
+ },
+ "panel": {
+  "rows": 80,
+  "columns": 53,
+  "value_columns": 48,
+  "states": 16,
+  "years": [
+   {
+    "year": 2021,
+    "filled": 623,
+    "carried": 48,
+    "empty": 97
+   },
+   {
+    "year": 2022,
+    "filled": 735,
+    "carried": 32,
+    "empty": 1
+   },
+   {
+    "year": 2023,
+    "filled": 752,
+    "carried": 16,
+    "empty": 0
+   },
+   {
+    "year": 2024,
+    "filled": 688,
+    "carried": 80,
+    "empty": 0
+   },
+   {
+    "year": 2025,
+    "filled": 672,
+    "carried": 96,
+    "empty": 0
+   }
+  ],
+  "column_names": [
+   "area_km2",
+   "lat",
+   "lon",
+   "visitors_k",
+   "population_k",
+   "spend_per_visitor_rm",
+   "spend_per_trip_rm",
+   "avg_length_of_stay",
+   "spend_year",
+   "receipts_rm_m",
+   "paid_accommodation_share",
+   "mode_air_pct",
+   "mode_private_vehicle_pct",
+   "tourists_k",
+   "overnight_share",
+   "out_of_state_share_pct",
+   "origin_diversity",
+   "od_year",
+   "rooms",
+   "hotels",
+   "occupancy_pct",
+   "hotel_guests_total",
+   "hotel_guests_foreign",
+   "foreign_guest_share_pct",
+   "spare_occupancy_pct",
+   "basic_amenities_pct",
+   "amenities_year",
+   "income_median_rm",
+   "poverty_absolute_pct",
+   "gdp_per_capita_rm",
+   "attractions_n",
+   "osm_attractions",
+   "osm_nature",
+   "osm_heritage",
+   "rail_stations_n",
+   "airports_100km",
+   "experience_score",
+   "access_sentiment",
+   "amenity_sentiment",
+   "mentions_n",
+   "visitor_share_pct",
+   "visitors_per_resident",
+   "visitors_per_km2",
+   "receipts_per_resident_rm",
+   "rooms_per_1000_tourists",
+   "rooms_per_1000_residents",
+   "attractions_per_1000km2",
+   "market_access"
+  ],
+  "map": [
+   {
+    "year": 2021,
+    "code": "JHR",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "KDH",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "KTN",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "KUL",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "LBN",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "MLK",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "NSN",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "PHG",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "PJY",
+    "cells": "ffffffffffeeeeeccffffffffcfffeffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "PLS",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "PNG",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "PRK",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "SBH",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "SGR",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "SWK",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2021,
+    "code": "TRG",
+    "cells": "ffffffffffeeeeeccffffffffcffffffffffffffffffefff"
+   },
+   {
+    "year": 2022,
+    "code": "JHR",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "KDH",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "KTN",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "KUL",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "LBN",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "MLK",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "NSN",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "PHG",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "PJY",
+    "cells": "fffffffffffffffccffffffffffffeffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "PLS",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "PNG",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "PRK",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "SBH",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "SGR",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "SWK",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2022,
+    "code": "TRG",
+    "cells": "fffffffffffffffccfffffffffffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "JHR",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "KDH",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "KTN",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "KUL",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "LBN",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "MLK",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "NSN",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "PHG",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "PJY",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "PLS",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "PNG",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "PRK",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "SBH",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "SGR",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "SWK",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2023,
+    "code": "TRG",
+    "cells": "fffffffffffffffffffffffffcffffffffffffffffffffff"
+   },
+   {
+    "year": 2024,
+    "code": "JHR",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "KDH",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "KTN",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "KUL",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "LBN",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "MLK",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "NSN",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "PHG",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "PJY",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "PLS",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "PNG",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "PRK",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "SBH",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "SGR",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "SWK",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2024,
+    "code": "TRG",
+    "cells": "fffffcccfcfffffffffffffffffffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "JHR",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "KDH",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "KTN",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "KUL",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "LBN",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "MLK",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "NSN",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "PHG",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "PJY",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "PLS",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "PNG",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "PRK",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "SBH",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "SGR",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "SWK",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   },
+   {
+    "year": 2025,
+    "code": "TRG",
+    "cells": "fffffcccfcfffffffffffffffcfffffffffffffffffcffff"
+   }
+  ],
+  "cells": 3840,
+  "empty": 98,
+  "carried": 272
+ },
+ "guide": {
+  "listings": 2455,
+  "had_coordinates": 1468,
+  "placed": 1168,
+  "from_wikivoyage": 914,
+  "from_map": 254,
+  "street_level": 25
+ },
+ "published_files": 12
+}

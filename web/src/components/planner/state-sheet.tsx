@@ -41,7 +41,6 @@ export function StateSheet({ code, open, onClose }: { code: string; open: boolea
 
   const jr = JR.states.find((x) => x.code === code);
   const topics = JR.topics.filter((t) => t.code === code && t.n > 0).sort((a, b) => b.n - a.n).slice(0, 8);
-  const maxN = Math.max(...topics.map((t) => t.n), 1);
   const emotions = jr ? JR.meta.emotions.map((e) => ({ e, v: (jr[`emo_${e}`] as number) ?? 0 })).filter((x) => x.v > 0.01).sort((a, b) => b.v - a.v) : [];
   const quotes = JR.quotes.filter((x) => x.code === code && (tone === "praise" ? x.overall > 0 : x.overall < 0)).slice(0, 3);
 
@@ -79,16 +78,17 @@ export function StateSheet({ code, open, onClose }: { code: string; open: boolea
       </Block>
 
       {jr && (
-        <Block title={`What ${fmt.int(jr.mentions_n)} travellers wrote`} info="From public travel blogs and video comments in Malay, English and Mandarin, tagged by AI. Bar length = how often the topic comes up; the number is sentiment (0-100, 50 is neutral). An indicator, not an official statistic.">
+        <Block title={`What ${fmt.int(jr.mentions_n)} travellers wrote`} info="From public travel blogs and video comments in Malay, English and Mandarin, tagged by AI. The bar and the number are the same thing: how positive travellers are about that topic (0-100, 50 is neutral). The small grey figure is how many posts mention it; topics are listed most-mentioned first. An indicator, not an official statistic.">
           <div className="space-y-1.5">
             {topics.map((t) => (
-              <div key={t.topic} className="grid grid-cols-[130px_1fr_30px] items-center gap-2 text-xs">
+              <div key={t.topic} className="grid grid-cols-[130px_1fr_30px_58px] items-center gap-2 text-xs">
                 <span className="truncate text-muted-foreground">{TOPIC_LABEL[t.topic]}</span>
                 <span className="relative h-3 overflow-hidden rounded-[4px] bg-muted">
-                  <motion.span className="absolute inset-y-0 left-0 rounded-[4px]" initial={{ width: 0 }} animate={{ width: `${(t.n / maxN) * 100}%` }} transition={{ duration: 0.6, ease: EASE }}
+                  <motion.span className="absolute inset-y-0 left-0 rounded-[4px]" initial={{ width: 0 }} animate={{ width: `${t.sentiment}%` }} transition={{ duration: 0.6, ease: EASE }}
                     style={{ background: t.sentiment >= 50 ? `color-mix(in oklab, #3987e5 ${40 + (t.sentiment - 50) * 1.2}%, #383835)` : `color-mix(in oklab, #c4c7ce ${40 + (50 - t.sentiment) * 1.2}%, #383835)` }} />
                 </span>
                 <span className="text-right tabular-nums">{t.sentiment.toFixed(0)}</span>
+                <span className="text-right text-[11px] tabular-nums text-muted-foreground">{fmt.int(t.n)} posts</span>
               </div>
             ))}
           </div>
