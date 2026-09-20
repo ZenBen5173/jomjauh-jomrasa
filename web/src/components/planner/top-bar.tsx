@@ -44,12 +44,12 @@ function SpotlightTabs() {
   return (
     <nav ref={nav} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       onMouseMove={(e) => nav.current?.style.setProperty("--spotlight-x", `${e.clientX - nav.current.getBoundingClientRect().left}px`)}
-      className="relative h-10 w-fit overflow-hidden rounded-full border border-border bg-card/70">
-      <ul className="relative z-10 flex h-full items-center px-1.5">
+      className="relative h-10 w-full overflow-hidden rounded-full border border-border bg-card/70 md:w-fit">
+      <ul className="relative z-10 flex h-full items-center justify-between px-1.5 md:justify-start">
         {TABS.map((t, i) => (
           <li key={t.href}>
             <Link href={t.href} data-index={i}
-              className={cn("block rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors", i === active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+              className={cn("block rounded-full px-2 py-1.5 text-xs font-medium transition-colors min-[400px]:px-3 md:px-3.5 md:text-[13px]", i === active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
               {t.label}
             </Link>
           </li>

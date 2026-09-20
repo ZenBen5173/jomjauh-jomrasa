@@ -33,7 +33,7 @@ export function Guide() {
   const px = useSpring(ex, { stiffness: 260, damping: 22 }), py = useSpring(ey, { stiffness: 260, damping: 22 });
 
   useEffect(() => {
-    setHovering(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+    setHovering(window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches);
     try { setAsleep(localStorage.getItem("jojo-asleep") === "1"); } catch { /* private mode */ }
   }, []);
 

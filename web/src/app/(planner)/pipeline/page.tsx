@@ -26,8 +26,8 @@ function Section({ step, title, children, say }: { step: number; title: string; 
     <motion.section initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.5, ease: EASE }} data-guide-say={say} className="mt-7">
       <div className="mb-2.5 flex items-center gap-3">
         <span className="grid size-6 place-items-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">{step}</span>
-        <h2 className="shrink-0 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</h2>
-        <span className="h-px flex-1 bg-border" />
+        <h2 className="min-w-0 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground sm:shrink-0">{title}</h2>
+        <span className="hidden h-px flex-1 bg-border sm:block" />
       </div>
       {children}
     </motion.section>
@@ -50,7 +50,7 @@ function BeforeAfter({ label, before, after, note, log }: { label: string; befor
   const w = (v: number) => (log ? Math.log10(v + 1) / Math.log10(before + 1) : v / before) * 100;
   return (
     <div className="group">
-      <div className="flex items-baseline justify-between gap-3 text-[13px]"><span className="font-medium">{label}</span><span className="text-xs text-muted-foreground">{note}</span></div>
+      <div className="flex flex-col gap-x-3 text-[13px] sm:flex-row sm:items-baseline sm:justify-between"><span className="font-medium">{label}</span><span className="text-xs text-muted-foreground">{note}</span></div>
       <div className="mt-1.5 space-y-1">
         {[{ v: before, tone: "bg-foreground/15", tag: "in" }, { v: after, tone: "bg-primary", tag: "kept" }].map((b) => (
           <div key={b.tag} className="flex items-center gap-2">
@@ -188,15 +188,14 @@ export default function Pipeline() {
             <ol className="space-y-2.5">
               {T.funnel.map((f, i) => (
                 <li key={f.label} className="group">
-                  {"removed" in f && <p className="mb-1 pl-1 text-[11px] text-muted-foreground">− {n(f.removed ?? 0)} {f.why}</p>}
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 flex-1 overflow-hidden rounded-lg bg-muted/40">
+                  {"removed" in f && <p className="mb-1.5 pl-1 text-[11px] text-muted-foreground">− {n(f.removed ?? 0)} {f.why}</p>}
+                  <p className="mb-1 flex items-baseline justify-between gap-3 text-[13px]"><span className="font-medium">{f.label}</span><span className="font-semibold tabular-nums">{n(f.n)}</span></p>
+                  <div>
+                    <div className="h-5 overflow-hidden rounded-md bg-muted/40">
                       <motion.div initial={{ width: 0 }} whileInView={{ width: `${(f.n / top) * 100}%` }} viewport={{ once: true }} transition={{ delay: 0.08 * i, duration: 0.9, ease: EASE }}
-                        className="flex h-full items-center rounded-lg px-3 text-xs font-medium text-white transition-[filter] group-hover:brightness-125" style={{ background: `color-mix(in oklab, var(--primary) ${45 + 55 * (i / (T.funnel.length - 1))}%, #1c1d22)` }}>
-                        <span className="truncate">{f.label}</span>
+                        className="h-full rounded-md transition-[filter] group-hover:brightness-125" style={{ background: `color-mix(in oklab, var(--primary) ${45 + 55 * (i / (T.funnel.length - 1))}%, #1c1d22)` }}>
                       </motion.div>
                     </div>
-                    <span className="w-16 text-right text-sm font-semibold tabular-nums">{n(f.n)}</span>
                   </div>
                 </li>
               ))}

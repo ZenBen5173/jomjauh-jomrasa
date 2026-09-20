@@ -1,3 +1,4 @@
+import { DesktopHint } from "@/components/planner/desktop-hint";
 import { Guide } from "@/components/planner/guide";
 import { TopBar } from "@/components/planner/top-bar";
 
@@ -8,6 +9,7 @@ export default function PlannerLayout({ children }: { children: React.ReactNode 
       <TopBar />
       <main className="mx-auto max-w-[1500px] px-4 py-4 md:px-6">{children}</main>
       <Guide />
+      <DesktopHint />
     </div>
   );
 }

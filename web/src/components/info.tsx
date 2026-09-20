@@ -4,7 +4,7 @@
  * The "i" that replaces paragraphs of fine print: source, method and assumptions stay one
  * hover (or tap) away, so the layout can speak first and the detail never disappears.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Info as InfoIcon } from "lucide-react";
 import { SPRING } from "@/lib/motion";
@@ -14,6 +14,16 @@ export function Info({ children, align = "left", className }: { children: React.
   const [open, setOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
+  const tip = useRef<HTMLSpanElement>(null);
+  const [shift, setShift] = useState(0);
+
+  // keep the bubble on screen: near a phone's edge it would otherwise open half outside the viewport
+  useLayoutEffect(() => {
+    if (!open || !ref.current || !tip.current) return;
+    const a = ref.current.getBoundingClientRect(), w = tip.current.offsetWidth, edge = 8;
+    const left = align === "right" ? a.right - w : a.left;
+    setShift(left < edge ? edge - left : left + w > window.innerWidth - edge ? window.innerWidth - edge - (left + w) : 0);
+  }, [open, align]);
 
   useEffect(() => {
     if (!open) return;
@@ -37,9 +47,9 @@ export function Info({ children, align = "left", className }: { children: React.
       </button>
       <AnimatePresence>
         {open && (
-          <motion.span role="tooltip" initial={{ opacity: 0, y: -4, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+          <motion.span ref={tip} role="tooltip" style={{ marginLeft: align === "right" ? undefined : shift, marginRight: align === "right" ? -shift : undefined }} initial={{ opacity: 0, y: -4, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.97, transition: { duration: 0.1 } }} transition={SPRING.snappy}
-            className={cn("absolute top-6 z-40 block w-64 rounded-xl border border-border bg-popover p-3 text-left text-[11px] font-normal normal-case leading-relaxed tracking-normal text-muted-foreground shadow-xl",
+            className={cn("absolute top-6 z-40 block w-64 max-w-[calc(100vw-16px)] rounded-xl border border-border bg-popover p-3 text-left text-[11px] font-normal normal-case leading-relaxed tracking-normal text-muted-foreground shadow-xl",
               align === "right" ? "right-0" : "left-0")}>
             {children}
           </motion.span>
