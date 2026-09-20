@@ -42,10 +42,12 @@ const STAGES: Stage[] = [
   {
     id: "clean", icon: <Eraser className="size-4" />, name: "Clean", line: "Messy spreadsheets become tidy tables.", big: tables.count, unit: `tidy tables, ${n(tables.rows)} rows`,
     points: [
-      ["Made for reading, not for computers", "Government spreadsheets have titles, merged cells and totals in odd places. We pull out just the numbers and label them."],
-      ["One name per state", "\"Pulau Pinang\", \"Penang\" and \"P. Pinang\" all become one code, so tables from different agencies can be joined."],
-      ["No personal details", "Usernames and profile links are stripped from travel posts. We keep only the text, the state, the link, the date and the language."],
-      ["A mistake we caught", "One file's total row was shifted by a column, which made the states look 30 million visits short. They actually add up exactly."],
+      ["Getting the numbers out", "Government spreadsheets are laid out for printing: merged headers, footnotes, totals mixed in. We find rows by their label, not their position, and turn text like \"2,506\" into real numbers. Dashes and \"n.a.\" become missing - never zero."],
+      ["One name per state", "\"Pulau Pinang\", \"Penang\" and \"P. Pinang\" all become one code, so tables from different agencies can be joined. Total and subtotal rows are dropped."],
+      ["Duplicates", "When two publications give the same year, we keep the newest, because later files carry revised figures. Repeated travel posts are caught by fingerprinting the text; a place listed in two sources is kept once."],
+      ["Missing values", "We never fill a gap with a zero or an average. If a newer year does not exist, we carry the latest one forward and write down which year it came from. The pipeline refuses to finish if any cell is empty from 2023 on."],
+      ["Odd values", "Every key figure has a sensible range it must sit in. When scoring, big counts are put on a log scale and we use the middle value rather than the average, so one unusual state cannot bend the picture."],
+      ["Cleaning the travel posts", "Links, emails, phone numbers and usernames are removed. Boilerplate like \"click here\" goes, posts under 60 characters go, and long articles are cut into short passages so one blog cannot drown out a state."],
     ],
     guard: "Cleaning is code, not hand-editing, so it can be re-run from the raw files at any time and gives the same answer.",
     files: ["pipeline/transform_structured.py", "pipeline/text/prepare.py", "pipeline/states.py"],
@@ -54,8 +56,10 @@ const STAGES: Stage[] = [
   {
     id: "check", icon: <ShieldCheck className="size-4" />, name: "Check", line: "Automatic checks stop bad data getting through.", big: tests.python, unit: "checks on the data and the maths",
     points: [
-      ["The states must add up", "The 16 states' visitors must equal DOSM's national total exactly. If they ever differ, the pipeline stops."],
-      ["Nothing missing, nothing silly", "Every year has exactly the 16 states, nothing is negative, and every figure sits in a sensible range."],
+      ["The states must add up", "The 16 states' visitors must equal DOSM's published national total exactly. If they ever differ, the pipeline stops."],
+      ["Our sums must match theirs", "Tourists plus day-trippers must equal visitors. Where-from tables must add up to published tourists. Ratios we work out, like spend per visitor, must match the ones DOSM prints."],
+      ["Nothing missing, nothing silly", "Every year has exactly the 16 states, nothing is negative, percentages stay between 0 and 100, and transport shares add up to 100."],
+      ["It caught a real mistake", "One DOSM file had its total row shifted by a column, which made the states look about 30 million visits short. The check flagged it; the states do add up."],
       ["The maths is tested too", "Each score is checked against small examples worked out by hand."],
       ["Privacy is tested", "A check fails if anything that looks like a username survives in the travel posts."],
     ],
