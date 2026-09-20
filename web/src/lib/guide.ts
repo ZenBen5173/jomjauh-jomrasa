@@ -98,10 +98,10 @@ export function explain(key: string, c: GuideCtx): Say | null {
   const [kind, a, b] = key.split(":");
   const f = c.facts;
   switch (kind) {
-    case "problem": return say("problem", `Ah, you're looking at the problem. Did you know? ${inWords(f.top3Share).replace(/^a/, "A")} of all trips go to just three places - ${labels(f.top3)}. That's a bit crowded, isn't it? Click and I'll show you where the crowds are.`);
+    case "problem": return say("problem", `Ah, you're looking at the problem. Did you know? ${inWords(f.top3Share).replace(/^a/, "A")} of all trips go to just three places - ${labels(f.top3)}. That's a bit crowded, isn't it?`);
     case "opportunity": return say("opportunity", `Here's the good news. Quiet states like ${labels(f.untapped.slice(0, 3))} have lots of empty hotel rooms right now. They could welcome many more visitors without building anything new.`);
-    case "obstacle": return say("obstacle", "So why aren't people going? Almost every quiet state has one weak spot: some are hard to get to, some are not well known, and some don't have enough places to stay. Click to see which is which.");
-    case "payoff": return say("payoff", `Let's play what-if. Imagine one in ten of ${STATE_LABEL[f.origin]}'s visitors went to ${labels(f.dests)} instead. Tourism would be shared ${f.giniChangePct <= 0 ? "a little more fairly" : "a little less fairly"}. The country would not earn more - the money just moves around. Click to try your own idea.`);
+    case "obstacle": return say("obstacle", "So why aren't people going? Almost every quiet state has one weak spot: some are hard to get to, some are not well known, and some don't have enough places to stay. Pick Bottleneck in the bar below to see which is which.");
+    case "payoff": return say("payoff", `Let's play what-if. Imagine one in ten of ${STATE_LABEL[f.origin]}'s visitors went to ${labels(f.dests)} instead. Tourism would be shared ${f.giniChangePct <= 0 ? "a little more fairly" : "a little less fairly"}. The country would not earn more - the money just moves around. Try your own idea in the Simulator tab.`);
     case "stat":
       if (a === "visits") return say(null, `How many trips Malaysians made inside Malaysia in ${c.year}. If someone visits two states on one holiday, that counts as two.`);
       if (a === "spending") return say(null, c.year > 2023

@@ -2,11 +2,11 @@
 
 /**
  * The planner dashboard, in an executive layout: the question and headline numbers on top; the
- * argument in four steps (problem, opportunity, obstacle, payoff); then a ranked list, the map
- * and the selected state side by side, all driven by the same metric and the same selection;
+ * argument in four steps (problem, opportunity, obstacle, payoff), to read; then ONE view bar (what to show,
+ * which state, weights) and a ranked list, the map and the selected state side by side, all following it;
  * the evidence underneath. Analyst tools and full profiles slide in instead of being separate pages.
  */
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { SlidersHorizontal } from "lucide-react";
 import { Card, LineChart, LorenzChart, RankBars, Segmented } from "@/components/charts";
@@ -57,7 +57,6 @@ export default function Dashboard() {
   const [metric, setMetric] = useState<MetricKey>("gap");
   const [profile, setProfile] = useState(false);
   const [weights, setWeights] = useState(false);
-  const explore = useRef<HTMLDivElement>(null);
 
   const ranked = useMemo(() => [...gap].sort((a, b) => b.gap - a.gap), [gap]);
   // open on the top-ranked full state; the three tiny federal territories stay one click away
@@ -94,26 +93,6 @@ export default function Dashboard() {
     }
   }, [metric, rows, gap, pillars, ranked, year]);
 
-  // a plain-language reading of the map: the three states at each end (or, for bottlenecks, how many states share each one)
-  const reading = useMemo(() => {
-    if (metric === "bottleneck") {
-      const groups = ["Access", "Awareness", "Amenities"].map((k) => ({ k, states: pillars.filter((p) => p.bottleneck === k && p.bottleneck_score < 50) }));
-      return [
-        { label: "States held back by", items: groups.map((g) => ({ code: "", text: `${g.k} · ${g.states.length}`, color: PILLAR_COLOR[g.k] })) },
-        { label: "Not held back", items: pillars.filter((p) => p.bottleneck_score >= 50).map((p) => ({ code: p.code, text: STATE_LABEL[p.code], color: "" })) },
-      ];
-    }
-    const labels: Record<string, [string, string]> = {
-      gap: ["Most untapped", "Most saturated"], visitors: ["Busiest", "Quietest"], occupancy: ["Fullest hotels", "Most spare rooms"],
-      spend: ["Highest spend per visitor", "Lowest spend per visitor"], feel: ["Best experienced", "Most friction"],
-    };
-    const item = (x: { code: string; value: number }) => ({ code: x.code, text: `${STATE_LABEL[x.code]} ${view.format(x.value)}`, color: "" });
-    return [
-      { label: labels[metric][0], items: view.list.slice(0, 3).map(item) },
-      { label: labels[metric][1], items: view.list.slice(-3).reverse().map(item) },
-    ];
-  }, [metric, view, pillars]);
-
   const total = rows.reduce((s, r) => s + (r.visitors_k as number), 0);
   const receipts = rows.reduce((s, r) => s + (r.receipts_rm_m as number), 0);
   const giniPrev = TREND.gini_by_year[String(year - 1)];
@@ -140,13 +119,30 @@ export default function Dashboard() {
         </dl>
       </motion.div>
 
-      <Story metric={metric} onMetric={(m) => { setMetric(m); explore.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }} />
+      <Story />
 
-      <SectionLabel hint="Click a state anywhere to focus it">Explore the 16 states</SectionLabel>
-      <div ref={explore} className="grid scroll-mt-20 gap-3 xl:grid-cols-[290px_minmax(0,1fr)_340px]">
-        <Card guide="ranking" className="order-2 xl:order-1" title={view.rank}
-          right={<button data-guide="weights" onClick={() => setWeights(true)} className="group inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
-            <SlidersHorizontal className="size-3 transition-transform group-hover:rotate-90" />Weights</button>}>
+      <SectionLabel>Explore the 16 states</SectionLabel>
+      {/* the one place that changes the dashboard: what to show, which state, and the weights behind the score */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.45, ease: EASE }}
+        className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2.5 rounded-2xl border border-border bg-card px-4 py-3">
+        <div className="flex min-w-0 max-w-full items-center gap-2.5">
+          <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Show</span>
+          <div className="hidden min-w-0 sm:block"><Segmented guide="metric" id="metric" value={metric} onChange={setMetric} options={METRICS} /></div>
+          <select aria-label="What to show" value={metric} onChange={(e) => setMetric(e.target.value as MetricKey)} className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring sm:hidden">
+            {METRICS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+          </select>
+        </div>
+        <label className="flex items-center gap-2.5" data-guide-say="Pick a state here. The list, the map and the panel on the right all follow it.">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">State</span>
+          <select value={sel} onChange={(e) => setSelected(e.target.value)} className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium outline-none transition-colors hover:border-foreground/30 focus-visible:ring-2 focus-visible:ring-ring">
+            {[...rows].sort((a, b) => STATE_LABEL[a.code].localeCompare(STATE_LABEL[b.code])).map((r) => <option key={r.code} value={r.code}>{STATE_LABEL[r.code]}</option>)}
+          </select>
+        </label>
+        <button data-guide="weights" onClick={() => setWeights(true)} className="group ml-auto inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
+          <SlidersHorizontal className="size-3.5 transition-transform group-hover:rotate-90" />Weights</button>
+      </motion.div>
+      <div className="grid gap-3 xl:grid-cols-[290px_minmax(0,1fr)_340px]">
+        <Card guide="ranking" className="order-2 xl:order-1" title={view.rank}>
           {metric === "bottleneck" ? (
             <div className="flex flex-col">
               {ranked.map((g, i) => {
@@ -167,7 +163,8 @@ export default function Dashboard() {
           )}
         </Card>
 
-        <Card guide={`metric:${metric}`} className="order-1 xl:order-2" title={view.title} info={view.info} right={<Segmented guide="metric" id="metric" value={metric} onChange={setMetric} options={METRICS} />}>
+        <Card guide={`metric:${metric}`} className="order-1 flex flex-col xl:order-2" title={view.title} info={view.info}>
+          <div className="my-auto">
           <StateMap values={view.values} scale={view.scale} selected={sel} onSelect={setSelected}
             tooltip={(c) => {
               const r = rows.find((x) => x.code === c)!, g = gap.find((x) => x.code === c)!, p = pilBy[c];
@@ -181,20 +178,6 @@ export default function Dashboard() {
               );
             }} />
           <Legend scale={view.scale} left={view.left} right={view.right} />
-          <div data-guide="reading" className="mt-4 grid gap-2 sm:grid-cols-2">
-            {reading.map((g) => (
-              <div key={g.label} className="rounded-xl bg-muted/50 px-3 py-2.5">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{g.label}</p>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {g.items.map((it) => (
-                    <button key={it.code + it.text} data-guide={it.code ? `state:${it.code}` : undefined} onClick={() => it.code && setSelected(it.code)} style={it.color ? { borderColor: it.color } : undefined}
-                      className={cn("rounded-full border border-border px-2.5 py-1 text-xs transition-colors hover:border-foreground/40", sel === it.code && "bg-accent")}>
-                      {it.text}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
           </div>
         </Card>
 
@@ -215,7 +198,7 @@ export default function Dashboard() {
           info={`JomRasa Experience Score per state from ${fmt.int(JR.meta.items_travel)} first-hand travel texts. Dot = score, band = 95% interval, tick = national mean. Most bands overlap, so low visitor numbers are not explained by bad experiences.`}>
           <div className="space-y-[2px]">
             {feel.map((x) => (
-              <button key={x.code} data-guide={`state:${x.code}`} onClick={() => setSelected(x.code)} className={cn("grid w-full grid-cols-[84px_1fr_34px] items-center gap-2 rounded-md px-1.5 py-[3px] text-left text-xs transition-colors hover:bg-accent/60", sel === x.code && "bg-accent")}>
+              <div key={x.code} data-guide={`state:${x.code}`} className={cn("grid w-full grid-cols-[84px_1fr_34px] items-center gap-2 rounded-md px-1.5 py-[3px] text-xs transition-colors", sel === x.code && "bg-accent")}>
                 <span className="truncate text-muted-foreground">{STATE_LABEL[x.code]}</span>
                 <span className="relative h-3">
                   <span className="absolute inset-x-0 top-1/2 h-px bg-[var(--slate-5)]" />
@@ -224,7 +207,7 @@ export default function Dashboard() {
                   <span className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3987e5]" style={{ left: `${pos(x.experience_score)}%` }} />
                 </span>
                 <span className="text-right tabular-nums">{x.experience_score.toFixed(0)}</span>
-              </button>
+              </div>
             ))}
           </div>
         </Card>
