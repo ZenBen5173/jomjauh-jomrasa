@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
+import facts from "../../../../public/data/pipeline.json";
 import { Card } from "@/components/charts";
+import { Methods } from "@/components/planner/methods";
 import { PageHeader } from "@/components/shell";
 import { INDICATORS, META } from "@/lib/data";
 
@@ -23,17 +25,26 @@ const SOURCES = [
   { name: "YouTube Data API v3", what: "Public comments on per-state travel videos; comment text only, no usernames or channel ids stored", years: "recent", level: "Text", url: "https://developers.google.com/youtube/v3", date: "2026-09-17" },
 ];
 
-const METHODS = [
-  { h: "Tourism concentration", p: "Gini coefficient and Lorenz curve of domestic visitors across the 16 states and federal territories (Fernández-Morales et al. 2016; Lau & Koo 2022), plus a population-weighted per-capita Gini, a normalised Herfindahl index and the Hoover index - the share of visits that would have to move for visits to be proportional to population. DOSM's national visitor figure is the sum of state visits (a person visiting two states is counted in both); our recomputed state sums match DOSM's Table 1 to within 0.05% every year. The total row printed under Table 9 is misaligned by one column in the source file, so we never read it." },
-  { h: "Potential, Actual and Gap", p: "Each indicator is min-max normalised to 0-100 across the 16 states; count-type indicators (rooms, sites, visitor share, intensity, density) are log-transformed first so the very small federal territories do not flatten everyone else. Indices are weighted arithmetic means with equal weights by default (OECD/JRC Handbook on Constructing Composite Indicators, 2008; the same normalise-then-average structure as the WEF Travel & Tourism Development Index). PCA weights are deliberately not used - they are unstable with 16 units. The Actual index follows the tourism-penetration tradition (McElroy & de Albuquerque; Eurostat tourism intensity and density): share of national visitors, visitors per resident and visitors per km². Gap = Potential − Actual." },
-  { h: "Sensitivity check", p: "800 Monte Carlo draws of Dirichlet(4) weights on both indices give a 5th-95th percentile rank interval for every state and the Spearman correlation with the equal-weight ranking; a leave-one-indicator-out test is run in the Python test suite (every ρ ≥ 0.85)." },
-  { h: "Bottleneck Finder", p: "Three pillars follow Buhalis's (2000) destination 'As': Access, Awareness, Amenities. Each indicator becomes a robust z-score against the national median (median / 1.4826·MAD, clipped at ±3); a pillar is the mean of its z-scores rescaled so 50 = the median state. The weakest pillar is reported as the main bottleneck only when it is below the median (a state strong on all three has none), and all three are always shown. The method is rule-based; any generated text only restates these numbers." },
-  { h: "Capacity Limit", p: "Spare room-nights = rooms × 365 × (target occupancy − current occupancy), using Tourism Malaysia's state room counts and average occupancy rate for the same year. Only overnight visitors in paid accommodation need rooms: room-nights per extra visitor = overnight share (DOSM tourists ÷ visitors) × paid-accommodation share (1 − share staying with friends & relatives, DOSM Table 12) × average length of stay ÷ guests per room. Target occupancy (default 75%) and guests per room (default 2.0) are user-set assumptions. Legal site-level limits exist in places (e.g. Sipadan's daily dive permits) but are outside this state-level model." },
-  { h: "Visitor Simulator", p: "A what-if calculator, not a forecast. Moved visitors = share × origin visitors, capped by each destination's Capacity Limit; with several destinations, the overflow from one that fills up is re-offered to the others, so visitors stay unmoved only when every destination is full. Receipts gained use the destination's spend per visitor and receipts lost use the origin's, so the national net is near zero by construction - this is rebalancing, not new money. Redirected visitors are assumed to behave like the destination's current average visitor. The optional economic multiplier (off by default) uses the Malaysian input-output range of 1.20-1.82, mean 1.42 (Mazumder et al. 2009). Results are an upper bound that presumes the destination's main bottleneck is addressed." },
-  { h: "JomRasa Experience Score", p: "Public travel text is collected per state in Malay, English and Mandarin (Exa search; YouTube Data API comments). Only text, state, URL, date and language are stored - no usernames. A small language model assigns closed-set labels: travel-experience yes/no, up to 11 topics with per-topic sentiment, overall sentiment and one of 8 emotions; a second, stricter pass must also agree the text is a first-hand account. Online travel writing is about 88% positive and praise for scenery, food and culture is near-identical everywhere, so a plain average of overall sentiment cannot separate states (range about 3 points). The Experience Score is therefore the equal-weight mean of the 11 aspect sentiments, each shrunk toward the national mean by sample size (empirical Bayes; Efron & Morris 1975), which lets the frictions that do differ - access, price, crowding, cleanliness, safety - count. It enters the Potential index; access and amenity sentiment enter the bottleneck pillars; text volume enters Awareness." },
-  { h: "Trip Planner: choosing where", p: "When a traveller describes a feeling (\"quiet beach, good seafood\"), a language model only converts the sentence into structured preferences (topics, feelings, budget, crowd tolerance, region). The ranking is a fixed formula: 40% how travellers rate the requested aspects, 25% quietness (DOSM visitor intensity and crowding sentiment), 15% budget fit (DOSM spend per visitor), 20% Experience Score; a requested region is a hard requirement. If the model is unreachable the page falls back to multilingual keyword rules, and naming a town needs no model at all, so the planner always answers." },
-  { h: "Trip Planner: planning the days", p: "Places to see and eat are the structured listings on English Wikivoyage's Malaysian destination pages (CC BY-SA 4.0): name, description, opening hours and coordinates, written by travellers and residents. Raw pages are stored untouched with their revision id; descriptions are trimmed but never rewritten, and sentences quoting prices are dropped because they go stale. Listings without coordinates are matched to OpenStreetMap (Nominatim) and kept only if they fall inside Malaysia and within 45 km of their town. An eatery is assigned to breakfast, lunch, dinner or supper from its opening hours, then from words in its description. Places to sleep are Wikivoyage write-ups (budget / mid-range / splurge) plus named hotels from OpenStreetMap; towns with few written-up eateries get named, cuisine-tagged ones from OpenStreetMap, labelled as map entries. Grounded generation: a language model acting as a local is shown only that town's real listings and the traveller's wishes, and returns place ids in visiting order with a one-line note each and a hotel id. It cannot add a place: ids not in our list are dropped, a sight cannot be a meal, meals must run in order, and a forgotten breakfast, lunch or dinner is filled with the nearest suitable eatery. Hard limits are enforced in code rather than trusted to the model - for \"no pork\" or \"with kids\", conflicting places are removed before the model sees the list and again from its answer, and the plan states what a keyword filter cannot promise (halal certification). Clock times, travel legs and the hotel's distance to the stops are computed by us, never by the model. If the model is unreachable, a rule-based plan takes over: the best-described sights are grouped into days by k-means clustering on their coordinates (farthest-point seeding, so the result is repeatable), each day is ordered by nearest neighbour plus 2-opt, and each meal goes to the nearest unused eatery open at that time. An island off a mainland town is a boat leg and is left out of the driving link. Travel times are estimates from great-circle distance (x1.35 for road winding, 22-60 km/h by distance). When to go: ten years (2015-2024) of daily rainfall at each town from the Open-Meteo archive (ERA5 reanalysis, CC BY 4.0); months at least 35% wetter than the town's average are flagged, months at least 15% drier are recommended, and east-coast islands are closed November-February for the northeast monsoon. Festival and season notes are a short editorial list of widely known, recurring events; dates that move are marked." },
-  { h: "Year alignment", p: "DOSM has published state-level spending only up to 2023. For base years 2024 and 2025, visitors, the origin-destination matrix, occupancy, rooms and hotel guests are from that year, while spend per visitor, length of stay and accommodation-type shares are carried forward from 2023 and labelled on screen; receipts for those years are therefore estimates. Base year 2023 is fully aligned." },
+const NOTES = [
+  { h: "Trip planner", points: [
+    "Places, eateries and hotels are real listings from Wikivoyage and OpenStreetMap. Descriptions are trimmed, never rewritten.",
+    "A language model picks and orders places from that list only. Anything not on the list is dropped.",
+    "Limits like \"no pork\" or \"with kids\" are enforced by our code before and after the model answers.",
+    "Clock times, travel legs and the nearest hotel are calculated by us, never guessed by the model.",
+    "If the model is down, a rule-based planner takes over: k-means groups sights into days, then the shortest route is found.",
+    "When to go comes from ten years of daily rainfall (Open-Meteo, 2015-2024) for each town.",
+  ] },
+  { h: "Which year each number is from", points: [
+    "Visitors, where tourists come from, hotel rooms and occupancy are from the year you pick.",
+    "DOSM publishes state spending only up to 2023. For 2024 and 2025, spend per visitor and nights stayed are the 2023 figures, labelled on screen.",
+    "Receipts for 2024 and 2025 are therefore estimates. 2023 is the fully matched year.",
+  ] },
+  { h: "References", points: [
+    "Concentration: Gini and Lorenz curve, as used for tourism by Fernández-Morales et al. (2016) and Lau & Koo (2022).",
+    "Opportunity: normalise-then-average composite index (OECD/JRC Handbook, 2008); visited side follows tourism intensity and density (McElroy & de Albuquerque; Eurostat).",
+    "Bottleneck: Buhalis's (2000) destination \"As\". Small samples: empirical-Bayes shrinkage (Efron & Morris, 1975).",
+    "Optional economic multiplier: Malaysian input-output range 1.20-1.82 (Mazumder et al., 2009). Off by default.",
+  ] },
 ];
 
 const LIMITS = [
@@ -51,12 +62,36 @@ export default function Methodology() {
   const groups = [["Potential index", INDICATORS.potential], ["Actual index", INDICATORS.actual], ...Object.entries(INDICATORS.pillars).map(([k, v]) => [`Pillar · ${k}`, v])] as [string, typeof INDICATORS.potential][];
   return (
     <>
-      <PageHeader eyebrow="Methodology & data" title="Every number, where it comes from, and how it is used">
-        One rerunnable Python pipeline (extract → transform → load → checks) produces every table behind this dashboard. 39 automated data checks and metric
-        tests must pass before export, and the dashboard&apos;s TypeScript calculations are tested (28 tests) against the Python reference results.
-      </PageHeader>
+      <PageHeader eyebrow="Methodology & data" title="How every score is worked out" />
 
-      <motion.div {...fade}>
+      <div className="mb-5 grid grid-cols-2 gap-2 lg:grid-cols-4">
+        {[
+          [facts.tests.python + facts.tests.web, "automatic tests", `${facts.tests.python} on the data, ${facts.tests.web} on the website`],
+          [facts.robustness.spearman_median.toFixed(2), "ranking stability", `${facts.robustness.draws.toLocaleString("en-MY")} random weightings, 1 = identical`],
+          [facts.robustness.leave_one_out_min.toFixed(2), "lowest when one ingredient is removed", "still almost the same ranking"],
+          ["5", "decimals", "the website's maths must match Python's"],
+        ].map(([big, label, sub], i) => (
+          <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i, duration: 0.45, ease: [0.16, 1, 0.3, 1] }} className="rounded-2xl border border-border bg-card p-4 transition-colors hover:border-foreground/20">
+            <p className="text-2xl font-semibold leading-none tracking-tight tabular-nums">{big}</p>
+            <p className="mt-1.5 text-xs font-medium">{label}</p>
+            <p className="text-[11px] text-muted-foreground">{sub}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <Methods />
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        {NOTES.map((m) => (
+          <motion.div key={m.h} {...fade}>
+            <Card title={m.h} className="h-full">
+              <ul className="space-y-2">{m.points.map((t) => <li key={t} className="flex gap-2 text-xs leading-relaxed text-muted-foreground"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-[#3987e5]" />{t}</li>)}</ul>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div {...fade} className="mt-4">
         <Card title="Data sources">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-xs">
@@ -76,14 +111,6 @@ export default function Methodology() {
           </div>
         </Card>
       </motion.div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        {METHODS.map((m) => (
-          <motion.div key={m.h} {...fade}>
-            <Card title={m.h} className="h-full"><p className="text-xs leading-relaxed text-muted-foreground">{m.p}</p></Card>
-          </motion.div>
-        ))}
-      </div>
 
       <motion.div {...fade} className="mt-4">
         <Card title="Indicators behind each score">
