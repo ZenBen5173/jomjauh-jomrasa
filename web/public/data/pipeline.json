@@ -1,0 +1,205 @@
+{
+ "generated": "2026-09-20",
+ "raw": {
+  "dosm_files": 20,
+  "datagovmy_files": 7,
+  "tourism_malaysia_files": 7,
+  "osm_layers": 7,
+  "osm_points": 7336,
+  "osm_hotels": 5369,
+  "osm_eateries": 10167,
+  "wikivoyage_pages": 83,
+  "rainfall_towns": 37,
+  "logged_downloads": 144
+ },
+ "tables": {
+  "count": 21,
+  "rows": 29701,
+  "panel_rows": 80,
+  "panel_columns": 53,
+  "list": [
+   {
+    "name": "accommodation_quarter",
+    "rows": 561,
+    "columns": 7
+   },
+   {
+    "name": "accommodation_year",
+    "rows": 153,
+    "columns": 8
+   },
+   {
+    "name": "foreign_arrivals_soe",
+    "rows": 70,
+    "columns": 3
+   },
+   {
+    "name": "guide_destinations_raw",
+    "rows": 72,
+    "columns": 9
+   },
+   {
+    "name": "guide_places_raw",
+    "rows": 2455,
+    "columns": 16
+   },
+   {
+    "name": "jomrasa_places",
+    "rows": 622,
+    "columns": 12
+   },
+   {
+    "name": "jomrasa_quotes",
+    "rows": 128,
+    "columns": 9
+   },
+   {
+    "name": "jomrasa_state",
+    "rows": 16,
+    "columns": 28
+   },
+   {
+    "name": "jomrasa_topics",
+    "rows": 176,
+    "columns": 6
+   },
+   {
+    "name": "national_key_stats",
+    "rows": 8,
+    "columns": 9
+   },
+   {
+    "name": "od_tourists",
+    "rows": 768,
+    "columns": 4
+   },
+   {
+    "name": "osm_points",
+    "rows": 7215,
+    "columns": 8
+   },
+   {
+    "name": "population_state",
+    "rows": 192,
+    "columns": 3
+   },
+   {
+    "name": "socioeconomic_state",
+    "rows": 157,
+    "columns": 10
+   },
+   {
+    "name": "state_detail",
+    "rows": 32,
+    "columns": 28
+   },
+   {
+    "name": "state_key_stats",
+    "rows": 112,
+    "columns": 8
+   },
+   {
+    "name": "state_panel",
+    "rows": 80,
+    "columns": 53
+   },
+   {
+    "name": "states",
+    "rows": 16,
+    "columns": 5
+   },
+   {
+    "name": "text_items",
+    "rows": 16506,
+    "columns": 7
+   },
+   {
+    "name": "top_places_dosm",
+    "rows": 218,
+    "columns": 5
+   },
+   {
+    "name": "visitors_state_year",
+    "rows": 144,
+    "columns": 3
+   }
+  ]
+ },
+ "text": {
+  "model": "google/gemini-2.5-flash-lite",
+  "collected": 16506,
+  "tagged": 16502,
+  "kept": 7629,
+  "by_source": {
+   "web": 12569,
+   "youtube_comment": 3937
+  },
+  "languages": {
+   "en": 9742,
+   "ms": 4538,
+   "zh": 2226
+  },
+  "topics": 11,
+  "emotions": 8,
+  "round1": {
+   "n": 200,
+   "travel_filter_accuracy": 0.695,
+   "polarity_accuracy": 0.8734177215189873,
+   "polarity_macro_f1": 0.479020979020979,
+   "polarity_kappa": 0.28247048138056297,
+   "emotion_accuracy": 0.5189873417721519,
+   "emotion_macro_f1": 0.45002180359323224,
+   "main_topic_recall": 0.8860759493670886
+  },
+  "round2": {
+   "n": 120,
+   "travel_filter_accuracy": 0.8166666666666667,
+   "polarity_accuracy": 0.8666666666666667,
+   "polarity_macro_f1": 0.5629251700680272,
+   "polarity_kappa": 0.5744680851063829,
+   "emotion_accuracy": 0.6333333333333333,
+   "emotion_macro_f1": 0.4977498691784406,
+   "main_topic_recall": 0.9333333333333333
+  }
+ },
+ "robustness": {
+  "draws": 1000,
+  "spearman_median": 0.938,
+  "spearman_p05": 0.77,
+  "leave_one_out_min": 0.932,
+  "top5": [
+   {
+    "code": "JHR",
+    "share": 0.977
+   },
+   {
+    "code": "LBN",
+    "share": 0.97
+   },
+   {
+    "code": "SBH",
+    "share": 0.758
+   },
+   {
+    "code": "SWK",
+    "share": 0.747
+   },
+   {
+    "code": "TRG",
+    "share": 0.634
+   }
+  ]
+ },
+ "guide": {
+  "towns": 37,
+  "places": 1168,
+  "stays": 676,
+  "street_located": 25,
+  "from_map_only": 254,
+  "states": 15
+ },
+ "tests": {
+  "python": 46,
+  "web": 57
+ }
+}

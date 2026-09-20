@@ -38,6 +38,7 @@ CAPTIONS = {
     "07": ("Weights and robustness", "Adjust what counts towards the Opportunity score and see how stable the ranking is under 800 random re-weightings."),
     "08": ("Jojo, the on-screen guide", "Resting the pointer on anything explains it in plain words. Scripted from the data - not generated."),
     "09": ("Simulator", "Move a share of a crowded state's visitors elsewhere: spending gained and lost, hotel capacity, and whether tourism ends up more evenly spread."),
+    "15": ("Pipeline", "Where the numbers come from, step by step in everyday words: collect, clean, check, combine, measure, the AI parts, publish - and which models are used and how we know they work."),
     "10": ("Methodology", "Every formula, source, assumption and limitation."),
     "11": ("JomRasa, the traveller side", "A chat that acts like a local friend."),
     "12": ("Traveller: a town guide", "What not to miss, what to eat, the best and worst months with the reason, festivals, and what a trip costs."),
@@ -52,6 +53,7 @@ Dashboard deliverable, prepared {today}
    Main product (interactive, no login, any modern browser):   {url}
      Planner dashboard ........ {url}/
      Simulator ................ {url}/simulator
+     Pipeline ................. {url}/pipeline
      Methodology .............. {url}/methodology
      Traveller trip planner ... {url}/trip
    It will stay online, unchanged, until the evaluation is complete.

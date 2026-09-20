@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { href: "/", label: "Dashboard" },
   { href: "/simulator", label: "Simulator" },
+  { href: "/pipeline", label: "Pipeline" },
   { href: "/methodology", label: "Methodology" },
 ];
 

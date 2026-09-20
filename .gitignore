@@ -14,3 +14,4 @@ web/.vercel/
 data/clean/text_items.parquet
 .playwright-mcp/
 submission/
+web/.vitest/
