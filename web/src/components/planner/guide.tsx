@@ -47,7 +47,7 @@ export function Guide() {
 
   useEffect(() => {
     if (!hovering) return;
-    let dwell: ReturnType<typeof setTimeout> | undefined, linger: ReturnType<typeof setTimeout> | undefined, last: string | null = null;
+    let dwell: ReturnType<typeof setTimeout> | undefined, linger: ReturnType<typeof setTimeout> | undefined, last: string | null = null, wide = false;
     const over = (e: PointerEvent) => {
       const target = e.target as Element | null;
       if (!target?.closest || pet.current?.contains(target)) return;
@@ -57,16 +57,26 @@ export function Guide() {
       if (id === last) return;
       last = id;
       clearTimeout(dwell);
-      if (!id) { linger = setTimeout(() => setHeard(null), LINGER); return; }
+      if (!id) { wide = false; linger = setTimeout(() => setHeard(null), LINGER); return; }
       clearTimeout(linger);
       const next: Heard = said ? { text: said, stage: (el!.getAttribute("data-guide-stage") as Stage | null) ?? null } : { key: key! };
       const r = el!.getBoundingClientRect();
-      const under = r.right > window.innerWidth - 380 && r.bottom > window.innerHeight - 330;
-      dwell = setTimeout(() => { setHeard(next); setSide(under ? "left" : "right"); }, DWELL);
+      const low = r.bottom > window.innerHeight - 330;
+      const under = low && r.right > window.innerWidth - 380;
+      // a zone that reaches BOTH bottom corners (a full-width row) has no free corner: stand on the side away from the pointer
+      wide = under && r.left < 380;
+      const away = e.clientX > window.innerWidth / 2 ? "left" : "right";
+      dwell = setTimeout(() => { setHeard(next); setSide(wide ? away : under ? "left" : "right"); }, DWELL);
     };
     const move = (e: PointerEvent) => {
       const r = pet.current?.getBoundingClientRect();
       if (!r) return;
+      // inside a full-width zone, keep out from under the pointer as it travels along the row
+      // (the strip level with Jojo is left alone, so he can still be reached and clicked)
+      if (wide && e.clientY > window.innerHeight - 330 && e.clientY < r.top - 8) {
+        if (e.clientX > window.innerWidth - 420) setSide("left");
+        else if (e.clientX < 420) setSide("right");
+      }
       const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), d = Math.hypot(dx, dy) || 1;
       const reach = Math.min(1, d / 220) * 2.6;
       ex.set((dx / d) * reach); ey.set((dy / d) * reach);
