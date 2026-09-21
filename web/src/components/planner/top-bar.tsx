@@ -9,11 +9,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { animate } from "framer-motion";
 import { motion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Moon, Sun } from "lucide-react";
 import { Info } from "@/components/info";
 import { YEARS } from "@/lib/data";
 import { SPRING } from "@/lib/motion";
 import { useStore } from "@/lib/store";
+import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -56,15 +57,16 @@ function SpotlightTabs() {
         ))}
       </ul>
       <div aria-hidden className="pointer-events-none absolute inset-0 transition-opacity duration-300"
-        style={{ opacity: hover ? 1 : 0, background: "radial-gradient(110px circle at var(--spotlight-x) 100%, rgba(255,255,255,0.14) 0%, transparent 55%)" }} />
+        style={{ opacity: hover ? 1 : 0, background: "radial-gradient(110px circle at var(--spotlight-x) 100%, color-mix(in oklab, var(--foreground) 14%, transparent) 0%, transparent 55%)" }} />
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px]"
-        style={{ background: "radial-gradient(56px circle at var(--ambience-x) 0%, rgba(255,255,255,0.95) 0%, transparent 100%)" }} />
+        style={{ background: "radial-gradient(56px circle at var(--ambience-x) 0%, color-mix(in oklab, var(--foreground) 95%, transparent) 0%, transparent 100%)" }} />
     </nav>
   );
 }
 
 export function TopBar() {
   const { year, setYear } = useStore();
+  const { theme, toggle } = useTheme();
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 md:px-6">
@@ -87,6 +89,12 @@ export function TopBar() {
             <b className="font-medium text-foreground">Base year.</b> Visitors, hotel occupancy and rooms use the year you pick. DOSM has published state-level spending only up to
             2023, so for 2024 and 2025 spend per visitor and length of stay are carried forward from 2023. 2023 is the fully aligned year.
           </Info>
+          <button onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} data-guide-say="Light or dark, whichever is easier on your eyes. The numbers are the same."
+            className="group ml-1 grid size-8 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
+            <motion.span key={theme} initial={{ rotate: -90, scale: 0.5, opacity: 0 }} animate={{ rotate: 0, scale: 1, opacity: 1 }} transition={SPRING.snappy} className="grid place-items-center">
+              {theme === "dark" ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+            </motion.span>
+          </button>
           <Link href="/trip" data-guide="travellers" className="group ml-2 inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
             For travellers <ArrowUpRight className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>

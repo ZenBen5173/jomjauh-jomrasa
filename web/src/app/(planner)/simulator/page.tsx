@@ -10,6 +10,7 @@ import { Legend, type Scale, StateMap } from "@/components/state-map";
 import { STAGE, STATE_LABEL, STATE_NAME, fmt } from "@/lib/data";
 import { lorenz, simulate } from "@/lib/metrics";
 import { useStore } from "@/lib/store";
+import { usePalette } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 function Slider({ label, value, min, max, step, onChange, format, hint }: {
@@ -33,6 +34,7 @@ const rm = (m: number) => (m >= 1000 ? { value: m / 1000, decimals: 2, prefix: "
 
 export default function Simulator() {
   const { rows, gap, assumptions, setAssumptions, year, selected } = useStore();
+  const tone = usePalette();
   const ranked = useMemo(() => [...gap].sort((a, b) => b.gap - a.gap).map((g) => g.code), [gap]);
   const [origin, setOrigin] = useState("SGR");
   const [mode, setMode] = useState<"one" | "top">("one");
@@ -55,7 +57,7 @@ export default function Simulator() {
   const afterVals = Object.fromEntries(sim.after.map((r) => [r.code, r.visitors_k as number]));
   const scale: Scale = view === "change"
     ? { kind: "diverging", max: maxChange, pos: STAGE.payoff.base, neg: STAGE.problem.base }
-    : { kind: "sequential", min: Math.min(...Object.values(afterVals)), max: Math.max(...Object.values(afterVals)), from: STAGE.payoff.deep, to: STAGE.payoff.pale };
+    : { kind: "sequential", min: Math.min(...Object.values(afterVals)), max: Math.max(...Object.values(afterVals)), ...tone.ramp(STAGE.payoff) };
   const maxMoved = Math.max(...sim.destinations.map((d) => d.moved_k), 1e-9);
 
   return (

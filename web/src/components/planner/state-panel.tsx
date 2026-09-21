@@ -5,9 +5,10 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, BedDouble, MessageCircleHeart, PanelRightOpen } from "lucide-react";
 import { Info } from "@/components/info";
-import { PILLAR_BLURB, PILLAR_COLOR, STAGE, STATE_NAME, fmt } from "@/lib/data";
+import { PILLAR_BLURB, STAGE, STATE_NAME, fmt } from "@/lib/data";
 import { JR, TOPIC_LABEL } from "@/lib/jomrasa";
 import { useStore } from "@/lib/store";
+import { usePalette } from "@/lib/theme";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -15,7 +16,7 @@ function Bar({ value, color, tick }: { value: number; color: string; tick?: numb
   return (
     <div className="relative h-2 rounded-full bg-muted">
       <motion.div className="absolute inset-y-0 left-0 rounded-full" style={{ background: color }} initial={false}
-        animate={{ width: `${Math.max(0, Math.min(100, value))}%` }} transition={{ duration: 0.6, ease: EASE }} />
+        animate={{ width: `${Math.max(0, Math.min(100, value)).toFixed(2)}%` }} transition={{ duration: 0.6, ease: EASE }} />
       {tick != null && <span className="absolute inset-y-[-3px] w-px bg-[var(--slate-9)]" style={{ left: `${tick}%` }} />}
     </div>
   );
@@ -23,6 +24,7 @@ function Bar({ value, color, tick }: { value: number; color: string; tick?: numb
 
 export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfile: () => void }) {
   const { rows, gap, pillars, capacity, assumptions } = useStore();
+  const tone = usePalette();
   const r = rows.find((x) => x.code === code)!;
   const g = gap.find((x) => x.code === code)!;
   const p = pillars.find((x) => x.code === code)!;
@@ -41,7 +43,7 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
               <h2 className="text-lg font-semibold tracking-tight">{STATE_NAME[code]}</h2>
               <p className="text-xs text-muted-foreground">{fmt.visitorsK(r.visitors_k as number)} visitors · {fmt.pct(r.visitor_share_pct as number)} of Malaysia</p>
             </div>
-            <span className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold tabular-nums" style={{ background: g.gap >= 0 ? "rgba(57,135,229,0.18)" : "rgba(230,103,103,0.18)", color: g.gap >= 0 ? "#86b6ef" : "#f0a3a3" }}>
+            <span className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold tabular-nums" style={{ background: g.gap >= 0 ? "rgba(57,135,229,0.18)" : "rgba(230,103,103,0.18)", color: g.gap >= 0 ? tone.ink.opportunity : tone.ink.problem }}>
               Opportunity {fmt.signed(g.gap, 0)} · #{g.gap_rank}
             </span>
           </div>
@@ -65,12 +67,12 @@ export function StatePanel({ code, onOpenProfile }: { code: string; onOpenProfil
                 <div key={k}>
                   <div className="mb-1 flex items-center justify-between text-xs">
                     <span className="flex items-center gap-1.5">
-                      <span className="size-2 rounded-sm" style={{ background: PILLAR_COLOR[k] }} />{k}
-                      {k === p.bottleneck && binding && <span className="rounded bg-[#e0a030]/20 px-1.5 py-px text-[10px] font-medium text-[#ecc477]">bottleneck</span>}
+                      <span className="size-2 rounded-sm" style={{ background: tone.pillar[k] }} />{k}
+                      {k === p.bottleneck && binding && <span className="rounded bg-[#e0a030]/20 px-1.5 py-px text-[10px] font-medium text-[#8a5a00] dark:text-[#ecc477]">bottleneck</span>}
                     </span>
                     <span className="font-medium tabular-nums">{v.toFixed(0)}</span>
                   </div>
-                  <Bar value={v} color={PILLAR_COLOR[k]} tick={50} />
+                  <Bar value={v} color={tone.pillar[k]} tick={50} />
                 </div>
               ))}
             </div>

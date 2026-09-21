@@ -189,7 +189,7 @@ export function PillarBars({ scores, colors, bottleneck }: { scores: Record<stri
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-sm" style={{ background: colors[k] }} />{k}
               {k === bottleneck && (v < 50
-                ? <span className="rounded bg-[#e0a030]/20 px-1.5 py-px text-[10px] font-medium text-[#ecc477]">⚠ main bottleneck</span>
+                ? <span className="rounded bg-[#e0a030]/20 px-1.5 py-px text-[10px] font-medium text-[#8a5a00] dark:text-[#ecc477]">⚠ main bottleneck</span>
                 : <span className="rounded bg-muted px-1.5 py-px text-[10px] text-muted-foreground">weakest, but above median</span>)}
             </span>
             <span className="font-medium tabular-nums">{v.toFixed(0)}</span>

@@ -17,10 +17,11 @@ import { StateSheet } from "@/components/planner/state-sheet";
 import { WeightsSheet } from "@/components/planner/weights-sheet";
 import StatsCounter from "@/components/ui/stats-counter";
 import { Legend, type Scale, StateMap } from "@/components/state-map";
-import { PILLAR_COLOR, STAGE, STATE_LABEL, TREND, fmt } from "@/lib/data";
+import { STAGE, STATE_LABEL, TREND, fmt } from "@/lib/data";
 import { JR } from "@/lib/jomrasa";
 import { lorenz } from "@/lib/metrics";
 import { useStore } from "@/lib/store";
+import { usePalette } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 type MetricKey = "gap" | "visitors" | "occupancy" | "spend" | "feel" | "bottleneck";
@@ -54,6 +55,7 @@ function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: st
 
 export default function Dashboard() {
   const { rows, gap, pillars, concentration, year, selected, setSelected } = useStore();
+  const tone = usePalette();
   const [metric, setMetric] = useState<MetricKey>("gap");
   const [profile, setProfile] = useState(false);
   const [weights, setWeights] = useState(false);
@@ -67,7 +69,7 @@ export default function Dashboard() {
     const col = (c: string) => Object.fromEntries(rows.map((r) => [r.code, r[c] as number]));
     const seq = (stage: keyof typeof STAGE, v: Record<string, number>, rank: string, title: string, left: string, right: string, format: (n: number) => string, info: string) => ({
       rank, title, info, left, right, format, diverging: false, color: STAGE[stage].base as string, values: v as Record<string, number | string>,
-      scale: { kind: "sequential", min: Math.min(...Object.values(v)), max: Math.max(...Object.values(v)), from: STAGE[stage].deep, to: STAGE[stage].pale } as Scale,
+      scale: { kind: "sequential", min: Math.min(...Object.values(v)), max: Math.max(...Object.values(v)), ...tone.ramp(STAGE[stage]) } as Scale,
       list: Object.entries(v).sort((a, b) => b[1] - a[1]).map(([code, value]) => ({ code, value })),
     });
     switch (metric) {
@@ -80,7 +82,7 @@ export default function Dashboard() {
         color: STAGE.obstacle.base as string, rank: "Bottleneck by state", title: "What holds each state back", left: "", right: "", format: (v: number) => fmt.signed(v, 0), diverging: true,
         info: "The weakest of three pillars - Access, Awareness, Amenities - when it is below the national median. Grey means nothing is below the median.",
         values: Object.fromEntries(pillars.map((p) => [p.code, p.bottleneck_score < 50 ? p.bottleneck : "None"])) as Record<string, number | string>,
-        scale: { kind: "categorical", colors: { ...PILLAR_COLOR, None: "#383835" } } as Scale,
+        scale: { kind: "categorical", colors: { ...tone.pillar, None: tone.neutral } } as Scale,
         list: ranked.map((g) => ({ code: g.code, value: g.gap })),
       };
       default: return {
@@ -91,7 +93,7 @@ export default function Dashboard() {
         list: ranked.map((g) => ({ code: g.code, value: g.gap })),
       };
     }
-  }, [metric, rows, gap, pillars, ranked, year]);
+  }, [metric, rows, gap, pillars, ranked, year, tone]);
 
   const total = rows.reduce((s, r) => s + (r.visitors_k as number), 0);
   const receipts = rows.reduce((s, r) => s + (r.receipts_rm_m as number), 0);
@@ -152,7 +154,7 @@ export default function Dashboard() {
                     className={cn("flex items-center justify-between rounded-md px-1.5 py-[5px] text-left text-xs transition-colors hover:bg-accent/60", sel === g.code && "bg-accent")}>
                     <span className="text-muted-foreground">{STATE_LABEL[g.code]}</span>
                     <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: "var(--muted)", color: binding ? "var(--foreground)" : "var(--muted-foreground)" }}>
-                      {binding && <span className="mr-1.5 inline-block size-1.5 rounded-full align-middle" style={{ background: PILLAR_COLOR[p.bottleneck] }} />}{binding ? p.bottleneck : "none"}
+                      {binding && <span className="mr-1.5 inline-block size-1.5 rounded-full align-middle" style={{ background: tone.pillar[p.bottleneck] }} />}{binding ? p.bottleneck : "none"}
                     </span>
                   </motion.button>
                 );

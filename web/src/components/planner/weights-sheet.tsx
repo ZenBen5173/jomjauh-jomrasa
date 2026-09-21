@@ -59,7 +59,7 @@ function Scatter({ points, selected, onSelect }: { points: { code: string; x: nu
         </g>
       ))}
       <line x1={px(0)} y1={py(0)} x2={px(100)} y2={py(100)} stroke="var(--slate-8)" strokeDasharray="3 3" />
-      <text x={px(3)} y={py(94)} className="fill-[#6da7ec] text-[9px] font-medium">UNDER-VISITED</text>
+      <text x={px(3)} y={py(94)} className="fill-[#1f63b8] text-[9px] font-medium dark:fill-[#6da7ec]">UNDER-VISITED</text>
       <text x={px(97)} y={py(4)} textAnchor="end" className="fill-[#e66767] text-[9px] font-medium">SATURATED</text>
       <text x={px(50)} y={S - 4} textAnchor="middle" className="fill-[var(--slate-10)] text-[9px]">How visited it is →</text>
       <text transform={`translate(10 ${py(50)}) rotate(-90)`} textAnchor="middle" className="fill-[var(--slate-10)] text-[9px]">What it can offer →</text>
@@ -97,7 +97,7 @@ export function WeightsSheet({ open, onClose }: { open: boolean; onClose: () => 
         </h3>
         <button onClick={reset} className="group flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><RotateCcw className="size-3 transition-transform group-hover:-rotate-90" />Equal weights</button>
       </div>
-      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#6da7ec]">What a state can offer</p>
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#1f63b8] dark:text-[#6da7ec]">What a state can offer</p>
       <Sliders inds={usedP} weights={weightsP} onChange={setWeightsP} />
       <p className="mb-2 mt-5 text-[11px] font-medium uppercase tracking-wider text-[#e66767]">How visited it already is</p>
       <Sliders inds={usedA} weights={weightsA} onChange={setWeightsA} />

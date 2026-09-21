@@ -85,7 +85,7 @@ export function StateSheet({ code, open, onClose }: { code: string; open: boolea
                 <span className="truncate text-muted-foreground">{TOPIC_LABEL[t.topic]}</span>
                 <span className="relative h-3 overflow-hidden rounded-[4px] bg-muted">
                   <motion.span className="absolute inset-y-0 left-0 rounded-[4px]" initial={{ width: 0 }} animate={{ width: `${t.sentiment}%` }} transition={{ duration: 0.6, ease: EASE }}
-                    style={{ background: t.sentiment >= 50 ? `color-mix(in oklab, #3987e5 ${40 + (t.sentiment - 50) * 1.2}%, #383835)` : `color-mix(in oklab, #c4c7ce ${40 + (50 - t.sentiment) * 1.2}%, #383835)` }} />
+                    style={{ background: t.sentiment >= 50 ? `color-mix(in oklab, #3987e5 ${40 + (t.sentiment - 50) * 1.2}%, var(--slate-6))` : `color-mix(in oklab, #c4c7ce ${40 + (50 - t.sentiment) * 1.2}%, var(--slate-6))` }} />
                 </span>
                 <span className="text-right tabular-nums">{t.sentiment.toFixed(0)}</span>
                 <span className="text-right text-[11px] tabular-nums text-muted-foreground">{fmt.int(t.n)} posts</span>

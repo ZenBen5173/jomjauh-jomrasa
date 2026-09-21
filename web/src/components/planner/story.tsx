@@ -9,9 +9,10 @@ import { motion } from "motion/react";
 import { ChevronRight } from "lucide-react";
 import { SpotlightCard } from "@/components/spotlight-card";
 import StatsCounter from "@/components/ui/stats-counter";
-import { PILLAR_COLOR, STAGE, STATE_LABEL, fmt } from "@/lib/data";
+import { STAGE, STATE_LABEL, fmt } from "@/lib/data";
 import { storyFacts } from "@/lib/story";
 import { useStore } from "@/lib/store";
+import { usePalette } from "@/lib/theme";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -41,6 +42,7 @@ const Line = ({ children }: { children: React.ReactNode }) => <p className="mt-1
 
 export function Story() {
   const { rows, gap, pillars, capacity, concentration, assumptions } = useStore();
+  const tone = usePalette();
 
   const s = useMemo(() => storyFacts(rows, gap, pillars, capacity, assumptions), [rows, gap, pillars, capacity, assumptions]);
 
@@ -58,7 +60,7 @@ export function Story() {
                 initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.2 + 0.02 * i, duration: 0.4, ease: EASE }} />
             ))}
           </div>
-          <p className="mt-1.5 truncate text-[11px]" style={{ color: STAGE.problem.soft }}>{names(s.shares.slice(0, 3).map((x) => x.code))}</p>
+          <p className="mt-1.5 truncate text-[11px]" style={{ color: tone.ink.problem }}>{names(s.shares.slice(0, 3).map((x) => x.code))}</p>
         </div>
       </Step>
 
@@ -67,7 +69,7 @@ export function Story() {
         <Line>more visitors fit in the 5 most under-visited states before hotels fill up</Line>
         <div className="mt-auto flex flex-wrap gap-1 pt-3">
           {s.untapped.map((c) => (
-            <span key={c} className="whitespace-nowrap rounded-full border border-[#3987e5]/40 px-1.5 py-0.5 text-[10.5px] text-[#86b6ef]">{STATE_LABEL[c]}</span>
+            <span key={c} className="whitespace-nowrap rounded-full border border-[#3987e5]/40 px-1.5 py-0.5 text-[10.5px] text-[#1f63b8] dark:text-[#86b6ef]">{STATE_LABEL[c]}</span>
           ))}
         </div>
       </Step>
@@ -78,11 +80,11 @@ export function Story() {
         <div className="mt-auto pt-3">
           <div className="flex h-2 gap-px overflow-hidden rounded-full">
             {s.groups.map((g, i) => (
-              <motion.span key={g.k} className="h-full origin-left" style={{ flex: g.n, background: PILLAR_COLOR[g.k] }} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.3 + 0.08 * i, duration: 0.5, ease: EASE }} />
+              <motion.span key={g.k} className="h-full origin-left" style={{ flex: g.n, background: tone.pillar[g.k] }} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.3 + 0.08 * i, duration: 0.5, ease: EASE }} />
             ))}
           </div>
           <p className="mt-1.5 flex flex-wrap gap-x-3 text-[11px] text-muted-foreground">
-            {s.groups.map((g) => <span key={g.k} className="flex items-center gap-1"><span className="size-1.5 rounded-full" style={{ background: PILLAR_COLOR[g.k] }} />{g.k} {g.n}</span>)}
+            {s.groups.map((g) => <span key={g.k} className="flex items-center gap-1"><span className="size-1.5 rounded-full" style={{ background: tone.pillar[g.k] }} />{g.k} {g.n}</span>)}
           </p>
         </div>
       </Step>
@@ -91,8 +93,8 @@ export function Story() {
         <Big><StatsCounter value={s.sim.moved_k / 1000} decimals={1} suffix="M" duration={0.9} /><span className="text-[0.55em] font-medium text-muted-foreground"> visitors moved</span></Big>
         <Line>if 10% of {STATE_LABEL[s.origin]}&apos;s trips went to {names(s.dests)}</Line>
         <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-3 text-[11px] text-muted-foreground">
-          <span>Concentration <b className="font-semibold" style={{ color: STAGE.payoff.soft }}>{fmt.signed(s.giniChangePct, 1)}%</b></span>
-          <span>National spending <b className="font-semibold" style={{ color: STAGE.payoff.soft }}>{s.sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(s.sim.net_national_rm_m))}</b></span>
+          <span>Concentration <b className="font-semibold" style={{ color: tone.ink.payoff }}>{fmt.signed(s.giniChangePct, 1)}%</b></span>
+          <span>National spending <b className="font-semibold" style={{ color: tone.ink.payoff }}>{s.sim.net_national_rm_m >= 0 ? "+" : "−"}{fmt.rmM(Math.abs(s.sim.net_national_rm_m))}</b></span>
         </div>
       </Step>
     </div>
