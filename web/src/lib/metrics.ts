@@ -187,7 +187,7 @@ export function gapSensitivity(rows: Row[], potential: Indicator[], actual: Indi
   };
 }
 
-// ------------------------------------------------------------ bottleneck finder
+// ------------------------------------------------------------ bottleneck diagnoser
 const median = (a: number[]) => {
   const s = [...a].sort((x, y) => x - y), m = s.length >> 1;
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;

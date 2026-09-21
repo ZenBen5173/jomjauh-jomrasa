@@ -121,7 +121,7 @@ export function Methods() {
           <span className="mt-2 block">{g.potential.toFixed(1)} − {g.actual.toFixed(1)} = <B>{fmt.signed(g.gap)}</B>, rank <B>{g.gap_rank}</B> of 16.</span>
         </Method>
 
-        <Method n={3} stage="obstacle" title="Bottleneck" tells="What holds a state back: getting there (access), being known (awareness), or places to stay (amenities)? Four ingredients each."
+        <Method n={3} stage="obstacle" title="Bottleneck Diagnoser" tells="What holds a state back: getting there (access), being known (awareness), or places to stay (amenities)? Four ingredients each."
           steps={["For each ingredient, find the typical state: the median of the 16.", "Typical spread = the median distance from that median × 1.4826.", "Distance = (state − median) ÷ typical spread, limited to −3 … +3.", "Pillar score = 50 + (average of its 4 distances) × 50 ÷ 3. 50 = the typical state.", "Bottleneck = the lowest pillar, flagged only if it is below 50."]}>
           <Eg>{name} {year}</Eg>
           {zInd && <span className="block">{zInd.label}: ({short(pre(num(row, zInd.col), zInd))} − {short(med)}) ÷ {short(spread)} = <B>{(pil.z[weakest][zCol]).toFixed(2)}</B></span>}

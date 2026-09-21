@@ -197,7 +197,7 @@ def gap_sensitivity(panel: pd.DataFrame, n: int = 1000, seed: int = 7, alpha: fl
     return out
 
 
-# ------------------------------------------------------------------ bottleneck finder
+# ------------------------------------------------------------------ bottleneck diagnoser
 def robust_z(s: pd.Series, ind: Indicator) -> pd.Series:
     """(x - median) / (1.4826 * MAD): distance from the national median in robust SDs."""
     x = _prep(s, ind)

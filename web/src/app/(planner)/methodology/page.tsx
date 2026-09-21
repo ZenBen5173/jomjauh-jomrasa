@@ -42,7 +42,7 @@ const NOTES = [
   { h: "References", points: [
     "Concentration: Gini and Lorenz curve, as used for tourism by Fernández-Morales et al. (2016) and Lau & Koo (2022).",
     "Opportunity: normalise-then-average composite index (OECD/JRC Handbook, 2008); visited side follows tourism intensity and density (McElroy & de Albuquerque; Eurostat).",
-    "Bottleneck: Buhalis's (2000) destination \"As\". Small samples: empirical-Bayes shrinkage (Efron & Morris, 1975).",
+    "Bottleneck Diagnoser: Buhalis's (2000) destination \"As\". Small samples: empirical-Bayes shrinkage (Efron & Morris, 1975).",
     "Optional economic multiplier: Malaysian input-output range 1.20-1.82 (Mazumder et al., 2009). Off by default.",
   ] },
 ];

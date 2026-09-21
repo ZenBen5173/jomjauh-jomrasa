@@ -151,7 +151,7 @@ export default function Pipeline() {
   ];
 
   const PUBLISH: Row[] = [
-    { method: "Open formulas", does: "Gini, Opportunity, Bottleneck, Room to grow, Simulator.", count: "5", unit: "scores", why: "Anyone can check by hand why a state ranks where it does. Steps are on the Methodology page." },
+    { method: "Open formulas", does: "Gini, Opportunity, Bottleneck Diagnoser, Room to grow, Simulator.", count: "5", unit: "scores", why: "Anyone can check by hand why a state ranks where it does. Steps are on the Methodology page." },
     { method: "Shake the weights", does: `Re-rank the states ${n(robustness.draws)} times with random weights.`, count: robustness.spearman_median.toFixed(2), unit: "of 1 agreement", share: robustness.spearman_median, why: "The ranking must not depend on the weights we happened to choose." },
     { method: "Automatic tests", does: `${tests.python} on the data and the maths, ${tests.web} on the website.`, count: n(tests.python + tests.web), unit: "must pass", why: "If one fails, nothing is published." },
     { method: "Two calculators must agree", does: "The website recalculates every score live; its answers are compared with Python's.", count: "5", unit: "decimal places", why: "So the screen can never drift from the pipeline." },
