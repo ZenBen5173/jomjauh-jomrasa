@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * The pipeline, step by step. For every step: the methods used, how many items each one caught, and why -
+ * The pipeline in the same four stages as the report (Extract, Transform, Load, Check). For every stage: the methods used, how many items each one caught, and why -
  * in one short line. Not a dashboard: a ledger you read top to bottom.
  * Every count is measured: pipeline/audit.py replays the cleaning code on the raw files with counters attached,
  * pipeline/quality.py runs the validation rules, and both write public/data/pipeline_audit.json.
  */
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, Combine, Download, Eraser, MessagesSquare, Rocket } from "lucide-react";
+import { ChevronDown, Combine, Download, Eraser, ShieldCheck } from "lucide-react";
 import facts from "../../../../public/data/pipeline.json";
 import audit from "../../../../public/data/pipeline_audit.json";
 import { PageHeader } from "@/components/shell";
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const EASE = [0.16, 1, 0.3, 1] as const;
 const n = (v: number) => v.toLocaleString("en-MY");
 const { raw, tests, robustness } = facts;
-const { structured: S, quality: Q, text: T, panel: P, guide: G } = audit;
+const { structured: S, quality: Q, text: T, panel: P } = audit;
 
 interface Row { method: string; does: string; count: string; unit: string; share?: number; why: string }
 
@@ -69,6 +69,8 @@ function Stage({ step, icon: Icon, title, line, result, last, children }: { step
   );
 }
 
+const Part = ({ children }: { children: React.ReactNode }) => <h3 className="mt-5 text-[11px] font-medium uppercase tracking-[0.14em] text-primary first-of-type:mt-4">{children}</h3>;
+
 const KIND = { f: { name: "From that year", cls: "fill-primary" }, c: { name: "Carried from an earlier year", cls: "fill-primary/35" }, e: { name: "Not published", cls: "fill-foreground/10" } } as const;
 const pretty = (col: string) => col.replace(/_/g, " ").replace(/\b(rm|k|n|pct)\b/g, "").trim();
 
@@ -116,18 +118,13 @@ export default function Pipeline() {
     { method: "Wikivoyage and rainfall", does: "MediaWiki API and Open-Meteo API", count: n(raw.wikivoyage_pages), unit: `pages, ${raw.rainfall_towns} towns`, why: "Real places and ten years of rain for the trip planner." },
   ];
 
-  const CLEAN: Row[] = [
+  const TABLES: Row[] = [
     { method: "Find rows by their label", does: "Search for the row that says \"Johor\" instead of trusting cell B12.", count: n(S.cells.read), unit: "cells read", why: "The sheets are laid out for printing, so positions shift from file to file." },
     { method: "Dashes stay empty", does: "\"-\" and \"n.a.\" become an empty cell, never 0.", count: n(S.cells.dash_to_empty), unit: "cells", share: S.cells.dash_to_empty / S.cells.read, why: "A dash means \"not published\". A zero would mean \"nobody came\"." },
     { method: "One code per state", does: "Every spelling is mapped to one 3-letter code.", count: `${S.spellings.variants} → ${S.spellings.codes}`, unit: "spellings", why: `"${S.spellings.examples.join("\" and \"")}" must be the same state, or tables from different agencies cannot be matched.` },
     { method: "Remove repeated state-years", does: "Two DOSM editions cover the same years. One copy is kept.", count: n(S.duplicates_removed), unit: `of ${n(dup.before)} removed`, share: S.duplicates_removed / dup.before, why: "Counting a state twice in one year would double its visitors." },
-    { method: "Compare the two editions", does: "Where both editions give the same state and year, do the numbers agree?", count: n(Q.editions.differ), unit: `of ${n(Q.editions.checked)} differ`, share: Q.editions.differ / Q.editions.checked, why: "They agree everywhere, so dropping the repeated copy loses nothing." },
     { method: "Keep only the rows we need", does: "Drop the rows split by sex, age group or sub-total; keep the \"everyone\" row.", count: n(keptRows), unit: `of ${n(rawRows)} kept`, share: keptRows / rawRows, why: "Each state and year must appear exactly once, or the join would multiply rows." },
     { method: "Map points inside a state", does: "Each point is placed in the state whose border it falls inside; repeats are dropped.", count: n(S.osm.raw - S.osm.kept), unit: `of ${n(S.osm.raw)} removed`, share: (S.osm.raw - S.osm.kept) / S.osm.raw, why: "A point out at sea or listed twice cannot be counted for a state." },
-    { method: "Range rules", does: "Percentages must be 0-100, counts cannot be negative, nights stayed must be believable.", count: n(Q.ranges.problems), unit: `problems in ${n(Q.ranges.checked)} values`, share: 0, why: "A value outside its range means we read the file wrongly. The pipeline stops if one appears." },
-    { method: "Every state, every year", does: "Each year must hold exactly the 16 states, once each.", count: n(Q.completeness.problems), unit: `missing of ${n(Q.completeness.checked)}`, share: 0, why: "A missing or doubled state would bend every share and every ranking." },
-    { method: "Totals must match the publisher", does: "Our 16 states added up = DOSM's national total; tourists + day-trippers = visitors; state rooms = Tourism Malaysia's total.", count: n(Q.reconcile.problems), unit: `failed of ${n(Q.reconcile.checked)} checks`, share: 0, why: `It proves nothing was lost or double-counted. ${S.reconcile.year}: ${n(S.reconcile.states_sum_k)} = ${n(S.reconcile.national_k)} thousand visitors.` },
-    { method: "Outlier scan", does: "Flag any yearly jump in visitors far from the usual change (robust z-score above 3.5).", count: n(Q.outliers.flagged), unit: `of ${n(Q.outliers.checked)} flagged`, share: Q.outliers.flagged / Q.outliers.checked, why: `All are ${Q.outliers.years.join(", ")}: travel bouncing back after the pandemic. Real, so kept unchanged. A flag in a normal year would point to an error.` },
   ];
 
   const TEXT: Row[] = [
@@ -144,23 +141,29 @@ export default function Pipeline() {
     { method: "Steady small samples", does: "A topic with few mentions is pulled towards the national average.", count: n(176), unit: "state-topic scores", why: "Twelve posts should not decide whether a state is called safe." },
   ];
 
-  const JOIN: Row[] = [
+  const LOAD: Row[] = [
+    { method: "Save as clean tables", does: "Each cleaned source is stored as a typed Parquet table, with a data dictionary.", count: n(facts.tables.count), unit: `tables, ${n(facts.tables.rows)} rows`, why: "Fixed column types, so a number can never quietly turn into text." },
     { method: "Match by state code and year", does: "Every clean table is looked up for each of the 16 states. No state is ever dropped.", count: `${P.rows} × ${P.columns}`, unit: "rows × columns", why: "One table means every score is worked out from the same numbers." },
     { method: "Carry the latest year forward", does: "If a year is not published, use the most recent earlier year and record which year it was.", count: n(P.carried), unit: `of ${n(P.cells)} cells`, share: P.carried / P.cells, why: "DOSM's state spending stops at 2023. We say so on screen instead of guessing." },
     { method: "Never fill a gap", does: "A value that was never published stays empty.", count: n(P.empty), unit: "cells left empty", share: P.empty / P.cells, why: "An invented number looks as real as a true one. Almost all are 2021 detail DOSM did not publish." },
+    { method: "Work out the scores", does: "Gini, Opportunity, Bottleneck Diagnoser, Room to grow, Simulator.", count: "5", unit: "scores", why: "Anyone can check by hand why a state ranks where it does. Steps are on the Methodology page." },
+    { method: "Ship small files", does: "The final table and scores are exported as JSON with the website. No database.", count: n(audit.published_files), unit: "files", why: "Nothing to log in to, nothing to go down." },
   ];
 
-  const PUBLISH: Row[] = [
-    { method: "Open formulas", does: "Gini, Opportunity, Bottleneck Diagnoser, Room to grow, Simulator.", count: "5", unit: "scores", why: "Anyone can check by hand why a state ranks where it does. Steps are on the Methodology page." },
-    { method: "Shake the weights", does: `Re-rank the states ${n(robustness.draws)} times with random weights.`, count: robustness.spearman_median.toFixed(2), unit: "of 1 agreement", share: robustness.spearman_median, why: "The ranking must not depend on the weights we happened to choose." },
+  const CHECK: Row[] = [
+    { method: "Range rules", does: "Percentages must be 0-100, counts cannot be negative, nights stayed must be believable.", count: n(Q.ranges.problems), unit: `problems in ${n(Q.ranges.checked)} values`, share: 0, why: "A value outside its range means we read the file wrongly. The pipeline stops if one appears." },
+    { method: "Every state, every year", does: "Each year must hold exactly the 16 states, once each.", count: n(Q.completeness.problems), unit: `missing of ${n(Q.completeness.checked)}`, share: 0, why: "A missing or doubled state would bend every share and every ranking." },
+    { method: "Totals must match the publisher", does: "Our 16 states added up = DOSM's national total; tourists + day-trippers = visitors; state rooms = Tourism Malaysia's total.", count: n(Q.reconcile.problems), unit: `failed of ${n(Q.reconcile.checked)} checks`, share: 0, why: `It proves nothing was lost or double-counted. ${S.reconcile.year}: ${n(S.reconcile.states_sum_k)} = ${n(S.reconcile.national_k)} thousand visitors.` },
+    { method: "Compare the two editions", does: "Where both editions give the same state and year, do the numbers agree?", count: n(Q.editions.differ), unit: `of ${n(Q.editions.checked)} differ`, share: Q.editions.differ / Q.editions.checked, why: "They agree everywhere, so dropping the repeated copy loses nothing." },
+    { method: "Outlier scan", does: "Flag any yearly jump in visitors far from the usual change (robust z-score above 3.5).", count: n(Q.outliers.flagged), unit: `of ${n(Q.outliers.checked)} flagged`, share: Q.outliers.flagged / Q.outliers.checked, why: `All are ${Q.outliers.years.join(", ")}: travel bouncing back after the pandemic. Real, so kept unchanged. A flag in a normal year would point to an error.` },
     { method: "Automatic tests", does: `${tests.python} on the data and the maths, ${tests.web} on the website.`, count: n(tests.python + tests.web), unit: "must pass", why: "If one fails, nothing is published." },
     { method: "Two calculators must agree", does: "The website recalculates every score live; its answers are compared with Python's.", count: "5", unit: "decimal places", why: "So the screen can never drift from the pipeline." },
-    { method: "Ship small files", does: "The final table and scores are exported as JSON with the website. No database.", count: n(audit.published_files), unit: "files", why: "Nothing to log in to, nothing to go down." },
+    { method: "Shake the weights", does: `Re-rank the states ${n(robustness.draws)} times with random weights.`, count: robustness.spearman_median.toFixed(2), unit: "of 1 agreement", share: robustness.spearman_median, why: "The ranking must not depend on the weights we happened to choose." },
   ];
 
   return (
     <>
-      <PageHeader eyebrow="From raw files to this screen" title="The data pipeline, step by step">
+      <PageHeader eyebrow="From raw files to this screen" title="The data pipeline: Extract, Transform, Load, Check">
         For every step: the methods we used, how much each one caught, and why. Every count is measured by re-running the cleaning code on the raw files.
       </PageHeader>
 
@@ -169,26 +172,25 @@ export default function Pipeline() {
           <Ledger rows={EXTRACT} head={["Source", "How we got it", "Got", "Used for"]} />
         </Stage>
 
-        <Stage step={2} icon={Eraser} title="Clean the official tables" line="Turn print-style spreadsheets into tidy tables, then prove nothing went wrong." result={`${facts.tables.count} clean tables`}>
-          <Ledger rows={CLEAN} />
-        </Stage>
-
-        <Stage step={3} icon={MessagesSquare} title="Clean and read the travel posts" line="Most of what we collected is thrown away on purpose. Each method below removes one kind of noise." result={`${n(start)} texts → ${n(end)} real trips`}>
+        <Stage step={2} icon={Eraser} title="Transform" line="Clean the data. Each row is one method: what it does, how much it caught, and why." result={`${n(start)} texts → ${n(end)} real trips`}>
+          <Part>Official tables</Part>
+          <Ledger rows={TABLES} />
+          <Part>Travel posts</Part>
           <Ledger rows={TEXT} />
         </Stage>
 
-        <Stage step={4} icon={Combine} title="Join into one table" line="One row for each state in each year, 2021 to 2025. Everything on the dashboard is calculated from it." result={`${n(P.cells)} values`}>
-          <Ledger rows={JOIN} />
+        <Stage step={3} icon={Combine} title="Load" line="Store the clean tables, join them into one row per state per year, work out the scores, and hand small files to the website." result={`${P.rows} rows × ${P.columns} columns`}>
+          <Ledger rows={LOAD} />
           <button onClick={() => setCells(!cells)} aria-expanded={cells} className="group mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
-            <ChevronDown className={cn("size-3.5 transition-transform", cells && "rotate-180")} />{cells ? "Hide" : "See"} every cell
+            <ChevronDown className={cn("size-3.5 transition-transform", cells && "rotate-180")} />{cells ? "Hide" : "See"} every cell of the joined table
           </button>
           <AnimatePresence initial={false}>
             {cells && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: EASE }} className="overflow-hidden"><CellMap /></motion.div>}
           </AnimatePresence>
         </Stage>
 
-        <Stage step={5} icon={Rocket} title="Score, test and publish" line="The table becomes scores, the scores are tested, and small files go to the website." result={`${n(G.placed)} trip places, ${n(end)} posts, 16 states`} last>
-          <Ledger rows={PUBLISH} />
+        <Stage step={4} icon={ShieldCheck} title="Check" line="Prove nothing went wrong. If any check fails, the pipeline stops and nothing is published." result={`${n(tests.python + tests.web)} automatic tests`} last>
+          <Ledger rows={CHECK} head={["Check", "What it does", "Found", "Why"]} />
         </Stage>
       </div>
 
