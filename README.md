@@ -1,80 +1,55 @@
+<div align="center">
+
 # JomJauh + JomRasa
 
-DOSM Datathon 2026 · *ML & AI for sustainable tourism in Malaysia*
+<img src="assets/hero.png" alt="JomJauh dashboard: where should the next visitor go?" width="860">
 
-A decision tool that shows which under-visited Malaysian states to steer tourists toward, why those
-states are skipped, what shifting visitors would do (capped by real hotel capacity), and how travellers
-feel about going there.
+[Live dashboard](https://jomjauh.vercel.app) · [Trip planner](https://jomjauh.vercel.app/trip) · [Pipeline page](https://jomjauh.vercel.app/pipeline) · [How to run](docs/RUNNING.md)
 
-```
-data/raw/        untouched downloads + _manifest.json (URL, access date, sha256)
-data/clean/      parquet tables (see docs/data_dictionary.md)
-pipeline/        extract -> transform -> panel -> export; pipeline/text = JomRasa
-core/metrics.py  reference implementation of every metric (Python)
-web/             Next.js dashboard; src/lib/metrics.ts is tested against the Python results
-tests/           data checks + metric tests (pytest)
-docs/            prior work review, data dictionary, validation files
-```
+![DOSM Datathon 2026](https://img.shields.io/badge/DOSM%20Datathon%202026-Team%20ANAK%20SUNWAY-1f63b8)
+![Stack](https://img.shields.io/badge/Python%20%2B%20Next.js-pipeline%20%2B%20dashboard-0e7a55)
+![Status](https://img.shields.io/badge/status-live-199e70)
 
-## Run the pipeline
+</div>
+
+Ever planned a Malaysian holiday and ended up in the same three states as everyone else? A third of all domestic trips go to Selangor, Kuala Lumpur and Perak, while other states sit with half-empty hotels and plenty to see. So I built JomJauh, a dashboard that shows planners which states are untapped and why, and JomRasa, a trip planner that sends travellers there with a real day-by-day plan. Built for the DOSM Datathon 2026 on official open data, with every cleaning step measured and shown on the site.
+
+## Features
+
+- **Opportunity score**: what a state can offer minus how visited it already is, for all 16 states.
+- **Bottleneck Diagnoser**: is the state hard to reach, not well known, or short of places to stay?
+- **Room to grow**: how many more visitors the existing hotels can take before they fill up.
+- **Simulator**: move visitors from a crowded state to quiet ones and see who gains, who loses, and whether the hotels cope.
+- **Traveller voices**: public travel posts in Malay, English and Chinese, read by AI and turned into a score per state, with every quote linked to its source.
+- **Trip planner**: a two-day plan from breakfast to supper, a route on the map, a place to sleep, and the best months to go. Real places only.
+- **Pipeline page**: every cleaning method, how many items it caught, and why.
+- **Jojo**: a guide in the corner that explains whatever you point at, in plain words.
+
+## Technical highlight
+
+Nothing on the site is typed in. The Pipeline page reads counts from an audit that re-runs the cleaning code on the raw files with counters attached, so it always says what really happened: 112 repeated state-years removed, 1,914 duplicate posts dropped, 16 states adding up to DOSM's national total to the decimal. The dashboard recalculates every score live in TypeScript, and a test suite requires those answers to match the Python reference to five decimal places. If any of the 110 tests fail, nothing is published.
+
+## Tech stack
+
+- Python, pandas, pyarrow - pipeline and the reference metrics
+- pytest, vitest - data checks and Python vs TypeScript agreement
+- Next.js, React, TypeScript, Tailwind CSS - dashboard and trip planner
+- motion, d3-geo, Leaflet - animation, the state map, the route map
+- Gemini 2.5 Flash Lite via OpenRouter - tagging travel posts and choosing trip stops
+- DOSM, data.gov.my, Tourism Malaysia, OpenStreetMap, Wikivoyage, Open-Meteo, Exa, YouTube - data
+- Vercel - hosting, deployed on every push to main
+
+## Run it
 
 ```bash
 uv venv --python 3.12 .venv && uv pip install --python .venv/Scripts/python.exe -r requirements-dev.txt
-python -m pipeline.extract                # DOSM, data.gov.my, geoBoundaries
-python -m pipeline.extract_powerbi        # Tourism Malaysia Paid Accommodation Survey
-python -m pipeline.extract_osm            # OpenStreetMap layers
-python -m pipeline.transform_structured   # clean tables
-python -m pipeline.build_panel            # one row per state per year
-python -m pytest tests -q                 # data checks + metric tests
-python -m pipeline.export_web             # JSON for the dashboard + Python reference results
-python -m pipeline.data_dictionary
-python -m pipeline.quality                # data-quality rules: ranges, completeness, totals vs publisher, outlier scan, edition agreement (stops on a problem)
-python -m pipeline.audit                  # replays the cleaning with counters: duplicates removed, rows filtered, posts dropped -> pipeline_audit.json
-python -m pipeline.export_pipeline        # counts for the website's Pipeline page (run last: it reads the other outputs and the test reports)
+python -m pipeline.extract && python -m pipeline.transform_structured && python -m pipeline.build_panel
+python -m pytest tests -q && python -m pipeline.export_web
+cd web && npm install && npm run dev
 ```
 
-JomRasa (needs `.env`, see `.env.example`; everything is cached, nothing is fetched or labelled twice):
+Full steps, including the traveller text and the trip planner data, are in [docs/RUNNING.md](docs/RUNNING.md).
 
-```bash
-python -m pipeline.text.collect exa --state TRG     # trial run: check quality and cost first
-python -m pipeline.text.collect exa --all
-python -m pipeline.text.collect youtube --all
-python -m pipeline.text.prepare                     # clean, de-identify, deduplicate
-python -m pipeline.text.tag --limit 200             # trial batch, then without --limit
-python -m pipeline.text.score build
-python -m pipeline.text.score sample                # 200 items to hand-label -> then `validate`
-python -m pipeline.build_panel && python -m pipeline.export_web
-```
+## License
 
-Traveller guide (no keys needed; pages, rainfall and geocoding are cached):
-
-```bash
-python -m pipeline.guide.collect          # Wikivoyage destination pages -> see / do / eat listings (raw pages kept with revision ids)
-python -m pipeline.guide.build            # locate, assign meals, rainfall 2015-2024, best months -> web/public/data/guide.json
-```
-
-Submission package (Dashboard.pdf, interactive Dashboard.xlsx, Data/, Source/, README.txt in one ZIP):
-
-```bash
-python -m pipeline.make_excel_dashboard   # offline Excel companion: state / year picker and a what-if simulator on live formulas
-python -m pipeline.make_submission        # needs screenshots in submission/shots/; writes submission/AnakSunway_Datathon2026_Dashboard.zip
-```
-
-## Run the dashboard
-
-```bash
-cd web && npm install && npm run dev      # http://localhost:3000
-npm test                                  # TypeScript metrics must reproduce the Python reference
-```
-
-## Data notes
-
-- `data/raw/` holds the untouched official downloads (DOSM, data.gov.my, Tourism Malaysia, geoBoundaries, OpenStreetMap) with access dates in `_manifest.json`.
-- The collected travel text corpus (`data/clean/text_items.parquet`, `data/raw/text/`) is **not** in this repository: it is third-party writing.
-  Only derived, aggregated tables and short attributed quotes are published. Re-create it with the JomRasa commands above.
-- Place descriptions in the traveller guide are from English Wikivoyage (CC BY-SA 4.0), trimmed and otherwise unchanged, and are published under the same licence;
-  rainfall is from the Open-Meteo archive (ERA5, CC BY 4.0); missing coordinates are from OpenStreetMap (ODbL).
-
-Live dashboard: https://jomjauh.vercel.app · Team ANAK SUNWAY · DOSM Datathon 2026
-
-Deployment: every push to `main` is built and published automatically by Vercel (project root `web/`).
+MIT for the code. Data keeps its publishers' licences, listed in [docs/RUNNING.md](docs/RUNNING.md).
